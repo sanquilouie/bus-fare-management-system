@@ -1,0 +1,304 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Merriweather:wght@700&family=Roboto:wght@500&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  background: rgb(87, 107, 237);
+}
+
+::selection {
+  background: rgba(133, 187, 101, 0.2);
+}
+
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgb(87, 107, 237);
+  padding: 10px;
+  z-index: 100000;
+  transition: 0.2s;
+}
+
+header.sticky {
+  background: rgb(87, 107, 237);
+}
+
+header.sticky ul li a {
+  color: white;
+}
+
+header.sticky ul li a:hover {
+  color: black;
+}
+
+ul,
+li {
+  display: inline-block;
+  padding: 0 15px;
+}
+
+li {
+  list-style-type: none;
+}
+
+li .aheader {
+  text-decoration: none;
+  color: black;
+  font-size: 15px;
+}
+
+li .aheader:hover {
+  color: white;
+  background-color: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+}
+
+.wrapper {
+  position: relative;
+  width: 400px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.wrapper p {
+  width: 100%;
+  text-align: center;
+
+  color: #d7b94b;
+  font-family: 'Merriweather', serif;
+  font-size: 2em;
+}
+
+
+.wrapper .title-text {
+  display: flex;
+  width: 200%;
+}
+
+.wrapper .title {
+  width: 50%;
+  font-size: 1.5em;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.wrapper .slide-controls {
+  position: relative;
+  display: flex;
+  height: 10px;
+  width: 100%;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+}
+
+.slide-controls .slide {
+  width: 100%;
+  font-size: 1em;
+  text-align: center;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.6s ease;
+}
+
+.slide-controls .slider-tab {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  background: rgb(87, 107, 237);
+  border-radius: 5px;
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+#signup:checked~.slider-tab {
+  left: 50%;
+}
+
+.wrapper .form-container {
+  width: 100%;
+  height: 90%;
+  overflow: hidden;
+}
+
+.form-container .form-inner {
+  display: flex;
+  height: 90%;
+  width: 200%;
+}
+
+.form-inner form {
+  width: 50%;
+  height: 90%;
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.form-inner form .field {
+  height: 55px;
+  margin: 15px 0;
+}
+
+.form-inner form .field input {
+  height: 100%;
+  width: 100%;
+  padding-left: 15px;
+  border-radius: 5px;
+  border: 1px solid lightgrey;
+  border-bottom-width: 2px;
+  font-size: 17px;
+  transition: all 0.3s ease;
+}
+
+.form-inner form .field input:focus {
+  border-color: rgb(87, 107, 237);
+}
+
+.form-inner form .pass-link,
+.form-inner form .signup-link {
+  margin-top: 5px;
+  text-align: center;
+}
+
+.form-inner form .pass-link a,
+.form-inner form .signup-link a {
+  color: #d7b94b;
+  text-decoration: none;
+}
+
+.form-inner form .pass-link a:hover,
+.form-inner form .signup-link a:hover {
+  text-decoration: underline;
+}
+
+form .btn {
+  height: 50px;
+  width: 100%;
+  border-radius: 5px;
+  position: relative;
+}
+
+form .btn .btn-layer {
+  width: 300%;
+  position: absolute;
+  background: rgb(87, 107, 237);
+  border-radius: 5px;
+  transition: all 0.4s ease;
+}
+
+form .btn:hover .btn-layer {
+  left: 0;
+}
+
+form .btn input[type="submit"] {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  background: none;
+  background-color: #576bed;
+  border: none;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+form .btn input[type="submit"]:hover {
+  color: #ffffff;
+  background-color: #ffe100;
+}
+
+/* Password strength indicator */
+form .indicator {
+  height: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+
+form .indicator span {
+  width: 100%;
+  background: lightgrey;
+  border-radius: 5px;
+}
+
+.indicator span:nth-child(2) {
+  margin: 0 3px;
+}
+
+.indicator span.active:before {
+  position: absolute;
+  content: '';
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.indicator span.weak:before {
+  background-color: #ff4757;
+}
+
+.indicator span.medium:before {
+  background-color: orange;
+}
+
+.indicator span.strong:before {
+  background-color: #23ad5c;
+}
+
+/* Media queries */
+@media (max-width: 680px) {
+  .wrapper {
+    max-width: 85%;
+    height: 95%;
+  }
+
+  .wrapper .title {
+    font-size: 1em;
+    padding: 0;
+  }
+
+  footer .afooter {
+    opacity: 0.75;
+  }
+
+  footer ul {
+    margin-top: 10%;
+    margin-left: 7%;
+    padding-right: 10%;
+    text-align: center;
+  }
+
+  footer .copyright {
+    font-size: 0.5em;
+    margin-top: 0;
+    text-align: center;
+  }
+}
