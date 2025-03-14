@@ -1,10 +1,9 @@
 <?php
 session_start();
-include '../../includes/connection.php';
-
+include '../../../includes/connection.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: //../index.php");
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -103,21 +102,18 @@ $busData[] = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Fare and Passengers</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use full version -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
- 
-    <link rel="stylesheet" href="../../assets/css/sidebars.css">
+    <!-- jQuery CDN link -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../../../assets/css/sidebars.css">
+
     <style>
-        h2 {
-          
+        h2 {    
             font-size: 2.5rem;
             margin-bottom: 20px;
             font-weight: bold;
@@ -134,16 +130,14 @@ $busData[] = [
         }
     </style>
 </head>
-
 <body>
-<?php
-        include '../../includes/topbar.php';
-        include '../../includes/sidebar.php';
-        include '../../includes/footer.php';
+    <?php
+    include '../../../includes/topbar.php';
+    include '../../../includes/sidebar.php';
+    include '../../../includes/footer.php';
     ?>
-<div id="main-content" class="container mt-4">
+    <div id="main-content" class="container mt-4">
         <h2>Bus Fare and Passengers Report for Today</h2>
-
         <!-- Display the bus data -->
         <table class="table table-bordered">
             <thead>
@@ -170,7 +164,5 @@ $busData[] = [
             </tbody>
         </table>
     </div>
-</div>
 </body>
-
 </html>

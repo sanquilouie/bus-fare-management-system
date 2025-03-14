@@ -1,9 +1,9 @@
 <head>
-<script src="../../assets/js/sidebar-toggle.js"></script>
+<script src="/NewRam/assets/js/sidebar-toggle.js"></script>
 </head>
 <div class="top-bar d-flex justify-content-between align-items-center p-3">
     <div class="d-flex align-items-center">
-        <img src="../../assets/images/logo.png" alt="Ramstar Logo" class="me-2" width="80">
+        <img src="/NewRam/assets/images/logo.png" alt="Ramstar Logo" class="me-2" width="80">
         <h4 class="m-0">Ramstar</h4>
     </div>
     <i id="hamburger" class="fas fa-bars fa-2x"></i>

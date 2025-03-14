@@ -1,9 +1,6 @@
 <?php
 session_start();
 include '../../includes/connection.php';
-include '../../includes/topbar.php';
-include '../../includes/sidebar.php';
-include '../../includes/footer.php';
 
 // Restrict access to Admin and Superadmin roles
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
@@ -132,39 +129,45 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
 </head>
 
 <body>
-
+    <?php
+        include '../../includes/topbar.php';
+        include '../../includes/sidebar.php';
+        include '../../includes/footer.php';
+    ?>
 
 <!-- Hamburger Button -->
     <!-- Main Content -->
-    <div id="main-content" class="container mt-4">
-        <div class="dashboard">
-            <div class="dashboard-item" onclick="window.location.href='activate.php';">
-                <i class="fas fa-users fa-2x"></i>
-                <h3>Registered Users</h3>
-                <p><?php echo $userCount; ?></p>
-            </div>
-            <div class="dashboard-item">
-                <i class="fas fa-desktop fa-2x"></i>
-                <h3>Total Terminals</h3>
-                <p>3</p>
-            </div>
-            <div class="dashboard-item" onclick="window.location.href='revenue.php';">
-                <i class="fas fa-money-bill-wave fa-2x"></i>
-                <h3>Total Revenue</h3>
-                <p>₱<?php echo number_format($totalRevenue, 2); ?></p>
-            </div>
-            <div class="dashboard-item" onclick="window.location.href='busviewinfo.php';">
-                <i class="fas fa-car fa-2x"></i>
-                <h3>Total Buses</h3>
-                <p><?php echo $busCount; ?></p>
-            </div>
-            <div class="dashboard-items" onclick=" window.location.href='revenue.php';">
-                <h3>Monthly Revenue Chart</h3>
-                <div id="revenueChart"></div>
-            </div>
-            <div class="dashboard-items" onclick="window.location.href='revenue.php';">
-                <h3>Today's Revenue</h3>
-                <div id="todayRevenueChart"></div>
+    <div id="main-content" class="container d-flex justify-content-center mt-4">
+        <div class="content-box">
+            <div class="dashboard">
+                <div class="dashboard-item" onclick="window.location.href='features/activate.php';">
+                    <i class="fas fa-users fa-2x"></i>
+                    <h3>Registered Users</h3>
+                    <p><?php echo $userCount; ?></p>
+                </div>
+                <div class="dashboard-item">
+                    <i class="fas fa-desktop fa-2x"></i>
+                    <h3>Total Terminals</h3>
+                    <p>3</p>
+                </div>
+                <div class="dashboard-item" onclick="window.location.href='features/revenue.php';">
+                    <i class="fas fa-money-bill-wave fa-2x"></i>
+                    <h3>Total Revenue</h3>
+                    <p>₱<?php echo number_format($totalRevenue, 2); ?></p>
+                </div>
+                <div class="dashboard-item" onclick="window.location.href='features/busviewinfo.php';">
+                    <i class="fas fa-car fa-2x"></i>
+                    <h3>Total Buses</h3>
+                    <p><?php echo $busCount; ?></p>
+                </div>
+                <div class="dashboard-items" onclick=" window.location.href='revenue.php';">
+                    <h3>Monthly Revenue Chart</h3>
+                    <div id="revenueChart"></div>
+                </div>
+                <div class="dashboard-items" onclick="window.location.href='revenue.php';">
+                    <h3>Today's Revenue</h3>
+                    <div id="todayRevenueChart"></div>
+                </div>
             </div>
         </div>
     </div>

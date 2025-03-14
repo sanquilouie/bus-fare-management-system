@@ -2,12 +2,9 @@
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-include '../../includes/topbar.php';
-include '../../includes/sidebar.php';
-include '../../includes/footer.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../index.php");
+    header("Location: ../../index.php");
     exit();
 }
 
@@ -90,15 +87,20 @@ $lastname = $_SESSION['lastname'];
             /* Prevent overflow */
         }
     </style>
-    <script src="../js/main.js"></script>
-    <script src="../js/register.js"></script>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/register.js"></script>
   
 </head>
 
 <body>
+    <?php
+    include '../../includes/topbar.php';
+    include '../../includes/sidebar.php';
+    include '../../includes/footer.php';
+    ?>
     <div id="main-content" class="container mt-5">
         <h2>Registration Form</h2>
-        <form method="POST" action="confirm_register.php" id="registrationForm" enctype="multipart/form-data">
+        <form method="POST" action="../../actions/confirm_register.php" id="registrationForm" enctype="multipart/form-data">
             <style>
                 .form-label.required::after {
                     content: " *";

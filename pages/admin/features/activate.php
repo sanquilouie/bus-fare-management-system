@@ -1,14 +1,11 @@
 <?php
 session_start();
 ob_start(); // Start output buffering
-include '../../includes/connection.php';
-include '../../includes/topbar.php';
-include '../../includes/sidebar.php';
-include '../../includes/footer.php';
+include '../../../includes/connection.php';
 
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../index.php");
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -171,7 +168,8 @@ if (isset($_POST['fetch_users'])) {
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
-    <link rel="stylesheet" href="../../assets/css/sidebars.css">
+    <link rel="stylesheet" href="../../../assets/css/sidebars.css">
+
     <style>
         .sidebar {
             width: 250px;
@@ -252,6 +250,11 @@ h5{
 </head>
 
 <body>
+    <?php
+    include '../../../includes/topbar.php';
+    include '../../../includes/sidebar.php';
+    include '../../../includes/footer.php';
+    ?>
 
     <!-- Page Content  -->
 
@@ -633,7 +636,7 @@ h5{
 
     // Submit the form to activate the user
     $.ajax({
-        url: '../../actions/activate_user.php', // Ensure this points to your activate.php or script
+        url: '../../../actions/activate_user.php', // Ensure this points to your activate.php or script
         method: 'POST',
         data: { user_id: userId, account_number: accountNumber }, // Send user ID and account number
         success: function (response) {
@@ -680,7 +683,7 @@ h5{
                     if (result.isConfirmed) {
                         const newAccountNumber = result.value;
                         $.ajax({
-                            url: '../../actions/transfer_and_disabled.php',
+                            url: '../../../actions/transfer_and_disabled.php',
                             method: 'POST',
                             data: { user_id: userId, new_account_number: newAccountNumber },
                             success: function (response) {
@@ -718,7 +721,7 @@ h5{
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: '../../actions/disable_user_only.php',
+                            url: '../../../actions/disable_user_only.php',
                             method: 'POST',
                             data: { user_id: userId },
                             success: function (response) {
@@ -743,7 +746,7 @@ h5{
                 $('#search').on('keyup', function () {
                     var query = $(this).val();
                     $.ajax({
-                        url: '../../actions/search_users.php',
+                        url: '../../../actions/search_users.php',
                         method: 'POST',
                         data: { query: query },
                         success: function (data) {
