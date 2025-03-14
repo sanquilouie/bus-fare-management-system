@@ -69,7 +69,7 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
     <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link rel="stylesheet" href="../../assets/css/sidebars.css">
+
     <style>
        body{
             background-color: #f8f9fa;
@@ -131,7 +131,7 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
 <body>
     <?php
         include '../../includes/topbar.php';
-        include '../../includes/sidebar.php';
+        include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
 
