@@ -58,18 +58,10 @@ margin-bottom: 20px;
 
 #main-content {
   transition: margin-left 0.3s ease;
-  padding-top: 60px; /* Prevents overlapping with the top bar */
-  
-  display: flex;
-  justify-content: center; /* Centers horizontally */
-  align-items: center; /* Centers vertically */
-  height: calc(100vh - 60px); /* Takes full viewport height minus top bar */
+  padding-top: 60px; /* Added space to avoid content under top bar */
 }
 
 
-#main-content.sidebar-open {
-  margin-left: 250px; /* Space for sidebar */
-}
 
 .sidebar a {
   display: flex;
@@ -120,18 +112,6 @@ margin-bottom: 20px;
 @media (max-width: 768px) {
   .top-bar h4 {
       color: #3e64ff;
-  }
-
-  .sidebar {
-      width: 250px;
-      position: fixed;
-      top: 0;
-      left: -250px; /* Initially hidden */
-      transition: left 0.3s ease;
-  }
-
-  .sidebar.open {
-      left: 0;
   }
 
   /* Hamburger Button Adjustments */

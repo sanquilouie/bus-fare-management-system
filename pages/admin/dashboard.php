@@ -137,7 +137,9 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
 
 <!-- Hamburger Button -->
     <!-- Main Content -->
-    <div id="main-content" class="container d-flex justify-content-center mt-4">
+    <div id="main-content" class="container mt-4">
+        <div class="row justify-content-center">
+        <div class="col-md-12">
         <div class="content-box">
             <div class="dashboard">
                 <div class="dashboard-item" onclick="window.location.href='features/activate.php';">
@@ -169,6 +171,8 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
                     <div id="todayRevenueChart"></div>
                 </div>
             </div>
+        </div>
+        </div>
         </div>
     </div>
 
