@@ -258,7 +258,7 @@ h5{
         <!-- Table for Displaying Users -->
         <div class="table-container">
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-bordered">
                 <caption>List of users</caption>
                     <thead>
                         <tr>

@@ -80,13 +80,14 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
     
 
     <style>
-       body{
-            background-color: #f8f9fa;
-        }
-        .dashboard {
+    body{
+        background-color: #f8f9fa;
+    }
+    .dashboard {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 20px;
+        margin-top: 50px;
     }
 
     .dashboard-item {
@@ -97,6 +98,13 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
         text-align: center;
         color: #333;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .dashboard-charts {
+        grid-column: span 2;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     .dashboard-item:hover {
@@ -123,16 +131,25 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
         margin: 0;
         color: #212529;
     }
-
-    .dashboard-items {
-        grid-column: span 2;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    @media (max-width: 768px) {
+    .dashboard {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
-  
+    .dashboard-item {
+        flex: 1 1 calc(50% - 20px); /* Ensures 2 items per row */
+        max-width: calc(50% - 20px);
+        min-height: 120px; /* Set a minimum height */
+    }
+
+    .dashboard-charts {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
     </style>
 
 </head>
@@ -147,40 +164,38 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
     <!-- Main Content -->
     <div id="main-content" class="container mt-4">
         <div class="row justify-content-center">
-        <div class="col-md-12">
-        <div class="content-box">
-            <div class="dashboard">
-                <div class="dashboard-item" onclick="window.location.href='features/activate.php';">
-                    <i class="fas fa-users fa-2x"></i>
-                    <h3>Registered Users</h3>
-                    <p><?php echo $userCount; ?></p>
-                </div>
-                <div class="dashboard-item">
-                    <i class="fas fa-desktop fa-2x"></i>
-                    <h3>Total Terminals</h3>
-                    <p>3</p>
-                </div>
-                <div class="dashboard-item" onclick="window.location.href='features/revenue.php';">
-                    <i class="fas fa-money-bill-wave fa-2x"></i>
-                    <h3>Total Revenue</h3>
-                    <p>₱<?php echo number_format($totalRevenue, 2); ?></p>
-                </div>
-                <div class="dashboard-item" onclick="window.location.href='features/busviewinfo.php';">
-                    <i class="fas fa-car fa-2x"></i>
-                    <h3>Total Buses</h3>
-                    <p><?php echo $busCount; ?></p>
-                </div>
-                <div class="dashboard-items" onclick=" window.location.href='revenue.php';">
-                    <h3>Monthly Revenue Chart</h3>
-                    <div id="revenueChart"></div>
-                </div>
-                <div class="dashboard-items" onclick="window.location.href='revenue.php';">
-                    <h3>Today's Revenue</h3>
-                    <div id="todayRevenueChart"></div>
+            <div class="col-md-12">
+                <div class="dashboard">
+                    <div class="dashboard-item" onclick="window.location.href='features/activate.php';">
+                        <i class="fas fa-users fa-2x"></i>
+                        <h3>Registered Users</h3>
+                        <p><?php echo $userCount; ?></p>
+                    </div>
+                    <div class="dashboard-item">
+                        <i class="fas fa-desktop fa-2x"></i>
+                        <h3>Total Terminals</h3>
+                        <p>3</p>
+                    </div>
+                    <div class="dashboard-item" onclick="window.location.href='features/revenue.php';">
+                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                        <h3>Total Revenue</h3>
+                        <p>₱<?php echo number_format($totalRevenue, 2); ?></p>
+                    </div>
+                    <div class="dashboard-item" onclick="window.location.href='features/busviewinfo.php';">
+                        <i class="fas fa-car fa-2x"></i>
+                        <h3>Total Buses</h3>
+                        <p><?php echo $busCount; ?></p>
+                    </div>
+                    <div class="dashboard-charts" onclick=" window.location.href='revenue.php';">
+                        <h3>Monthly Revenue Chart</h3>
+                        <div id="revenueChart"></div>
+                    </div>
+                    <div class="dashboard-charts" onclick="window.location.href='revenue.php';">
+                        <h3>Today's Revenue</h3>
+                        <div id="todayRevenueChart"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        </div>
         </div>
     </div>
     <script>

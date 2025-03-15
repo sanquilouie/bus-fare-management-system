@@ -108,17 +108,12 @@ ob_end_flush();
             margin-bottom: 20px;
             font-weight: bold;
             color: transparent;
-            /* Make the text color transparent */
             background-image: linear-gradient(to right, #f1c40f, #e67e22);
             background-clip: text;
             -webkit-background-clip: text;
-            /* WebKit compatibility */
             -webkit-text-fill-color: transparent;
-            /* Ensures only the gradient is visible */
             -webkit-text-stroke: 0.5px black;
-            /* Outline effect */
         }
-      /* Country code styling */
       .country-code {
             background-color: #f8f9fa;
             /* Light background */
@@ -138,11 +133,6 @@ ob_end_flush();
             padding-left: 0.5rem;
             /* Padding to align text with country code */
         }
-        .primary {
-            color: #fff;
-            background-color: #007bff;
-            border-color: #007bff;
-        }
     </style>
 </head>
 <body>
@@ -152,128 +142,115 @@ ob_end_flush();
         include '../../includes/footer.php';
     ?>
 <div id="main-content" class="container mt-5">
-    <h2 class="text-center mb-4">Employee Registration</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8 mt-20">
+            <h2 class="text-center">Employee Registration</h2>
+            <form method="POST" action="">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                    <label for="employeeType" class="form-label required">Employee Type</label>
+                        <select class="form-select" id="employeeType" name="employeeType" required>
+                            <option value="" disabled selected>Select Role</option>
+                            <option value="Conductor">Conductor</option>
+                            <option value="Driver">Driver</option>
+                            <option value="Cashier">Cashier</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="employeeNumber" class="form-label required">Employee No.</label>
+                        <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Auto generated" readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label required">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="middleName" class="form-label required">Middle Name</label>
+                        <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name">
+                    </div>
+                </div>
 
-    <form method="POST" action="">
-        <div class="row mb-3">
-            <label for="employeeType" class="col-sm-2 col-form-label">Employee Type</label>
-            <div class="col-sm-10">
-                <select class="form-select" id="employeeType" name="employeeType" required>
-                    <option value="" disabled selected>Select Role</option>
-                    <option value="Conductor">Conductor</option>
-                    <option value="Driver">Driver</option>
-                    <option value="Cashier">Cashier</option>
-                </select>
-            </div>
-        </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label required">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label required">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+                        <div id="emailFeedback" class="invalid-feedback"></div>
+                    </div>
+                </div>
 
-        <div class="row mb-3">
-            <label for="employeeNumber" class="col-sm-2 col-form-label">Employee Number</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Auto generated" readonly>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <label for="firstName" class="col-sm-2 col-form-label">First Name</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <label for="middleName" class="col-sm-2 col-form-label">Middle Name</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name">
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <label for="lastName" class="col-sm-2 col-form-label">Last Name</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <label for="email" class="col-sm-2 col-form-label">Email</label>
-            <div class="col-sm-10">
-                <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
-                <div id="emailFeedback" class="invalid-feedback"></div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <label for="phone" class="col-sm-2 col-form-label">Phone</label>
-            <div class="col-sm-10">
-            <div class="form-group d-flex">
-                        <span class="border-end country-code px-2">+63</span>
-                        <input type="text" class="form-control" id="phone" name="contactnumber" placeholder="" required
-                            pattern="\d{11}" maxlength="11" />
+                <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="phone" class="form-label required">Phone</label>
+                    <div class="form-group position-relative">
+                        <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder="" required pattern="\d{10}" maxlength="10" />
+                        <span class="position-absolute top-50 start-0 translate-middle-y ps-2 text-muted">+63</span>
                     </div>
                     <div id="contactError" class="invalid-feedback" style="display: none;"></div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <label for="dob" class="col-sm-2 col-form-label">Date of Birth</label>
-            <div class="col-sm-10">
-                <input type="date" class="form-control" id="dob" name="birthday" required>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <label for="gender" class="col-sm-2 col-form-label">Gender</label>
-            <div class="col-sm-10">
-                <select class="form-select" id="gender" name="gender" required>
-                    <option value="" disabled selected>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <label for="address" class="col-sm-2 col-form-label">Address</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="address" rows="3" name="address" placeholder="Enter address" required></textarea>
-            </div>
-        </div>
-
-        <!-- Conditional fields for Driver -->
-        <div id="driverFields" class="driver-fields" style="display:none;">
-            <div class="row mb-3">
-                <label for="driverLicense" class="col-sm-2 col-form-label">Driver's License No.</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="driverLicense" name="driverLicense" placeholder="Enter license number">
+                    </div>
+                <div class="col-md-4">
+                        <label for="dob" class="form-label required">Date of Birth</label>
+                        <input type="date" class="form-control" id="dob" name="birthday" required>
                 </div>
-            </div>
-        </div>
-
-        <!-- Conditional fields for Conductor -->
-        <div id="conductorFields" class="conductor-fields" style="display:none;">
-            <div class="row mb-3">
-                <label for="workExperience" class="col-sm-2 col-form-label">Work Experience</label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" id="workExperience" rows="3" placeholder="Enter work experience"></textarea>
+                <div class="col-md-4">   
+                        <label for="gender" class="form-label required">Gender</label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
                 </div>
-            </div>
-        </div>
-
-        <!-- Conditional fields for Cashier -->
-        <div id="cashierFields" class="cashier-fields" style="display:none;">
-            <div class="row mb-3">
-                <label for="cashHandlingExperience" class="col-sm-2 col-form-label">Cash Handling Experience</label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" id="cashHandlingExperience" rows="3" placeholder="Enter experience in cash handling"></textarea>
                 </div>
-            </div>
-        </div>
 
-        <div class="text-center">
-            <button type="submit" class="btn primary">Register</button>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                    <label for="address" class="form-label required">Address</label>
+                        <textarea class="form-control" id="address" rows="2" name="address" placeholder="Enter address" required></textarea>
+                    </div>
+                </div>
+
+                <!-- Conditional fields for Driver -->
+                <div id="driverFields" class="driver-fields" style="display:none;">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                                <label for="driverLicense" class="form-label required">Driver's License No.</label>
+                                <input type="text" class="form-control" id="driverLicense" name="driverLicense" placeholder="Enter license number">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conditional fields for Conductor -->
+                <div id="conductorFields" class="conductor-fields" style="display:none;">
+                    <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="workExperience" class="form-label required">Work Experience</label>
+                            <textarea class="form-control" id="workExperience" rows="2" placeholder="Enter work experience"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conditional fields for Cashier -->
+                <div id="cashierFields" class="cashier-fields" style="display:none;">
+                    <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="cashHandlingExperience" class="form-label required">Cash Handling Experience</label>
+                            <textarea class="form-control" id="cashHandlingExperience" rows="2" placeholder="Enter experience in cash handling"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 
 

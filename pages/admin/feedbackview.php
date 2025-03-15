@@ -107,7 +107,7 @@ while ($row = $aggregatedFeedbackResult->fetch_assoc()) {
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-4">
+    <div id="main-content" class="container mt-5">
         <h2>Feedbacks for Bus, Driver, and Conductor</h2>
 
         <?php if (!empty($aggregatedFeedbacks)): ?>

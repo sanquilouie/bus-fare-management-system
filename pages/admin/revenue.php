@@ -67,12 +67,6 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-    <style>
-        h1 {
-            color: black;
-        }
-    </style>
 </head>
 
 <body>
@@ -82,7 +76,7 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
         include '../../includes/footer.php';
     ?>
 <div id="main-content" class="container mt-5">
-        <h1>Revenue Report</h1>
+        <h2 class="text-center">Revenue Report</h2>
 
         <!-- Filter Form -->
         <form id="filterForm" method="POST">

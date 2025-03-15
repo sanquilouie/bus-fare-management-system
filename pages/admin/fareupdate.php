@@ -59,20 +59,6 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
-
-        /* Page heading */
-        h1.text-center {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: transparent;
-            background-image: linear-gradient(to right, #f1c40f, #e67e22);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            -webkit-text-stroke: 0.5px black;
-        }
-
         /* Form labels */
         form .form-label {
             font-size: 1.1rem;
@@ -94,24 +80,6 @@ $conn->close();
         form .form-control:focus {
             border-color: #e67e22;
             box-shadow: 0 0 5px rgba(230, 126, 34, 0.5);
-        }
-
-        /* Submit button */
-        form .fare {
-            background: linear-gradient(to right, #f1c40f, #e67e22);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-
-        form .fare:hover {
-            background: linear-gradient(to right, #f1c40f, #e67e22);
-            transform: scale(1.1);
         }
 
         /* SweetAlert2 styling */
@@ -142,38 +110,35 @@ $conn->close();
         unset($_SESSION['fare_updated']);
     }
     ?>
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h2>Fare Settings</h2>
+                <form method="POST">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="base_fare" class="form-label">Base Fare (₱) First 4 Km</label>
+                            <input type="number" id="base_fare" name="base_fare" class="form-control" placeholder="14.00"
+                                step="0.01" value="<?= htmlspecialchars($fareSettings['base_fare']) ?>" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="additional_fare" class="form-label">Additional Fare per Km (₱)</label>
+                            <input type="number" id="additional_fare" name="additional_fare" class="form-control" step="0.01"
+                                value="<?= htmlspecialchars($fareSettings['additional_fare']) ?>" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="discount_percentage" class="form-label">Discount Percentage (%)</label>
+                            <input type="number" id="discount_percentage" name="discount_percentage" class="form-control" placeholder="20.00"
+                                step="0.01" value="<?= htmlspecialchars($fareSettings['discount_percentage']) ?>" required>
+                        </div>
+                    </div>
 
-        <h1 class="text-center">Fare Settings</h1>
-
-        <form method="POST" class="mt-4">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="base_fare" class="form-label">Base Fare (₱) First 4 Km</label>
-                    <input type="number" id="base_fare" name="base_fare" class="form-control" placeholder="14.00"
-                        step="0.01" value="<?= htmlspecialchars($fareSettings['base_fare']) ?>" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="additional_fare" class="form-label">Additional Fare per Km (₱)</label>
-                    <input type="number" id="additional_fare" name="additional_fare" class="form-control" step="0.01"
-                        value="<?= htmlspecialchars($fareSettings['additional_fare']) ?>" required>
-                </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Save Fare Settings</button>
+                    </div>
+                </form>
             </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="discount_percentage" class="form-label">Discount Percentage (%)</label>
-                    <input type="number" id="discount_percentage" name="discount_percentage" class="form-control" placeholder="20.00"
-                        step="0.01" value="<?= htmlspecialchars($fareSettings['discount_percentage']) ?>" required>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6 offset-md-3">
-                    <button type="submit" class="fare btn-lg w-100">Save Fare Settings</button>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
     <script>
         document.querySelector('form').addEventListener('submit', function (e) {

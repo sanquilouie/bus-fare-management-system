@@ -8,26 +8,28 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
     exit();
 }
 
-$activeUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 ORDER BY created_at DESC";
-$activeUsersResult = mysqli_query($conn, $activeUsersQuery);
+// Count total records
+$totalQuery = "SELECT COUNT(*) AS total FROM useracc WHERE is_activated = 1";
+$totalResult = mysqli_query($conn, $totalQuery);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $user_id = $_POST['user_id'];
+    $user_id = $_POST['user_id'] ?? null;
 
     if ($user_id) {
         $disableQuery = "UPDATE useracc SET is_activated = 0 WHERE id = ?";
         $stmt = $conn->prepare($disableQuery);
         $stmt->bind_param("i", $user_id);
+        
         if ($stmt->execute()) {
-            $_SESSION['message'] = ['type' => 'success', 'text' => 'User disabled successfully.'];
+            echo json_encode(["success" => true]);
         } else {
-            $_SESSION['message'] = ['type' => 'error', 'text' => 'Error disabling user.'];
+            echo json_encode(["success" => false, "message" => "Error disabling user."]);
         }
+        
         $stmt->close();
     } else {
-        $_SESSION['message'] = ['type' => 'error', 'text' => 'User ID is missing.'];
+        echo json_encode(["success" => false, "message" => "User ID is missing."]);
     }
-    header("Location: disable_users.php");
     exit;
 }
 ?>
@@ -57,8 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         include '../../../includes/sidebar2.php';
         include '../../../includes/footer.php';
     ?>
-<div class="container mt-5">
-    <h3>Disable Users</h3>
+<div id="main-content" class="container mt-5">
+    <h2>Disable Users</h2>
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
@@ -69,38 +71,117 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                <?php while ($row = mysqli_fetch_assoc($activeUsersResult)): ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-                        <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-                        <td>
-                            <form method="POST" action="disable_users.php">
-                                <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                <button type="submit" class="btn btn-danger">Disable</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
+            <tbody id="userTableBody"></tbody>
         </table>
     </div>
+    <nav>
+        <ul class="pagination" id="pagination"></ul>
+    </nav>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        <?php if (isset($_SESSION['message'])): ?>
-            const message = <?php echo json_encode($_SESSION['message']); ?>;
-            Swal.fire({
-                icon: message.type === 'success' ? 'success' : 'error',
-                title: message.type === 'success' ? 'Success' : 'Error',
-                text: message.text,
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'OK'
-            });
-            <?php unset($_SESSION['message']); ?>
-        <?php endif; ?>
+$(document).ready(function () {
+    function loadUsers(page = 1) {
+        $.ajax({
+            url: '../../../actions/fetch_disable_users.php',
+            type: 'GET',
+            data: { page: page },
+            dataType: 'json',
+            success: function (response) {
+                let users = response.users;
+                let totalPages = response.totalPages;
+                let currentPage = response.currentPage;
+                let tableBody = $("#userTableBody");
+                let pagination = $("#pagination");
+
+                // Clear existing data
+                tableBody.empty();
+                pagination.empty();
+
+                // Populate the user table
+                users.forEach(user => {
+                    tableBody.append(`
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.firstname}</td>
+                            <td>${user.lastname}</td>
+                            <td>${user.account_number}</td>
+                            <td>
+                                <button type="button" class="btn btn-danger disable-user" data-user-id="${user.id}">
+                                    Disable
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+                // Previous button
+                if (currentPage > 1) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                        </li>
+                    `);
+                }
+
+                // Numbered page links
+                for (let i = 1; i <= totalPages; i++) {
+                    pagination.append(`
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+
+                // Next button
+                if (currentPage < totalPages) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+                        </li>
+                    `);
+                }
+            }
+        });
+    }
+
+    // Handle pagination click
+    $(document).on('click', '.page-link', function (e) {
+        e.preventDefault();
+        let page = $(this).data('page');
+        loadUsers(page);
     });
+
+    // Load the first page initially
+    loadUsers();
+});
+    
+$(document).on("click", ".disable-user", function () {
+    let userId = $(this).data("user-id");
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This will disable the user!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, disable!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post("disable_users.php", { user_id: userId }, function (response) {
+                let result = JSON.parse(response);
+                if (result.success) {
+                    Swal.fire("Disabled!", "The user has been disabled.", "success").then(() => {
+                        location.reload(); // Refresh to reflect changes
+                    });
+                } else {
+                    Swal.fire("Error!", result.message, "error");
+                }
+            });
+        }
+    });
+});
+
 </script>
 </body>
 </html>

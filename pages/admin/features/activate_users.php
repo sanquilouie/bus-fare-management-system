@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 session_start();
 require '../../../libraries/PHPMailer/src/PHPMailer.php';
 require '../../../libraries/PHPMailer/src/SMTP.php';
@@ -10,6 +13,11 @@ use PHPMailer\PHPMailer\Exception;
 ob_start(); // Start output buffering
 include '../../../includes/connection.php';
 
+$limit = 5;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max($page, 1); // Ensure the page is at least 1
+$offset = ($page - 1) * $limit;
+
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
     header("Location: ../../../index.php");
     exit();
@@ -18,6 +26,11 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 // Fetch users for activation
 $inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 ORDER BY created_at DESC";
 $inactiveUsersResult = mysqli_query($conn, $inactiveUsersQuery);
+$totalUsersRow = mysqli_fetch_assoc($inactiveUsersResult);
+$totalUsers = $totalUsersRow['total'];
+
+// Calculate total pages
+$totalPages = ceil($totalUsers / $limit);
 
 // Handle activation
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -35,9 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($stmt->execute()) {
                 // Sending Email using PHPMailer
                 sendActivationEmail($user_id, $account_number); // Send email after assigning account number
+            
+                echo json_encode(["success" => true]); // ✅ Ensure JSON output
             } else {
-                $_SESSION['message'] = ['type' => 'error', 'text' => 'Error activating user.'];
+                echo json_encode(["success" => false, "message" => "Error activating user."]);
             }
+            
             $stmt->close();
         } else {
             // If no account number provided, just activate the user directly
@@ -46,17 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bind_param("i", $user_id);
 
             if ($stmt->execute()) {
-                $_SESSION['message'] = ['type' => 'success', 'text' => 'User activated without email.'];
+                echo json_encode(["success" => true]);
             } else {
-                $_SESSION['message'] = ['type' => 'error', 'text' => 'Error activating user.'];
+                echo json_encode(["success" => false, "message" => "Error disabling user."]);
             }
             $stmt->close();
         }
     } else {
-        $_SESSION['message'] = ['type' => 'error', 'text' => 'User ID is missing.'];
+        echo json_encode(["success" => false, "message" => "User ID is missing."]);
     }
-
-    header("Location: activate_users.php"); // Redirect back to the activation page
     exit;
 }
 
@@ -140,9 +154,8 @@ function sendActivationEmail($user_id, $account_number)
         include '../../../includes/sidebar2.php';
         include '../../../includes/footer.php';
     ?>
-    <div class="container mt-5">
-        <h3>Activate Users</h3>
-
+    <div id="main-content" class="container mt-5">
+        <h2>Activate Users</h2>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -150,57 +163,124 @@ function sendActivationEmail($user_id, $account_number)
                         <th>ID</th>
                         <th>Firstname</th>
                         <th>Lastname</th>
-                        <th>Account Number</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php while ($row = mysqli_fetch_assoc($inactiveUsersResult)): ?>
-                        <tr>
-                            <td><?php echo $row['id']; ?></td>
-                            <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-                            <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-                            <td>
-                                <?php if (!$row['account_number']): ?>
-                                    <form method="POST" action="activate_users.php">
-                                        <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                        <input type="text" name="account_number" placeholder="Enter Account Number" required
-                                            class="form-control">
-                                        <button type="submit" class="btn btn-success mt-2">Activate</button>
-                                    </form>
-                                <?php else: ?>
-                                    <?php echo $row['account_number']; ?>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($row['account_number']): ?>
-                                    <form method="POST" action="activate_users.php">
-                                        <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                        <button type="submit" class="btn btn-success">Activate</button>
-                                    </form>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
+                <tbody id="userTableBody"></tbody>
             </table>
         </div>
+        <nav>
+            <ul class="pagination" id="pagination"></ul>
+        </nav>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        <?php if (isset($_SESSION['message'])): ?>
-            const message = <?php echo json_encode($_SESSION['message']); ?>;
-            Swal.fire({
-                icon: message.type === 'success' ? 'success' : 'error',
-                title: message.type === 'success' ? 'Success' : 'Error',
-                text: message.text,
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'OK'
-            });
-            <?php unset($_SESSION['message']); ?>
-        <?php endif; ?>
+    $(document).ready(function () {
+    function loadUsers(page = 1) {
+        $.ajax({
+            url: '../../../actions/fetch_enable_users.php',
+            type: 'GET',
+            data: { page: page },
+            dataType: 'json',
+            success: function (response) {
+                let users = response.users;
+                let totalPages = response.totalPages;
+                let currentPage = response.currentPage;
+                let tableBody = $("#userTableBody");
+                let pagination = $("#pagination");
+
+                // Clear existing data
+                tableBody.empty();
+                pagination.empty();
+
+                // Populate the user table
+                users.forEach(user => {
+                    tableBody.append(`
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.firstname}</td>
+                            <td>${user.lastname}</td>
+                            <td>${user.account_number}</td>
+                            <td>
+                                <button type="button" class="btn btn-success enable-user" data-user-id="${user.id}">
+                                    Activate
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+                // Previous button
+                if (currentPage > 1) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                        </li>
+                    `);
+                }
+
+                // Numbered page links
+                for (let i = 1; i <= totalPages; i++) {
+                    pagination.append(`
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+
+                // Next button
+                if (currentPage < totalPages) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+                        </li>
+                    `);
+                }
+            }
+        });
+    }
+
+    // Handle pagination click
+    $(document).on('click', '.page-link', function (e) {
+        e.preventDefault();
+        let page = $(this).data('page');
+        loadUsers(page);
     });
+
+    // Load the first page initially
+    loadUsers();
+});
+    
+$(document).on("click", ".enable-user", function () {
+    let userId = $(this).data("user-id");
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This will enable the user!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, enable!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post("activate_users.php", { user_id: userId }, function (response) {
+            try {
+                let result = JSON.parse(response);
+                if (result.success) {
+                    Swal.fire("Enabled!", "The user has been enabled.", "success").then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire("Error!", result.message, "error");
+                }
+            } catch (error) {
+                console.error("Invalid JSON response:", response);
+                Swal.fire("Error!", "Unexpected response from server.", "error");
+            }
+        });
+
+        }
+    });
+});
 </script>
 
 </body>

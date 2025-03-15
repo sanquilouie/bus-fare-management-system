@@ -142,7 +142,7 @@ $busData[] = [
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-<div id="main-content" class="container mt-4">
+<div id="main-content" class="container mt-5">
         <h2>Bus Fare and Passengers Report for Today</h2>
 
         <!-- Display the bus data -->

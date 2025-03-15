@@ -39,7 +39,8 @@ margin-bottom: 20px;
 
 #main-content {
   transition: margin-left 0.3s ease;
-  padding-top: 60px; /* Added space to avoid content under top bar */
+  padding-top: 60px;
+  padding-bottom: 65px;
 }
 
 #hamburger {
@@ -90,4 +91,40 @@ margin: 5px 0;
 }
 .footer p {
   margin: 0;
+}
+
+h2{
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: transparent;
+  background-image: linear-gradient(to right, #f1c40f, #e67e22);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.5px black;
+  text-align: center;
+}
+
+/* Form labels */
+form .form-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: blue;
+}
+
+/* Form inputs */
+form .form-control, form .form-select {
+  border: 2px solid #f1c40f;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease-in-out;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+}
+
+form .form-control:focus {
+  border-color: #e67e22;
+  box-shadow: 0 0 5px rgba(230, 126, 34, 0.5);
 }

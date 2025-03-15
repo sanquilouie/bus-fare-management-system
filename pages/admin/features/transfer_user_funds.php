@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $_SESSION['message'] = "User  ID is missing.";
     }
-    header("Location: transfer.php"); // Redirect back to the transfer page
+    header("Location: transfer_user_funds.php"); // Redirect back to the transfer page
     exit;
 }
 ?>
@@ -54,8 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         include '../../../includes/sidebar2.php';
         include '../../../includes/footer.php';
     ?>
-    <div class="container mt-5">
-        <h3>Transfer Funds</h3>
+    <div id="main-content" class="container mt-5">
+        <h2>Transfer Funds</h2>
 
         <!-- Feedback Message -->
         <?php if (isset($_SESSION['message'])): ?>
@@ -78,21 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-    <?php while ($row = mysqli_fetch_assoc($allUsersResult)): ?>
-        <tr>
-            <td><?php echo $row['id']; ?></td>
-            <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-            <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-            <td><?php echo htmlspecialchars($row['account_number']); ?></td>
-            <td>
-                <button type="button" class="btn btn-warning" onclick="confirmTransferDisable(<?php echo $row['id']; ?>)">Transfer Funds</button>
-            </td>
-        </tr>
-    <?php endwhile; ?>
-</tbody>
+                <tbody id="userTableBody"></tbody>
             </table>
         </div>
+        <nav>
+            <ul class="pagination" id="pagination"></ul>
+        </nav>
     </div>
 </body>
 <script>
@@ -141,6 +132,84 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     });
 }
+
+$(document).ready(function () {
+    function loadUsers(page = 1) {
+        $.ajax({
+            url: '../../../actions/fetch_disable_users.php',
+            type: 'GET',
+            data: { page: page },
+            dataType: 'json',
+            success: function (response) {
+                let users = response.users;
+                let totalPages = response.totalPages;
+                let currentPage = response.currentPage;
+                let tableBody = $("#userTableBody");
+                let pagination = $("#pagination");
+
+                // Clear existing data
+                tableBody.empty();
+                pagination.empty();
+
+                // Populate the user table
+                users.forEach(user => {
+                    tableBody.append(`
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.firstname}</td>
+                            <td>${user.lastname}</td>
+                            <td>${user.account_number}</td>
+                            <td>
+                                <button type="button" class="btn btn-warning" onclick="confirmTransferDisable(${user.id})">
+                                    Transfer Funds
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+
+
+                // Previous button
+                if (currentPage > 1) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                        </li>
+                    `);
+                }
+
+                // Numbered page links
+                for (let i = 1; i <= totalPages; i++) {
+                    pagination.append(`
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+
+                // Next button
+                if (currentPage < totalPages) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+                        </li>
+                    `);
+                }
+            }
+        });
+    }
+
+    // Handle pagination click
+    $(document).on('click', '.page-link', function (e) {
+        e.preventDefault();
+        let page = $(this).data('page');
+        loadUsers(page);
+    });
+
+    // Load the first page initially
+    loadUsers();
+});
 </script>
 </html>
 
