@@ -46,14 +46,17 @@ $menuItems = [
             'Trip Reports' => ['icon' => 'fa-list', 'url' => '/NewRam/pages/conductor/trips.php'],
         ]
     ],
-    'Driver' => [
+    'Cashier' => [
         'before' => [
-            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/driver/dashboard.php'],
+            'Dashboard' => ['icon' => 'fa-tachometer-alt', 'url' => '/NewRam/pages/cashier/dashboard.php'],
+            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/cashier/loadrfidadmin.php'],
+            'Remit' => ['icon' => 'fa-hand-holding-usd', 'url' => '/NewRam/pages/cashier/loadtranscashier.php'],
+            'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/cashier/remit_logs.php'],
+            'Remit Logs' => ['icon' => 'fa-clipboard-list', 'url' => '/NewRam/pages/cashier/remit.php'],
+            'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/cashier/translogscashier.php'],
         ],
         'dropdown' => [],
-        'after' => [
-            'Vehicle Maintenance' => ['icon' => 'fa-wrench', 'url' => '/NewRam/pages/driver/maintenance.php'],
-        ]
+        'after' => []
     ],
     'User' => [
         'before' => [

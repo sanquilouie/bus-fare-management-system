@@ -13,7 +13,7 @@ function getRedirectURL($role)
       case 'Admin':
          return '../pages/admin/dashboard.php';
       case 'Cashier':
-         return 'cashier/cashierdashboard.php';
+         return '../pages/cashier/dashboard.php';
       case 'Superadmin':
          return 'superadmin/superadmin.php';
       case 'User':
