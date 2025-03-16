@@ -1,26 +1,75 @@
 <?php
 $role = $_SESSION['role'];
-$currentPage = $_SERVER['REQUEST_URI']; 
+$currentPage = $_SERVER['REQUEST_URI'];
 
-$menuItemsBefore = [
-    'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/admin/dashboard.php'],
-    'Registration' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/admin/register.php'],
-    'Reg Employee' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/admin/regemployee.php'],
-    'Revenue' => ['icon' => 'fa-cogs', 'url' => '/NewRam/pages/admin/revenue.php'],
+// Define menu items per role
+$menuItems = [
+    'SuperAdmin' => [
+        'before' => [
+            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/admin/dashboard.php'],
+            'User Management' => ['icon' => 'fa-users', 'url' => '/NewRam/pages/admin/users.php'],
+        ],
+        'dropdown' => [
+            'Activate Account' => ['icon' => 'fa-user-check', 'url' => '/NewRam/pages/admin/features/activate_users.php'],
+            'Disable Account' => ['icon' => 'fa-user-slash', 'url' => '/NewRam/pages/admin/features/disable_users.php'],
+            'Transfer User Funds' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/admin/features/transfer_user_funds.php']
+        ],
+        'after' => [
+            'System Settings' => ['icon' => 'fa-cogs', 'url' => '/NewRam/pages/admin/settings.php'],
+        ]
+    ],
+    'Admin' => [
+        'before' => [
+            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/admin/dashboard.php'],
+            'Registration' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/admin/register.php'],
+            'Reg Employee' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/admin/regemployee.php'],
+            'Revenue' => ['icon' => 'fa-cogs', 'url' => '/NewRam/pages/admin/revenue.php'],
+        ],
+        'dropdown' => [
+            'Activate Account' => ['icon' => 'fa-user-check', 'url' => '/NewRam/pages/admin/features/activate_users.php'],
+            'Disable Account' => ['icon' => 'fa-user-slash', 'url' => '/NewRam/pages/admin/features/disable_users.php'],
+            'Transfer User Funds' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/admin/features/transfer_user_funds.php']
+        ],
+        'after' => [
+            'Fare Update' => ['icon' => 'fa-arrow-up-1-9', 'url' => '/NewRam/pages/admin/fareupdate.php'],
+            'Reg Bus Info' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/admin/businfo.php'],
+            'View Bus Info' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/busviewinfo.php'],
+            'Feedbacks' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/feedbackview.php'],
+        ]
+    ],
+    'Conductor' => [
+        'before' => [
+            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/conductor/dashboard.php'],
+        ],
+        'dropdown' => [],
+        'after' => [
+            'Trip Reports' => ['icon' => 'fa-list', 'url' => '/NewRam/pages/conductor/trips.php'],
+        ]
+    ],
+    'Driver' => [
+        'before' => [
+            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/driver/dashboard.php'],
+        ],
+        'dropdown' => [],
+        'after' => [
+            'Vehicle Maintenance' => ['icon' => 'fa-wrench', 'url' => '/NewRam/pages/driver/maintenance.php'],
+        ]
+    ],
+    'User' => [
+        'before' => [
+            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/user/dashboard.php'],
+            'Recent Trips' => ['icon' => 'fa-route', 'url' => '/NewRam/pages/user/recent_trips.php'],
+            'Convert Points' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/user/convert_points.php'],
+            'Update Password' => ['icon' => 'fa-key', 'url' => '/NewRam/pages/user/update_pass.php'],
+            'Transaction Logs' => ['icon' => 'fa-file-alt', 'url' => '/NewRam/pages/user/transaction_logs.php'],
+        ],
+        'after' => [],
+    ],
 ];
 
-$menuItemsAfter = [
-    'Fare Update' => ['icon' => 'fa-arrow-up-1-9', 'url' => '/NewRam/pages/admin/fareupdate.php'],
-    'Reg Bus Info' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/admin/businfo.php'],
-    'View Bus Info' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/busviewinfo.php'],
-    'Feedbacks' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/feedbackview.php'],
-];
+// Default to an empty array if role doesn't match
+$menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
 
-$dropdownItems = [
-    'Activate Account' => ['icon' => 'fa-user-check', 'url' => '/NewRam/pages/admin/features/activate_users.php'],
-    'Disable Account' => ['icon' => 'fa-user-slash', 'url' => '/NewRam/pages/admin/features/disable_users.php'],
-    'Transfer User Funds' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/admin/features/transfer_user_funds.php']
-];
 
 ?>
 <!DOCTYPE html>
@@ -116,41 +165,44 @@ $dropdownItems = [
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header p-3">
             <div class="d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Admin Panel</h5>
+                <h5 class="mb-0"><?php echo $_SESSION['role'] ?> Panel</h5>
             </div>
         </div>
 
         <nav class="nav flex-column mt-2">
-            <?php if ($role == 'Admin'): ?>
-                <?php foreach ($menuItemsBefore as $label => $item): ?>
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
-                            <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle <?= in_array($currentPage, array_column($dropdownItems, 'url')) ? 'active' : ''; ?>" 
-                    href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-sticky-note"></i> Accounts
+    <?php foreach ($menu['before'] as $label => $item): ?>
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
+                <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
+            </a>
+        </li>
+    <?php endforeach; ?>
+
+    <?php if (!empty($menu['dropdown'])): ?>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle <?= in_array($currentPage, array_column($menu['dropdown'], 'url')) ? 'active' : ''; ?>" 
+            href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-sticky-note"></i> Accounts
+            </a>
+            <div class="dropdown-menu" aria-labelledby="accountsDropdown">
+                <?php foreach ($menu['dropdown'] as $label => $item): ?>
+                    <a class="dropdown-item <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
+                        <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="accountsDropdown">
-                        <?php foreach ($dropdownItems as $label => $item): ?>
-                            <a class="dropdown-item <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
-                                <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
-                            </a>
-                        <?php endforeach; ?>
-                    </div>
-                </li>
-                <?php foreach ($menuItemsAfter as $label => $item): ?>
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
-                            <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
-                        </a>
-                    </li>
                 <?php endforeach; ?>
-            <?php endif; ?>
-        </nav>
+            </div>
+        </li>
+    <?php endif; ?>
+
+    <?php foreach ($menu['after'] as $label => $item): ?>
+        <li class="nav-item">
+            <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
+                <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
+            </a>
+        </li>
+    <?php endforeach; ?>
+</nav>
+
     </div>
 
     

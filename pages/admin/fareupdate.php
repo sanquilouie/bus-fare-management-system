@@ -110,7 +110,7 @@ $conn->close();
         unset($_SESSION['fare_updated']);
     }
     ?>
-    <div id="main-content" class="container mt-4">
+    <div id="main-content" class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <h2>Fare Settings</h2>

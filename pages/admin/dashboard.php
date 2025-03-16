@@ -132,23 +132,23 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
         color: #212529;
     }
     @media (max-width: 768px) {
-    .dashboard {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-    .dashboard-item {
-        flex: 1 1 calc(50% - 20px); /* Ensures 2 items per row */
-        max-width: calc(50% - 20px);
-        min-height: 120px; /* Set a minimum height */
-    }
+        .dashboard-item {
+            flex: 1 1 calc(50% - 20px); /* Ensures 2 items per row */
+            max-width: calc(50% - 20px);
+            min-height: 120px; /* Set a minimum height */
+        }
 
-    .dashboard-charts {
-        flex: 1 1 100%;
-        max-width: 100%;
+        .dashboard-charts {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
     }
-}
 
     </style>
 
@@ -162,7 +162,7 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
     ?>
 
     <!-- Main Content -->
-    <div id="main-content" class="container mt-4">
+    <div id="main-content" class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="dashboard">

@@ -5,7 +5,7 @@
     </div>
     <div class="profile d-flex align-items-center">
         <i class="fas fa-user-circle fa-2x d-none d-md-inline"></i> <!-- Hide on small screens -->
-        <span class="ms-2">Admin</span> <!-- Always visible -->
+        <span class="ms-2"><?php echo $_SESSION['role'] ?></span> <!-- Always visible -->
         <a href="../../auth/logout.php" class="btn btn-sm btn-light ms-2 d-md-none">
             <i class="fas fa-sign-out-alt"></i> <!-- Show icon only on small screens -->
         </a>

@@ -17,7 +17,7 @@ function getRedirectURL($role)
       case 'Superadmin':
          return 'superadmin/superadmin.php';
       case 'User':
-         return 'users/index.php';
+         return '../pages/user/dashboard.php';
       case 'Conductor':
          return 'conductor/conductordashboard.php';
       default:
@@ -69,22 +69,21 @@ if (isset($_POST['Login'])) {
 
             // Trigger SweetAlert2 for successful login using JavaScript
             echo "
-                    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-                    <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        Swal.fire({
-                            title: 'Login Successfully',
-                            text: ' " . /* htmlspecialchars($row['fullname']) . */ "',
-                            icon: 'success',
-                             showConfirmButton: false,
-                           timer: 1000
-                        }).then((result) => {
-                        
-                                window.location.href = '" . getRedirectURL($row['role']) . "';
-                            
-                        });
-                    });
-                    </script>";
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Swal.fire({
+            title: 'Login Successfully',
+            text: 'Welcome, " . htmlspecialchars($row['fullname']) . "! Your role is: " . htmlspecialchars($row['role']) . "',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 1000
+        }).then((result) => {
+            window.location.href = '" . getRedirectURL($row['role']) . "';
+        });
+    });
+    </script>";
+
             exit;
          }
       } else {
