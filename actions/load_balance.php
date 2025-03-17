@@ -1,44 +1,51 @@
 <?php
+session_start();
 include "../includes/connection.php";
+include 'functions.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['load_balance'])) {
-    $account_number = $_POST['user_account_number']; // Updated to match input name
-    $amount = floatval($_POST['load_balance']); // Changed to match input name
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-    // Check if the amount is valid
-    if ($amount <= 0) {
-        echo json_encode(['error' => 'Invalid amount.']);
-        exit;
-    }
+function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
+{
+    // Fetch session variables for bus_number and conductor_id
+    $busNumber = 'Cashier';
+    $conductorId = isset($_SESSION['account_number']) ? $_SESSION['account_number'] : null;
 
-    // Query to get current balance and user ID
-    $query = "SELECT id, balance FROM useracc WHERE account_number = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("s", $account_number);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Sanitize inputs
+    $userAccountNumber = mysqli_real_escape_string($conn, $userAccountNumber);
+    $balanceToLoad = floatval($balanceToLoad);
+    $rfid = mysqli_real_escape_string($conn, $rfid);
 
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        $new_balance = $user['balance'] + $amount;
+    // Check if the user account exists
+    $query = "SELECT * FROM useracc WHERE account_number = '$userAccountNumber'";
+    $result = mysqli_query($conn, $query);
 
+    if (mysqli_num_rows($result) > 0) {
         // Update the user's balance
-        $updateQuery = "UPDATE useracc SET balance = ? WHERE account_number = ?";
-        $updateStmt = $conn->prepare($updateQuery);
-        $updateStmt->bind_param("ds", $new_balance, $account_number);
-
-        if ($updateStmt->execute()) {
-            $logQuery = "INSERT INTO transactions (user_id, account_number, amount, transaction_type) VALUES (?, ?, ?, 'Load')";
-            $logStmt = $conn->prepare($logQuery);
-            $logStmt->bind_param("isd", $user['id'], $account_number, $amount);
-            $logStmt->execute();
-
-            echo json_encode(['success' => 'Balance loaded successfully. New balance is ₱' . number_format($new_balance, 2)]);
+        $updateQuery = "UPDATE useracc SET balance = balance + $balanceToLoad WHERE account_number = '$userAccountNumber'";
+        if (mysqli_query($conn, $updateQuery)) {
+            // Log the transaction
+            $logQuery = "INSERT INTO transactions (account_number, amount, transaction_type, bus_number, conductor_id) VALUES ('$userAccountNumber', $balanceToLoad, 'load', '$busNumber', '$conductorId')";
+            mysqli_query($conn, $logQuery);
+            return ['success' => '₱' . number_format($balanceToLoad, 2) . ' loaded successfully.'];
         } else {
-            echo json_encode(['error' => 'Failed to update balance: ' . $updateStmt->error]);
+            return ['error' => 'Failed to update balance.'];
         }
     } else {
-        echo json_encode(['error' => 'User not found.']);
+        return ['error' => 'User  account not found.'];
     }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $userAccountNumber = $_POST['user_account_number'];
+    $loadAmount = $_POST['loadAmount'];
+    $rfid = $_POST['rfid'];
+
+    // Call the function to load the user balance
+    $response = loadUserBalance($conn, $userAccountNumber, $loadAmount, $rfid);
+    
+    header('Content-Type: application/json'); // Set the content type to JSON
+    echo json_encode($response);
 }
 ?>
