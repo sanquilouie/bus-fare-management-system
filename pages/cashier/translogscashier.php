@@ -5,60 +5,6 @@ include '../../includes/functions.php'; // Include your functions file
 
 // Assuming you have the user id in session
 $account_number = $_SESSION['account_number']; // Fetch account number from session
-
-// Fetch user data based on account_number
-$query = "SELECT firstname, lastname, role FROM useracc WHERE account_number = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param('s', $account_number); // Use the account number for fetching user data
-$stmt->execute();
-$stmt->bind_result($firstname, $lastname, $role);
-$stmt->fetch();
-$stmt->close(); // Close the prepared statement after fetching user data
-
-// Pagination Setup
-$limit = 15; // Number of records per page
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Get current page from query string
-$offset = ($page - 1) * $limit; // Calculate the offset
-
-// Fetch total number of transactions for pagination
-$totalQuery = "SELECT COUNT(*) AS total FROM transactions t";
-$totalResult = $conn->query($totalQuery);
-$totalRows = $totalResult->fetch_assoc()['total'];
-$totalPages = ceil($totalRows / $limit); // Calculate total pages
-
-// Fetch transactions with pagination
-function fetchTransactions($conn, $limit, $offset)
-{
-    $transactionQuery = "SELECT 
-    t.id, 
-    u.firstname, 
-    u.lastname, 
-    u.account_number, 
-    t.amount, 
-    t.transaction_type, 
-    t.transaction_date, 
-    t.conductor_id, 
-    c.firstname AS conductor_firstname, 
-    c.lastname AS conductor_lastname, 
-    c.account_number AS conductor_account_number,
-    c.role AS loaded_by_role
-    FROM transactions t
-    JOIN useracc u ON t.user_id = u.id
-    LEFT JOIN useracc c ON t.conductor_id = c.account_number
-    ORDER BY t.transaction_date DESC
-    LIMIT ? OFFSET ?";
-
-    $stmt = $conn->prepare($transactionQuery);
-    $stmt->bind_param('ii', $limit, $offset); // Bind limit and offset
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $stmt->close();
-
-    return $result;
-}
-
-$transactions = fetchTransactions($conn, $limit, $offset);
-
 ?>
 
 <!DOCTYPE html>
@@ -81,19 +27,6 @@ $transactions = fetchTransactions($conn, $limit, $offset);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <title>Transaction Logs</title>
-    <style>
-        h2 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: transparent;
-            background-image: linear-gradient(to right, #f1c40f, #e67e22);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            -webkit-text-stroke: 0.5px black;
-        }
-    </style>
 </head>
 
 <body>
@@ -105,56 +38,157 @@ $transactions = fetchTransactions($conn, $limit, $offset);
     <!-- Page Content  -->
     <div id="main-content" class="container mt-5">
         <h2>Transaction Logs</h2>
-        <table id="transactionTable" class="table table-bordered mt-4">
-            <thead class="thead-light">
-                <tr>
-                    <th>Account Number</th>
-                    <th>User Name</th>
-                    <th>Amount</th>
-                    <th>Transaction Type</th>
-                    <th>Transaction Time</th>
-                    <th>Loaded By</th>
-                    <th>Role of Loader</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (mysqli_num_rows($transactions) > 0): ?>
-                    <?php while ($row = mysqli_fetch_assoc($transactions)): ?>
-                        <tr>
-                            <td><?php echo $row['account_number']; ?></td>
-                            <td><?php echo htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?></td>
-                            <td><?php echo number_format($row['amount'], 2); ?></td>
-                            <td><?php echo htmlspecialchars(ucfirst($row['transaction_type'])); ?></td>
-                            <td><?php echo date('F-d-Y h:i:s A', strtotime($row['transaction_date'])); ?></td>
-                            <td><?php echo htmlspecialchars($row['conductor_firstname'] . ' ' . $row['conductor_lastname']); ?></td>
-                            <td><?php echo htmlspecialchars($row['loaded_by_role']); ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="7" class="text-center">No transaction records found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                <li class="page-item <?php if ($page == 1) echo 'disabled'; ?>">
-                    <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Previous</a>
-                </li>
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
-                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                    </li>
-                <?php endfor; ?>
-                <li class="page-item <?php if ($page == $totalPages) echo 'disabled'; ?>">
-                    <a class="page-link" href="?page=<?php echo $page + 1; ?>">Next</a>
-                </li>
-            </ul>
-        </nav>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Account Number</th>
+                                <th>User Name</th>
+                                <th>Amount</th>
+                                <th>Transaction Type</th>
+                                <th>Transaction Time</th>
+                                <th>Loaded By</th>
+                                <th>Role of Loader</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody"></tbody>
+                        
+                    </table>
+                    
+                </div>
+                <nav>
+                    <ul class="pagination" id="pagination"></ul>
+                </nav>
+            </div>
+        </div>
     </div>
+    <script>
+$(document).ready(function () {
+    function loadTransactions(page = 1) {
+        $.ajax({
+            url: '../../actions/fetch_translogscashier.php',
+            type: 'GET',
+            data: { page: page },
+            dataType: 'json',
+            success: function (response) {
+                let transactions = response.transactions;
+                let totalPages = response.totalPages;
+                let currentPage = response.currentPage;
+                let tableBody = $("#transactionTableBody");
+                let pagination = $("#pagination");
+
+                tableBody.empty();
+                pagination.empty();
+
+                // Populate the transactions table
+                transactions.forEach(transaction => {
+                    tableBody.append(`
+                        <tr>
+                            <td>${transaction.account_number}</td>
+                            <td>${transaction.firstname} ${transaction.lastname}</td>
+                            <td>${transaction.amount}</td>
+                            <td>${transaction.transaction_type}</td>
+                            <td>${transaction.transaction_date}</td>
+                            <td>${transaction.conductor_firstname} ${transaction.conductor_lastname}</td>
+                            <td>${transaction.loaded_by_role}</td>
+                        </tr>
+                    `);
+                });
+
+                // Responsive pagination logic
+                function addPageButton(pageNumber, isActive = false) {
+                    pagination.append(`
+                        <li class="page-item ${isActive ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${pageNumber}">${pageNumber}</a>
+                        </li>
+                    `);
+                }
+
+                function addEllipsis() {
+                    pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                }
+
+                // Previous button
+                if (currentPage > 1) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                        </li>
+                    `);
+                }
+
+                let screenWidth = $(window).width();
+                let showAll = screenWidth > 768; // Show all pages on larger screens
+
+                if (showAll) {
+                    // Full pagination
+                    for (let i = 1; i <= totalPages; i++) {
+                        addPageButton(i, currentPage === i);
+                    }
+                } else {
+                    // Compact pagination
+                    if (currentPage > 2) addPageButton(1); // First page
+                    if (currentPage > 3) addEllipsis();
+
+                    let start = Math.max(1, currentPage - 1);
+                    let end = Math.min(totalPages, currentPage + 1);
+
+                    for (let i = start; i <= end; i++) {
+                        addPageButton(i, currentPage === i);
+                    }
+
+                    if (currentPage < totalPages - 2) addEllipsis();
+                    if (currentPage < totalPages - 1) addPageButton(totalPages); // Last page
+                }
+
+                // Next button
+                if (currentPage < totalPages) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+                        </li>
+                    `);
+                }
+
+                // Dropdown for mobile users
+                if (screenWidth < 576) {
+                    let selectDropdown = `<select id="pageSelect" class="form-select form-select-sm">`;
+                    for (let i = 1; i <= totalPages; i++) {
+                        selectDropdown += `<option value="${i}" ${i === currentPage ? "selected" : ""}>Page ${i}</option>`;
+                    }
+                    selectDropdown += `</select>`;
+                    pagination.append(`<li class="page-item">${selectDropdown}</li>`);
+                }
+            }
+        });
+    }
+
+    // Initial load
+    loadTransactions();
+
+    // Handle pagination click
+    $(document).on("click", ".page-link", function (e) {
+        e.preventDefault();
+        let page = $(this).data("page");
+        loadTransactions(page);
+    });
+
+    // Handle dropdown change (for mobile)
+    $(document).on("change", "#pageSelect", function () {
+        let page = $(this).val();
+        loadTransactions(page);
+    });
+
+    // Re-render pagination on window resize
+    $(window).resize(function () {
+        loadTransactions($(".page-item.active .page-link").data("page") || 1);
+    });
+});
+
+
+        </script>
 </body>
 
 </html>

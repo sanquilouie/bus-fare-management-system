@@ -75,33 +75,31 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-<div id="main-content" class="container mt-5">
-        <h2 class="text-center">Revenue Report</h2>
-
-        <!-- Filter Form -->
-        <form id="filterForm" method="POST">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="date" class="form-label">Select Date</label>
-                    <input type="date" id="date" name="date" class="form-control"
-                        value="<?php echo "$currentYear-$currentMonth-$currentDay"; ?>" required>
+    <div id="main-content" class="container mt-5">
+        <h2>Revenue Report</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <!-- Filter Form -->
+                <form id="filterForm" method="POST">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="date" class="form-label">Select Date</label>
+                            <input type="date" id="date" name="date" class="form-control"
+                                value="<?php echo "$currentYear-$currentMonth-$currentDay"; ?>" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <button type="button" class="btn btn-danger" id="generatePdfBtn" disabled>Download PDF</button>
+                </form>
+                <!-- Display Total Revenue -->
+                <div class="mt-4" id="revenueDisplay">
+                    <h3>Total Revenue</h3>
+                    <p>₱<?php echo number_format($selectedDayRevenue, 2); ?></p>
                 </div>
+                <div id="revenueChart"></div>
             </div>
-            <button type="submit" class="btn btn-primary">Filter</button>
-            <button type="button" class="btn btn-danger" id="generatePdfBtn" disabled>Download PDF</button>
-        </form>
-
-        <!-- Display Total Revenue -->
-        <div class="mt-4" id="revenueDisplay">
-            <h3>Total Revenue</h3>
-            <p>₱<?php echo number_format($selectedDayRevenue, 2); ?></p>
         </div>
-
-        <!-- Chart for daily revenue -->
-        <div id="revenueChart"></div> <!-- ApexCharts container -->
     </div>
-    </div>
-    <script src="../js/sidebar.js"></script>
     <script>
         // Update the chart using ApexCharts (for a single day)
         function updateChart(dailyRevenue) {

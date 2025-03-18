@@ -103,17 +103,6 @@ ob_end_flush();
  
     
     <style>
-        h2{
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: transparent;
-            background-image: linear-gradient(to right, #f1c40f, #e67e22);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            -webkit-text-stroke: 0.5px black;
-        }
       .country-code {
             background-color: #f8f9fa;
             /* Light background */
@@ -143,7 +132,7 @@ ob_end_flush();
     ?>
 <div id="main-content" class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 mt-20">
+        <div class="col-md-8">
             <h2 class="text-center">Employee Registration</h2>
             <form method="POST" action="">
                 <div class="row mb-3">

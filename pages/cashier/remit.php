@@ -72,42 +72,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     ?>
     <div id="main-content" class="container mt-5">
         <h2>Conductor Remittance</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form id="remittanceForm" method="POST" action="">
+                    <label for="rfid_scan" class="form-label">RFID Scan:</label>
+                    <input type="text" class="form-control" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required
+                        value="<?= htmlspecialchars($rfid_scan) ?>" class="form-label">
 
-        <form id="remittanceForm" method="POST" action="">
-            <label for="rfid_scan">RFID Scan:</label>
-            <input type="text" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required
-                value="<?= htmlspecialchars($rfid_scan) ?>">
+                    <label for="bus_no" class="form-label">Bus No:</label>
+                    <input type="text" class="form-control" id="bus_no" name="bus_no" required value="<?= htmlspecialchars($bus_number) ?>" readonly>
 
-            <label for="bus_no">Bus No:</label>
-            <input type="text" id="bus_no" name="bus_no" required value="<?= htmlspecialchars($bus_number) ?>" readonly>
+                    <label for="conductor_name" class="form-label">Conductor Name:</label>
+                    <input type="text" class="form-control" id="conductor_name" name="conductor_name" required
+                        value="<?= htmlspecialchars($conductor_name) ?>" readonly>
 
-            <label for="conductor_name">Conductor Name:</label>
-            <input type="text" id="conductor_name" name="conductor_name" required
-                value="<?= htmlspecialchars($conductor_name) ?>" readonly>
+                    <label for="total_load" class="form-label">Total Load (₱):</label>
+                    <input type="number" class="form-control" id="total_load" name="total_load" step="0.01" readonly
+                        value="<?= htmlspecialchars($total_load) ?>">
 
-            <label for="total_load">Total Load (₱):</label>
-            <input type="number" id="total_load" name="total_load" step="0.01" readonly
-                value="<?= htmlspecialchars($total_load) ?>">
-
-            <div id="deductions-container">
-                <button type="button" id="toggleDeductions" class="btn btn-primary">+ Deductions</button>
-                <div id="deductions" style="display: none; margin-top: 10px;">
-                    <h3>Deductions</h3>
-                    <div class="deduction-row">
-                        <input type="text" name="deduction_desc[]" placeholder="Description">
-                        <input type="number" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)">
+                    <div id="deductions-container">
+                        <div class="text-center mt-1">
+                            <button type="button" id="toggleDeductions" class="btn btn-primary w-100">+ Deductions</button>
+                        </div>
+                        <div id="deductions" style="display: none; margin-top: 10px;">
+                            <h3>Deductions</h3>
+                            <div class="deduction-row">
+                                <input type="text" class="form-control" name="deduction_desc[]" placeholder="Description">
+                                <input type="number" class="form-control" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)">
+                            </div>
+                            <div class="text-center mt-1">
+                                <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
+                            </div>
+                        </div>
                     </div>
-                    <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
-                </div>
+
+                    <label for="net_amount" class="form-label">Net Amount (₱):</label>
+                    <input type="number" class="form-control" id="net_amount" name="net_amount" step="0.01" readonly
+                        value="<?= htmlspecialchars($total_load) ?>">
+                        <div class="text-center mt-1">
+                            <button type="submit" name="generate_remittance" id="remitButton" class="btn btn-primary w-100">Generate Remittance</button>
+                        </div>
+                </form>
             </div>
-
-            <label for="net_amount">Net Amount (₱):</label>
-            <input type="number" id="net_amount" name="net_amount" step="0.01" readonly
-                value="<?= htmlspecialchars($total_load) ?>">
-
-            <button type="submit" name="generate_remittance" id="remitButton">Generate Remittance</button>
-
-        </form>
+        </div>
     </div>
     <script>
         document.getElementById('rfid_scan').addEventListener('input', function () {

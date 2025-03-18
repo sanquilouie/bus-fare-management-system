@@ -128,8 +128,8 @@ $stmt->fetch();
 
     <!-- Page Content -->
     <div id="main-content" class="container mt-5">
-        <div class="row">
-            <div class="col-md-12 mb-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title text-primary">Past Months' Total Load</h2>
@@ -138,7 +138,7 @@ $stmt->fetch();
                 </div>
             </div>
 
-            <div class="col-md-12 mb-4">
+            <div class="col-md-10 mt-5">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title text-primary">Today's Total Load</h2>

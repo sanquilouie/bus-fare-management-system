@@ -92,91 +92,35 @@ $totalRevenue = array_sum($dailyRevenue);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .sidebar {
-            background-color: #ffffff;
-            padding: 20px;
-            color: #001f3f;
-            border-right: 1px solid #e0e0e0;
-        }
-
-        .main-content {
-            padding: 20px;
-            background-color: #ffffff;
-            border-left: 1px solid #e0e0e0;
-        }
-
-        h1,
-        h2 {
-            color: #343a40;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3
-        }
-
-        #chart {
-            width: 100%;
-            height: 350px;
-        }
-
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 150px;
-            }
-        }
-    </style>
 </head>
 
 <body>
-<?php
+    <?php
         include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
     
     <div id="main-content" class="container mt-5">
-    <h2>Daily Revenue Report</h2>
-    <form method="POST" class="mb-4">
-        <div class="form-group">
-            <label for="selected_date">Select Date:</label>
-            <input type="date" id="selected_date" name="selected_date" class="form-control"
-                value="<?php echo htmlspecialchars($selectedDate); ?>">
-        </div>
-        <div class="form-group form-check">
-            <input type="checkbox" id="show_whole_month" name="show_whole_month" class="form-check-input" <?php echo $showWholeMonth ? 'checked' : ''; ?>>
-            <label for="show_whole_month" class="form-check-label">Show Whole Month</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Generate Report</button>
-    </form>
-
-    <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
-
-    <div id="chart"></div>
-    <script src="../js/sidebar.js"></script>
-    <script>
+        <h2>Daily Revenue Report</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form method="POST" class="mb-4">
+                    <div class="form-group">
+                        <label for="selected_date">Select Date:</label>
+                        <input type="date" id="selected_date" name="selected_date" class="form-control"
+                            value="<?php echo htmlspecialchars($selectedDate); ?>">
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" id="show_whole_month" name="show_whole_month" class="form-check-input" <?php echo $showWholeMonth ? 'checked' : ''; ?>>
+                        <label for="show_whole_month" class="form-check-label">Show Whole Month</label>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="submit" class="btn btn-primary">Generate Report</button>
+                    </div>
+                </form>
+                <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
+                <script>
         window.onload = function () {
             const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;
             updateChart(dailyRevenue);
@@ -216,8 +160,8 @@ $totalRevenue = array_sum($dailyRevenue);
 
 
     </script>
-    </div>
-    </div>
+            </div>
+        </div>
+    </div>    
 </body>
-
 </html>

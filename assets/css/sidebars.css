@@ -128,3 +128,11 @@ form .form-control:focus {
   border-color: #e67e22;
   box-shadow: 0 0 5px rgba(230, 126, 34, 0.5);
 }
+
+#pagination {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  max-width: 100%;
+}

@@ -50,10 +50,10 @@ $menuItems = [
         'before' => [
             'Dashboard' => ['icon' => 'fa-tachometer-alt', 'url' => '/NewRam/pages/cashier/dashboard.php'],
             'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/cashier/loadrfidadmin.php'],
-            'Remit' => ['icon' => 'fa-hand-holding-usd', 'url' => '/NewRam/pages/cashier/loadtranscashier.php'],
-            'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/cashier/remit_logs.php'],
-            'Remit Logs' => ['icon' => 'fa-clipboard-list', 'url' => '/NewRam/pages/cashier/remit.php'],
-            'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/cashier/translogscashier.php'],
+            'Remit' => ['icon' => 'fa-hand-holding-usd', 'url' => '/NewRam/pages/cashier/remit.php'],
+            'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/cashier/translogscashier.php'],
+            'Remit Logs' => ['icon' => 'fa-clipboard-list', 'url' => '/NewRam/pages/cashier/remit_logs.php'],
+            'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/cashier/loadtranscashier.php'],
         ],
         'dropdown' => [],
         'after' => []
