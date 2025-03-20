@@ -43,7 +43,7 @@ $result = $conn->query($query);
         include '../../includes/footer.php';
     ?>
     <div id="main-content" class="container mt-5">
-    <h2>Remittance Logs</h2>
+        <h2>Remittance Logs</h2>
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="table-responsive">
@@ -63,137 +63,137 @@ $result = $conn->query($query);
                         </thead>
                         <tbody id="remitLogsTableBody"></tbody>
                     </table>
-    </div>
-    <nav>
-                    <ul class="pagination" id="pagination"></ul>
-                </nav>
-    </div>
+                </div>
+                    <nav>
+                        <ul class="pagination" id="pagination"></ul>
+                    </nav>
+        </div>
     </div>
     <script>
-        $(document).ready(function () {
-    function loadRemitLogs(page = 1) {
-        $.ajax({
-            url: '../../actions/fetch_remitlogs.php', // Update this to your correct PHP file
-            type: 'GET',
-            data: { page: page },
-            dataType: 'json',
-            success: function (response) {
-                let remitLogs = response.remit_logs;
-                let totalPages = response.totalPages;
-                let currentPage = response.currentPage;
-                let tableBody = $("#remitLogsTableBody"); // Update to match your table ID
-                let pagination = $("#pagination");
+    $(document).ready(function () {
+        function loadRemitLogs(page = 1) {
+            $.ajax({
+                url: '../../actions/fetch_remitlogs.php', // Update this to your correct PHP file
+                type: 'GET',
+                data: { page: page },
+                dataType: 'json',
+                success: function (response) {
+                    let remitLogs = response.remit_logs;
+                    let totalPages = response.totalPages;
+                    let currentPage = response.currentPage;
+                    let tableBody = $("#remitLogsTableBody"); // Update to match your table ID
+                    let pagination = $("#pagination");
 
-                tableBody.empty();
-                pagination.empty();
+                    tableBody.empty();
+                    pagination.empty();
 
-                // Populate the remit logs table
-                remitLogs.forEach(log => {
-                    tableBody.append(`
-                        <tr>
-                            <td>${log.id}</td>
-                            <td>${log.bus_no}</td>
-                            <td>${log.conductor_id}</td>
-                            <td>${parseFloat(log.total_load).toFixed(2)}</td>
-                            <td>${parseFloat(log.total_cash).toFixed(2)}</td>
-                            <td>${parseFloat(log.total_deductions).toFixed(2)}</td>
-                            <td>${parseFloat(log.net_amount).toFixed(2)}</td>
-                            <td>${log.remit_date}</td>
-                            <td>${log.created_at}</td>
-                        </tr>
+                    // Populate the remit logs table
+                    remitLogs.forEach(log => {
+                        tableBody.append(`
+                            <tr>
+                                <td>${log.id}</td>
+                                <td>${log.bus_no}</td>
+                                <td>${log.conductor_id}</td>
+                                <td>${parseFloat(log.total_load).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_cash).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_deductions).toFixed(2)}</td>
+                                <td>${parseFloat(log.net_amount).toFixed(2)}</td>
+                                <td>${log.remit_date}</td>
+                                <td>${log.created_at}</td>
+                            </tr>
 
-                    `);
-                });
+                        `);
+                    });
 
-                // Responsive pagination logic
-                function addPageButton(pageNumber, isActive = false) {
-                    pagination.append(`
-                        <li class="page-item ${isActive ? 'active' : ''}">
-                            <a class="page-link" href="#" data-page="${pageNumber}">${pageNumber}</a>
-                        </li>
-                    `);
-                }
-
-                function addEllipsis() {
-                    pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
-                }
-
-                // Previous button
-                if (currentPage > 1) {
-                    pagination.append(`
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
-                        </li>
-                    `);
-                }
-
-                let screenWidth = $(window).width();
-                let showAll = screenWidth > 768; // Show all pages on larger screens
-
-                if (showAll) {
-                    // Full pagination
-                    for (let i = 1; i <= totalPages; i++) {
-                        addPageButton(i, currentPage === i);
-                    }
-                } else {
-                    // Compact pagination
-                    if (currentPage > 2) addPageButton(1); // First page
-                    if (currentPage > 3) addEllipsis();
-
-                    let start = Math.max(1, currentPage - 1);
-                    let end = Math.min(totalPages, currentPage + 1);
-
-                    for (let i = start; i <= end; i++) {
-                        addPageButton(i, currentPage === i);
+                    // Responsive pagination logic
+                    function addPageButton(pageNumber, isActive = false) {
+                        pagination.append(`
+                            <li class="page-item ${isActive ? 'active' : ''}">
+                                <a class="page-link" href="#" data-page="${pageNumber}">${pageNumber}</a>
+                            </li>
+                        `);
                     }
 
-                    if (currentPage < totalPages - 2) addEllipsis();
-                    if (currentPage < totalPages - 1) addPageButton(totalPages); // Last page
-                }
-
-                // Next button
-                if (currentPage < totalPages) {
-                    pagination.append(`
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
-                        </li>
-                    `);
-                }
-
-                // Dropdown for mobile users
-                if (screenWidth < 576) {
-                    let selectDropdown = `<select id="pageSelect" class="form-select form-select-sm">`;
-                    for (let i = 1; i <= totalPages; i++) {
-                        selectDropdown += `<option value="${i}" ${i === currentPage ? "selected" : ""}>Page ${i}</option>`;
+                    function addEllipsis() {
+                        pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
                     }
-                    selectDropdown += `</select>`;
-                    pagination.append(`<li class="page-item">${selectDropdown}</li>`);
+
+                    // Previous button
+                    if (currentPage > 1) {
+                        pagination.append(`
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                            </li>
+                        `);
+                    }
+
+                    let screenWidth = $(window).width();
+                    let showAll = screenWidth > 768; // Show all pages on larger screens
+
+                    if (showAll) {
+                        // Full pagination
+                        for (let i = 1; i <= totalPages; i++) {
+                            addPageButton(i, currentPage === i);
+                        }
+                    } else {
+                        // Compact pagination
+                        if (currentPage > 2) addPageButton(1); // First page
+                        if (currentPage > 3) addEllipsis();
+
+                        let start = Math.max(1, currentPage - 1);
+                        let end = Math.min(totalPages, currentPage + 1);
+
+                        for (let i = start; i <= end; i++) {
+                            addPageButton(i, currentPage === i);
+                        }
+
+                        if (currentPage < totalPages - 2) addEllipsis();
+                        if (currentPage < totalPages - 1) addPageButton(totalPages); // Last page
+                    }
+
+                    // Next button
+                    if (currentPage < totalPages) {
+                        pagination.append(`
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+                            </li>
+                        `);
+                    }
+
+                    // Dropdown for mobile users
+                    if (screenWidth < 576) {
+                        let selectDropdown = `<select id="pageSelect" class="form-select form-select-sm">`;
+                        for (let i = 1; i <= totalPages; i++) {
+                            selectDropdown += `<option value="${i}" ${i === currentPage ? "selected" : ""}>Page ${i}</option>`;
+                        }
+                        selectDropdown += `</select>`;
+                        pagination.append(`<li class="page-item">${selectDropdown}</li>`);
+                    }
                 }
-            }
+            });
+        }
+
+        // Initial load
+        loadRemitLogs();
+
+        // Handle pagination click
+        $(document).on("click", ".page-link", function (e) {
+            e.preventDefault();
+            let page = $(this).data("page");
+            loadRemitLogs(page);
         });
-    }
 
-    // Initial load
-    loadRemitLogs();
+        // Handle dropdown change (for mobile)
+        $(document).on("change", "#pageSelect", function () {
+            let page = $(this).val();
+            loadRemitLogs(page);
+        });
 
-    // Handle pagination click
-    $(document).on("click", ".page-link", function (e) {
-        e.preventDefault();
-        let page = $(this).data("page");
-        loadRemitLogs(page);
+        // Re-render pagination on window resize
+        $(window).resize(function () {
+            loadRemitLogs($(".page-item.active .page-link").data("page") || 1);
+        });
     });
-
-    // Handle dropdown change (for mobile)
-    $(document).on("change", "#pageSelect", function () {
-        let page = $(this).val();
-        loadRemitLogs(page);
-    });
-
-    // Re-render pagination on window resize
-    $(window).resize(function () {
-        loadRemitLogs($(".page-item.active .page-link").data("page") || 1);
-    });
-});
 
         </script>
 </body>

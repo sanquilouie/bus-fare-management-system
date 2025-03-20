@@ -5,7 +5,7 @@ include '../../../includes/connection.php';
 
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../../../index.php");
+    header("Location: ../.././index.php");
     exit();
 }
 
@@ -42,35 +42,6 @@ $userCountQuery = "SELECT COUNT(*) as userCount FROM useracc WHERE is_activated 
 $userCountResult = mysqli_query($conn, $userCountQuery);
 $userCountRow = mysqli_fetch_assoc($userCountResult);
 $userCount = $userCountRow['userCount'];
-
-
-// Activate user action
-if (isset($_POST['activate_user'])) {
-    $user_id = $_POST['user_id']; // Get the user ID from the form
-
-    if ($user_id) {
-        $activateQuery = "UPDATE useracc SET is_activated = 1 WHERE id = ?";
-        $stmt = $conn->prepare($activateQuery);
-        if ($stmt) {
-            $stmt->bind_param("i", $user_id);
-            if ($stmt->execute()) {
-                logActivity($conn, $user_id, 'Activated', $firstname . ' ' . $lastname);
-                $_SESSION['message'] = "User  activated successfully.";
-            } else {
-                // Error executing statement
-                $_SESSION['message'] = "Error activating user.";
-            }
-            $stmt->close();
-        } else {
-            // Error preparing statement
-            $_SESSION['message'] = "Error preparing statement.";
-        }
-    } else {
-        $_SESSION['message'] = "User ID is missing.";
-    }
-    header("Location: users.php"); // Redirect to refresh the page
-    exit;
-}
 
 // Fetch recently registered users
 $recentUsersQuery = "SELECT * FROM useracc ORDER BY created_at DESC"; // Fetch non-activated users
@@ -125,6 +96,10 @@ if (isset($_POST['fetch_users'])) {
         $output .= '<td>' . date('F j, Y', strtotime($row['birthday'])) . '</td>';
         $output .= '<td>' . $row['age'] . '</td>';
         $output .= '<td>' . htmlspecialchars($row['gender']) . '</td>';
+        $output .= '<td>' . htmlspecialchars($row['address']) . '</td>';
+        $output .= '<td>' . htmlspecialchars($row['province']) . '</td>';
+        $output .= '<td>' . htmlspecialchars($row['municipality']) . '</td>';
+        $output .= '<td>' . htmlspecialchars($row['barangay']) . '</td>';
         $output .= '<td>' . htmlspecialchars($row['account_number']) . '</td>';
         $output .= '<td>₱' . number_format($row['balance'], 2) . '</td>';
         $output .= '<td>' . ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') . '</td>';
@@ -153,9 +128,12 @@ if (isset($_POST['fetch_users'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Fare and Passengers</title>
+    <title>RAMSTAR - Admin Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -166,212 +144,129 @@ if (isset($_POST['fetch_users'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use full version -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-    <style>
-
-        h3 {
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-
-
-        .table-responsive {
-            overflow-x: auto;
-            /* Enable horizontal scrolling */
-            -webkit-overflow-scrolling: touch;
-            /* Smooth scrolling on iOS */
-        }
-
-        .table {
-            min-width: 800px;
-            /* Set a minimum width for the table */
-        }
-
-        .table-container {
-            max-height: 520px;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        .clickable-count {
-    text-decoration: none; /* Remove underline */
-    color: #007bff; /* Bootstrap primary color */
-    font-weight: bold; /* Make the text bold */
-    transition: color 0.3s, background-color 0.3s; /* Smooth transition for hover effects */
-    padding: 5px; /* Add some padding */
-    border-radius: 4px; /* Rounded corners */
-}
-
-.clickable-count:hover {
-    color: #fff; /* Change text color on hover */
-    background-color: #007bff; /* Change background color on hover */
-}
-h5{
-    color: black;
-}
-
-.custom-btn {
-    padding: 12px 24px; /* Adjust padding for button size */
-    font-size: 16px; /* Adjust font size */
-}
-    </style>
 </head>
 
 <body>
     <?php
-    include '../../../includes/topbar.php';
-    include '../../../includes/sidebar2.php';
-    include '../../../includes/footer.php';
+        include '../../../includes/topbar.php';
+        include '../../../includes/superadmin_sidebar.php';
+        include '../../../includes/footer.php';
     ?>
 
     <!-- Page Content  -->
 
     <div id="main-content" class="container mt-5">
-    <h3>
-    <a href="#" id="awaitingActivation" class="clickable-count">
-        Awaiting Activation: <?php echo $userActivateCount; ?> (Disabled)
-    </a>
-</h3>
-<h3>
-    <a href="#" id="registeredUsers" class="clickable-count">
-        Registered Users: <?php echo $userCount; ?> (Activate)
-    </a>
-</h3>
-
-        <form method="POST" action="">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" id="search" name="search" placeholder="Search users...">
-              
-            </div>
-        </form>
-        <!-- Feedback Message -->
-        <?php if (isset($_SESSION['message'])): ?>
-            <div class="alert alert-info">
-                <?php
-                echo $_SESSION['message'];
-                unset($_SESSION['message']); // Clear message after displaying
-                ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Table for Displaying Users -->
-        <div class="table-container">
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                <caption>List of users</caption>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Firstname</th>
-                            <th>Middlename</th>
-                            <th>Lastname</th>
-                            <th>Birthday</th>
-                            <th>Age</th>
-                            <th>Gender</th>
-                          
-                            <th>Account Number</th>
-                            <th>Balance</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        <?php while ($row = mysqli_fetch_assoc($userResult)): ?>
-                            <tr id="user-row-<?php echo $row['id']; ?>">
-                                <td><?php echo $row['id']; ?></td>
-                                <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-                                <td><?php echo htmlspecialchars($row['middlename']); ?></td>
-                                <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-                                <td><?php echo date('F j, Y', strtotime($row['birthday'])); ?></td>
-                                <td><?php echo $row['age']; ?></td>
-                                <td><?php echo htmlspecialchars($row['gender']); ?></td>
-
-                                <td><?php echo htmlspecialchars($row['account_number']); ?></td>
-                                <td>₱<?php echo number_format($row['balance'], 2); ?></td>
-                                <td><?php echo isset($row['is_activated']) ? ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') : 'N/A'; ?>
-                                </td>
-                                <td>
-                                    <form id="actionForm<?php echo $row['id']; ?>" method="POST">
-                                        <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#actionModal"
-                                            onclick="prepareActions(<?php echo $row['id']; ?>, <?php echo $row['is_activated']; ?>)">
-                                            Action
-                                        </button>
-                                    </form>
-                                </td>
-                              
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Action Modal -->
-        <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title d-flex justify-content-center w-100" id="actionModalLabel">Actions</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2>Accounts</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <h3> Registered Users Awaiting Activation: <?php echo $userActivateCount; ?> Registered Users: <?php echo $userCount; ?> </h3>
+                <form method="POST" action="">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Search users...">
+                        <select class="form-select" id="statusFilter" name="statusFilter">
+                            <option value="">All Users</option>
+                            <option value="1">Activated</option>
+                            <option value="0">Disabled</option>
+                        </select>
                     </div>
-                    <div class="modal-body">
-                        <div id="accountNumberContainer" style="display: none;">
-                            <label for="accountNumberInput">Enter Account Number:</label>
-                            <input type="text" id="accountNumberInput" class="form-control" placeholder="Account Number">
+                </form>
+                <!-- Feedback Message -->
+                <?php if (isset($_SESSION['message'])): ?>
+                    <div class="alert alert-info">
+                        <?php
+                        echo $_SESSION['message'];
+                        unset($_SESSION['message']); // Clear message after displaying
+                        ?>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Table for Displaying Users -->
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Firstname</th>
+                                    <th>Middlename</th>
+                                    <th>Lastname</th>
+                                    <th>Birthday</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Address</th>
+                                    <th>Province</th>
+                                    <th>Municipality</th>
+                                    <th>Barangay</th>
+                                    <th>Account Number</th>
+                                    <th>Balance</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <?php while ($row = mysqli_fetch_assoc($userResult)): ?>
+                                    <tr id="user-row-<?php echo $row['id']; ?>">
+                                        <td><?php echo $row['id']; ?></td>
+                                        <td><?php echo htmlspecialchars($row['firstname']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['middlename']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['lastname']); ?></td>
+                                        <td><?php echo date('F j, Y', strtotime($row['birthday'])); ?></td>
+                                        <td><?php echo $row['age']; ?></td>
+                                        <td><?php echo htmlspecialchars($row['gender']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['address']); ?></td>
+                                        <td id="province-<?php echo $row['id']; ?>">
+                                            <?php echo htmlspecialchars($row['province']); ?>
+                                        </td>
+                                        <td id="municipality-<?php echo $row['id']; ?>">
+                                            <?php echo htmlspecialchars($row['municipality']); ?>
+                                        </td>
+                                        <td id="barangay-<?php echo $row['id']; ?>">
+                                            <?php echo htmlspecialchars($row['barangay']); ?>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($row['account_number']); ?></td>
+                                        <td>₱<?php echo number_format($row['balance'], 2); ?></td>
+                                        <td><?php echo isset($row['is_activated']) ? ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') : 'N/A'; ?>
+                                        </td>
+                                        <td>
+                                            <form id="actionForm<?php echo $row['id']; ?>" method="POST">
+                                                <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#actionModal"
+                                                    onclick="prepareActions(<?php echo $row['id']; ?>, <?php echo $row['is_activated']; ?>)">
+                                                    Action
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Action Modal -->
+                    <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="actionModalLabel">User Actions</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <button id="activateBtn" class="btn btn-success btn-sm"
+                                        onclick="confirmActivate()">Activate</button>
+                                    <button id="disableBtn" class="btn btn-danger btn-sm"
+                                        onclick="confirmDisable()">Disable</button>
+                                    <button id="transferFundsBtn" class="btn btn-warning btn-sm"
+                                        onclick="confirmTransferDisable()">Transfer
+                                        Funds</button>
+                                </div>
+                            </div>
                         </div>
-                        <button id="activateBtn" class="btn btn-success custom-btn mx-2" onclick="confirmActivate()">Activate</button>
-                        <button id="disableBtn" class="btn btn-danger custom-btn mx-2" onclick="confirmDisable()">Disable</button>
-                        <button id="transferFundsBtn" class="btn btn-warning custom-btn mx-2" onclick="confirmTransferDisable()">Transfer Funds</button>
                     </div>
                 </div>
             </div>
         </div>
-</div>
         <script>
-
-
-            $(document).ready(function () {
-    // Function to fetch users based on search and filter
-    function fetchUsers(search = '', statusFilter = '') {
-        $.ajax({
-            url: '', // Current file
-            method: 'POST',
-            data: {
-                search: search,
-                statusFilter: statusFilter,
-                fetch_users: true // Indicate that we want to fetch users
-            },
-            success: function (data) {
-                $('#userTableBody').html(data); // Update the table body with the response
-            }
-        });
-    }
-
-    // Trigger fetch on search input change
-    $('#search').on('keyup', function () {
-        fetchUsers($(this).val(), $('#statusFilter').val());
-    });
-
-    // Trigger fetch on dropdown change
-    $('#statusFilter').on('change', function () {
-        fetchUsers($('#search').val(), $(this).val());
-    });
-
-    // Click event for Awaiting Activation count
-    $('#awaitingActivation').on('click', function (e) {
-        e.preventDefault(); // Prevent default anchor behavior
-        fetchUsers('', 0); // Fetch users with status 0 (not activated)
-    });
-
-    // Click event for Registered Users count
-    $('#registeredUsers').on('click', function (e) {
-        e.preventDefault(); // Prevent default anchor behavior
-        fetchUsers('', 1); // Fetch users with status 1 (activated)
-    });
-});
             $(document).ready(function () {
                 // Function to fetch users based on search and filter
                 function fetchUsers() {
@@ -402,30 +297,20 @@ h5{
                     fetchUsers();
                 });
             });
-
             function prepareActions(userId, isActivated) {
-    // Store the user ID in the modal
-    $('#actionModal').data('userId', userId);
+                // Store the user ID in the modal
+                $('#actionModal').data('userId', userId);
 
-    // Enable or disable the buttons based on the user's status
-    if (isActivated == 1) {
-        $('#activateBtn').prop('disabled', true); // Disable 'Activate' if the user is already activated
-        $('#disableBtn').prop('disabled', false); // Enable 'Disable' if the user is activated
-        $('#accountNumberContainer').hide(); // Hide account number input
-    } else {
-        $('#activateBtn').prop('disabled', false); // Enable 'Activate' if the user is not activated
-        $('#disableBtn').prop('disabled', true);
-        $('#transferFundsBtn').prop('disabled', true); // Enable 'Disable' if the user is not activated
-
-        // Check if the user has an account number
-        var accountNumber = $('#user-row-' + userId + ' td:nth-child(8)').text().trim(); // Assuming account number is in the 8th column
-        if (!accountNumber) {
-            $('#accountNumberContainer').show(); // Show input for account number
-        } else {
-            $('#accountNumberContainer').hide(); // Hide input if account number exists
-        }
-    }
-}
+                // Enable or disable the buttons based on the user's status
+                if (isActivated == 1) {
+                    $('#activateBtn').prop('disabled', true); // Disable 'Activate' if the user is already activated
+                    $('#disableBtn').prop('disabled', false); // Enable 'Disable' if the user is activated
+                } else {
+                    $('#activateBtn').prop('disabled', false); // Enable 'Activate' if the user is not activated
+                    $('#disableBtn').prop('disabled', true);
+                    $('#transferFundsBtn').prop('disabled', true); // Enable 'Disable' if the user is not activated
+                }
+            }
 
             $(document).ready(function () {
                 var provinceData = {};
@@ -534,86 +419,49 @@ h5{
                 fetchBarangays();
             });
 
-            function activateUser(userId, accountNumber) {
-        // Create the data to send
-        var formData = new FormData();
-        formData.append('user_id', userId);
-        formData.append('account_number', accountNumber);
+            function confirmActivate(userId) {
+                var userId = $('#actionModal').data('userId'); // Get stored user ID
+                $('#actionForm').find('input[name="user_id"]').val(userId);
 
-        // Send the POST request to the PHP script
-        fetch('path/to/your/script.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
+                // Move focus to the body or another visible element before closing modal
+                document.activeElement.blur();
+
                 Swal.fire({
-                    title: 'Success!',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then(function() {
-                    window.location.href = 'activate.php'; // Redirect after alert
-                });
-            } else {
-                Swal.fire({
-                    title: 'Error!',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonText: 'Try Again'
+                    title: 'Are you sure?',
+                    text: "Do you really want to activate this user?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, activate it!',
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '../../../actions/activate_user.php',
+                            method: 'POST',
+                            data: { user_id: userId },
+                            success: function (response) {
+                                const result = JSON.parse(response);
+                                if (result.status === 'success') {
+                                    Swal.fire('Success!', 'User has been activated', 'success').then(() => {
+                                        $('#actionModal').modal('hide'); // Hide modal after confirmation
+                                        $('body').focus(); // Move focus to body after closing modal
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Error!', result.message, 'error');
+                                }
+                            },
+                            error: function () {
+                                Swal.fire('Error!', 'There was an error activating the user.', 'error');
+                            }
+                        });
+                    }
                 });
             }
-        })
-        .catch(error => {
-            Swal.fire({
-                title: 'Error!',
-                text: 'There was a problem with the request.',
-                icon: 'error',
-                confirmButtonText: 'Try Again'
-            });
-        });
-    }
-    function confirmActivate() {
-    var userId = $('#actionModal').data('userId'); // Get the stored user ID
-    var accountNumber = $('#accountNumberInput').val(); // Get the account number from the input
 
-    // Set the user_id in the hidden form input for submitting
-    $('#actionForm').find('input[name="user_id"]').val(userId);
 
-    // Check if the account number input is visible
-    if ($('#accountNumberContainer').is(':visible')) {
-        // If the input is visible, it means we need to use the provided account number
-        if (!accountNumber) {
-            Swal.fire('Error!', 'Please enter an account number.', 'error');
-            return; // Exit if no account number is provided
-        }
-    } else {
-        // If the input is not visible, we can proceed without it
-        accountNumber = ''; // Set to empty or handle as needed
-    }
-
-    // Submit the form to activate the user
-    $.ajax({
-        url: '../../../actions/activate_user.php', // Ensure this points to your activate.php or script
-        method: 'POST',
-        data: { user_id: userId, account_number: accountNumber }, // Send user ID and account number
-        success: function (response) {
-            const result = JSON.parse(response); // Parse the JSON response
-
-            if (result.status === 'success') { // Check if the result status is success
-                Swal.fire('Activated!', result.message, 'success').then(() => {
-                    location.reload(); // Reload the page after successful activation
-                });
-            } else {
-                Swal.fire('Error!', result.message, 'error'); // Show error if activation fails
-            }
-        },
-        error: function () {
-            Swal.fire('Error!', 'There was an error activating the user.', 'error');
-        }
-    });
-}
 
             function confirmTransferDisable(userId) {
                 $('#actionModal').modal('hide');
@@ -705,7 +553,7 @@ h5{
                 $('#search').on('keyup', function () {
                     var query = $(this).val();
                     $.ajax({
-                        url: '../../../actions/search_users.php',
+                        url: 'search_users.php',
                         method: 'POST',
                         data: { query: query },
                         success: function (data) {

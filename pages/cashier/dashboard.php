@@ -98,24 +98,6 @@ $stmt->fetch();
             font-size: 40px;
             margin-bottom: 20px;
         }
-
-        h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            background-color: #ffffff;
-            overflow-y: auto;
-            border-left: 1px solid #e0e0e0;
-        }
-
-        /* Ensure the page content doesn't stretch too wide */
-        #main-content {
-            padding: 30px;
-        }
     </style>
 </head>
 

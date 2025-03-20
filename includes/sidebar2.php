@@ -86,13 +86,11 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
         display: flex;
         min-height: 100vh;
     }
-
-    .main-content {
-        flex: 1;
-        padding: 20px;
-        transition: margin-left 0.3s;
+    #main-content {
+        transition: margin-left 0.3s ease;
+        padding-top: 60px;
+        padding-bottom: 65px;
     }
-
     .sidebar {
         z-index: 100;
         width: 300px;
@@ -155,58 +153,64 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
         color: #4b5563;
         padding: 1.0rem 1.25rem;
         transition: all 0.2s;
-    }
+        }
+        .top-bar h4 {
+        color: #3e64ff;
+  } 
     }
 
     </style>
 </head>
 <body>
-    <button class="btn btn-light toggle-btn shadow-sm" onclick="toggleSidebar()">
+    <button class="btn btn-light toggle-btn shadow-sm collapsed" onclick="toggleSidebar()">
         <i class="bi bi-list fs-5"></i>
     </button>
 
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header p-3">
-            <div class="d-flex align-items-center justify-content-between">
-                <h5 class="mb-0"><?php echo $_SESSION['role'] ?> Panel</h5>
-            </div>
+    <div class="sidebar collapsed" id="sidebar">
+    <div class="sidebar-header p-3">
+        <div class="d-flex align-items-center justify-content-between">
+            <h5 class="mb-0"><?php echo $_SESSION['role'] ?> Panel</h5>
         </div>
-
-        <nav class="nav flex-column mt-2">
-    <?php foreach ($menu['before'] as $label => $item): ?>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
-                <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
-            </a>
-        </li>
-    <?php endforeach; ?>
-
-    <?php if (!empty($menu['dropdown'])): ?>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle <?= in_array($currentPage, array_column($menu['dropdown'], 'url')) ? 'active' : ''; ?>" 
-            href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa fa-sticky-note"></i> Accounts
-            </a>
-            <div class="dropdown-menu" aria-labelledby="accountsDropdown">
-                <?php foreach ($menu['dropdown'] as $label => $item): ?>
-                    <a class="dropdown-item <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
-                        <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        </li>
-    <?php endif; ?>
-
-    <?php foreach ($menu['after'] as $label => $item): ?>
-        <li class="nav-item">
-            <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
-                <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
-            </a>
-        </li>
-    <?php endforeach; ?>
-</nav>
-
     </div>
+
+    <nav class="nav flex-column mt-2">
+        <?php foreach ($menu['before'] as $label => $item): ?>
+            <li class="nav-item">
+                <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
+                    <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
+                </a>
+            </li>
+        <?php endforeach; ?>
+
+        <?php if (!empty($menu['dropdown'])): ?>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#accountsMenu" aria-expanded="false">
+                    <i class="fa fa-sticky-note"></i> Accounts <i class="fa fa-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="accountsMenu">
+                    <ul class="nav flex-column ms-3">
+                        <?php foreach ($menu['dropdown'] as $label => $item): ?>
+                            <li class="nav-item">
+                                <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
+                                    <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </li>
+        <?php endif; ?>
+
+        <?php foreach ($menu['after'] as $label => $item): ?>
+            <li class="nav-item">
+                <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
+                    <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
+                </a>
+            </li>
+        <?php endforeach; ?>
+    </nav>
+</div>
+
 
     
     <script>
@@ -217,6 +221,5 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
             toggleBtn.classList.toggle('collapsed');
         }
     </script>
-    
 </body>
 </html>
