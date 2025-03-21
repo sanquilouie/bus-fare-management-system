@@ -12,89 +12,32 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
 
-// Variables for today
-$today = date('Y-m-d');
+$rowsPerPage = 10; // Number of rows per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Get the current page
+$page = max($page, 1); // Ensure page is at least 1
+$offset = ($page - 1) * $rowsPerPage; // Calculate the offset
 
-// Query to get all bus numbers
-$busQuery = "SELECT DISTINCT bus_number FROM passenger_logs";
+// Get total number of distinct buses
+$totalQuery = "SELECT COUNT(DISTINCT bus_number) AS total FROM passenger_logs";
+$totalResult = $conn->query($totalQuery);
+$totalRow = $totalResult->fetch_assoc();
+$totalPages = ceil($totalRow['total'] / $rowsPerPage);
 
-if ($stmt = $conn->prepare($busQuery)) {
-    $stmt->execute();
-    $stmt->bind_result($busNumber);
-    $buses = [];
+// Main query with pagination
+$query = "SELECT 
+            pl.bus_number,
+            COALESCE(SUM(pl.fare), 0) AS total_fare,
+            COALESCE(COUNT(pl.id), 0) AS passenger_count,
+            bi.driverName,
+            bi.conductorName,
+            bi.status
+          FROM passenger_logs pl
+          LEFT JOIN businfo bi ON pl.bus_number = bi.bus_number
+          WHERE DATE(pl.timestamp) = CURDATE()
+          GROUP BY pl.bus_number, bi.driverName, bi.conductorName, bi.status
+          LIMIT $rowsPerPage OFFSET $offset";
 
-    // Fetch all bus numbers
-    while ($stmt->fetch()) {
-        $buses[] = $busNumber;
-    }
-    $stmt->close();
-} else {
-    echo "<script>alert('Error preparing query for bus numbers');</script>";
-}
-
-// Fetch total fare and passenger count for each bus
-$busData = [];
-
-foreach ($buses as $bus) {
-    // Query to get total fare for today for the bus
-    $fareQuery = "SELECT SUM(fare) AS total_fare
-                  FROM passenger_logs
-                  WHERE bus_number = ? AND DATE(timestamp) = ?";
-
-    if ($stmt = $conn->prepare($fareQuery)) {
-        $stmt->bind_param("ss", $bus, $today);
-        $stmt->execute();
-        $stmt->bind_result($totalFare);
-        $stmt->fetch();
-        $stmt->close();
-    } else {
-        echo "<script>alert('Error preparing query for total fare');</script>";
-        continue;
-    }
-
-    // Query to get the number of passengers who boarded the bus today
-    $passengerQuery = "SELECT COUNT(*) AS passenger_count
-                       FROM passenger_logs
-                       WHERE bus_number = ? AND DATE(timestamp) = ?";
-
-    if ($stmt = $conn->prepare($passengerQuery)) {
-        $stmt->bind_param("ss", $bus, $today);
-        $stmt->execute();
-        $stmt->bind_result($passengerCount);
-        $stmt->fetch();
-        $stmt->close();
-    } else {
-        echo "<script>alert('Error preparing query for passenger count');</script>";
-        continue;
-    }
- // Query to get driver and conductor information
- $driverConductorQuery = "SELECT driverName, conductorName, status 
- FROM businfo
- WHERE bus_number = ?";
-
-if ($stmt = $conn->prepare($driverConductorQuery)) {
-$stmt->bind_param("s", $bus);
-$stmt->execute();
-$stmt->bind_result($driverName, $conductorName, $status);
-$stmt->fetch();
-$stmt->close();
-} else {
-echo "<script>alert('Error preparing query for driver and conductor info');</script>";
-$driverName = 'N/A';
-$conductorName = 'N/A';
-$status = 'Unknown';
-}
-
-// Store the data for each bus
-$busData[] = [
-'status' => $status,
-'bus_number' => $bus,
-'total_fare' => $totalFare,
-'passenger_count' => $passengerCount,
-'driverName' => $driverName,
-'conductorName' => $conductorName
-];
-}
+$result = $conn->query($query);
 ?>
 
 <!DOCTYPE html>
@@ -143,18 +86,21 @@ $busData[] = [
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($busData as $data): ?>
-                                <tr>
-                                <td><?php echo htmlspecialchars($data['status']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['bus_number']); ?></td>
-                                    <td>₱<?php echo number_format($data['total_fare'], 2); ?></td>
-                                    <td><?php echo $data['passenger_count']; ?></td>
-                                    <td><?php echo htmlspecialchars($data['driverName']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['conductorName']); ?></td>
-                                </tr>
-                            <?php endforeach; ?>
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($row['status']); ?></td>
+                                <td><?= htmlspecialchars($row['bus_number']); ?></td>
+                                <td>₱<?= number_format($row['total_fare'], 2); ?></td>
+                                <td><?= $row['passenger_count']; ?></td>
+                                <td><?= htmlspecialchars($row['driverName']); ?></td>
+                                <td><?= htmlspecialchars($row['conductorName']); ?></td> 
+                            </tr>
+                        <?php endwhile; ?>
                         </tbody>
                     </table>
+                </div>
+                <div class="text-center mt-2">
+                    <?php include '../../../includes/pagination.php' ?>
                 </div>
             </div>
         </div>

@@ -24,8 +24,8 @@ $menuItems = [
             'Load Revenue' => ['icon' => 'fa-coins', 'url' => '/NewRam/pages/superadmin/features/activate_users.php'],
         ],
         'dropdown_conductor' => [
-            'Bus Fare' => ['icon' => 'fa-money-check-alt', 'url' => '/NewRam/pages/superadmin/settings.php'],
-            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/superadmin/settings.php'],
+            'Bus Fare' => ['icon' => 'fa-money-check-alt', 'url' => '/NewRam/pages/superadmin/conductor/busfare.php'],
+            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/superadmin/loadrfidconductor.php'],
             'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/superadmin/settings.php'],
             'Load Revenue' => ['icon' => 'fa-coins', 'url' => '/NewRam/pages/superadmin/settings.php'],
         ],

@@ -12,6 +12,16 @@ $lastname = $_SESSION['lastname'];
 
 $query = "SELECT * FROM businfo";
 $result = $conn->query($query);
+
+//Table Pagination
+$rowsPerPage = 10; // Number of rows per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Get the current page
+$offset = ($page - 1) * $rowsPerPage; // Calculate the offset
+
+$totalQuery = "SELECT COUNT(DISTINCT bus_number) AS total FROM businfo";
+$totalResult = mysqli_query($conn, $totalQuery);
+$totalRow = mysqli_fetch_assoc($totalResult);
+$totalPages = ceil($totalRow['total'] / $rowsPerPage);
 ?>
 
 <!DOCTYPE html>
@@ -87,6 +97,9 @@ $result = $conn->query($query);
                         </tbody>
                     </table>
                 </div>
+                <div class="text-center mt-2">
+                        <?php include '../../../includes/pagination.php' ?>
+                    </div>
             </div>
         </div>
     </div>

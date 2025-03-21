@@ -1,5 +1,5 @@
 <?php
-include '../config/connection.php';
+include "../includes/connection.php";
 
 if (isset($_POST['busNumber']) || isset($_POST['plateNumber'])) {
     $busNumber = isset($_POST['busNumber']) ? $_POST['busNumber'] : '';

@@ -120,6 +120,24 @@ if (isset($_POST['fetch_users'])) {
     echo $output;
     exit(); // Stop further execution after handling AJAX request
 }
+
+//Table Pagination
+$rowsPerPage = 10; // Number of rows per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Get the current page
+$offset = ($page - 1) * $rowsPerPage; // Calculate the offset
+
+// Fetch total row count
+$totalQuery = "SELECT COUNT(*) AS total FROM useracc";
+$totalResult = mysqli_query($conn, $totalQuery);
+$totalRow = mysqli_fetch_assoc($totalResult);
+$totalPages = ceil($totalRow['total'] / $rowsPerPage);
+
+// Fetch paginated data
+$userQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address, account_number, balance, province, municipality, barangay, is_activated 
+              FROM useracc 
+              LIMIT $rowsPerPage OFFSET $offset";
+$userResult = mysqli_query($conn, $userQuery);
+
 ?>
 
 <!DOCTYPE html>
@@ -129,9 +147,6 @@ if (isset($_POST['fetch_users'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAMSTAR - Admin Dashboard</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
@@ -157,7 +172,7 @@ if (isset($_POST['fetch_users'])) {
 
     <!-- Page Content  -->
 
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Accounts</h2>
         <div class="row justify-content-center">
             <div class="col-md-10">
@@ -184,7 +199,7 @@ if (isset($_POST['fetch_users'])) {
 
                 <!-- Table for Displaying Users -->
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                        <table class="table table-striped">
+                        <table class="table table-striped table-bordered">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -205,43 +220,45 @@ if (isset($_POST['fetch_users'])) {
                                 </tr>
                             </thead>
                             <tbody id="userTableBody">
-                                <?php while ($row = mysqli_fetch_assoc($userResult)): ?>
-                                    <tr id="user-row-<?php echo $row['id']; ?>">
-                                        <td><?php echo $row['id']; ?></td>
-                                        <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['middlename']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-                                        <td><?php echo date('F j, Y', strtotime($row['birthday'])); ?></td>
-                                        <td><?php echo $row['age']; ?></td>
-                                        <td><?php echo htmlspecialchars($row['gender']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['address']); ?></td>
-                                        <td id="province-<?php echo $row['id']; ?>">
-                                            <?php echo htmlspecialchars($row['province']); ?>
-                                        </td>
-                                        <td id="municipality-<?php echo $row['id']; ?>">
-                                            <?php echo htmlspecialchars($row['municipality']); ?>
-                                        </td>
-                                        <td id="barangay-<?php echo $row['id']; ?>">
-                                            <?php echo htmlspecialchars($row['barangay']); ?>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($row['account_number']); ?></td>
-                                        <td>₱<?php echo number_format($row['balance'], 2); ?></td>
-                                        <td><?php echo isset($row['is_activated']) ? ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') : 'N/A'; ?>
-                                        </td>
-                                        <td>
-                                            <form id="actionForm<?php echo $row['id']; ?>" method="POST">
-                                                <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#actionModal"
-                                                    onclick="prepareActions(<?php echo $row['id']; ?>, <?php echo $row['is_activated']; ?>)">
-                                                    Action
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; ?>
+                            <?php while ($row = mysqli_fetch_assoc($userResult)): ?>
+                            <tr id="user-row-<?php echo $row['id']; ?>">
+                                <td><?= $row['id']; ?></td>
+                                <td><?= $row['firstname']; ?></td>
+                                <td><?= $row['middlename']; ?></td>
+                                <td><?= $row['lastname']; ?></td>
+                                <td><?= $row['birthday']; ?></td>
+                                <td><?= $row['age']; ?></td>
+                                <td><?= $row['gender']; ?></td>
+                                <td><?= $row['address']; ?></td>
+                                <td id="province-<?php echo $row['id']; ?>">
+                                    <?php echo htmlspecialchars($row['province']); ?>
+                                </td>
+                                <td id="municipality-<?php echo $row['id']; ?>">
+                                    <?php echo htmlspecialchars($row['municipality']); ?>
+                                </td>
+                                <td id="barangay-<?php echo $row['id']; ?>">
+                                    <?php echo htmlspecialchars($row['barangay']); ?>
+                                </td>
+                                <td><?= $row['account_number']; ?></td>
+                                <td><?= $row['balance']; ?></td>
+                                <td><?= $row['is_activated'] ? 'Yes' : 'No'; ?></td>
+                                <td>
+                                    <form id="actionForm<?php echo $row['id']; ?>" method="POST">
+                                        <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#actionModal"
+                                            onclick="prepareActions(<?php echo $row['id']; ?>, <?php echo $row['is_activated']; ?>)">
+                                            Action
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="text-center mt-2">
+                        <?php include '../../../includes/pagination.php' ?>
                     </div>
                     <!-- Action Modal -->
                     <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">

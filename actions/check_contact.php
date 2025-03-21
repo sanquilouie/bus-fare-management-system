@@ -2,7 +2,7 @@
 // check_email.php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-include '../config/connection.php'; // Make sure to include your database connection
+include "../includes/connection.php";
 
 if (isset($_POST['contactnumber'])) {
     $email = $_POST['contactnumber'];
