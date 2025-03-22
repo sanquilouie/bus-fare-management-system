@@ -127,8 +127,6 @@ $transactions = fetchTransactions($conn, $accountNumber, $limit, $offset);
             </div>
         </div>
     </div>
-
-    <script src="path/to/bootstrap.bundle.min.js"></script> <!-- Adjust the path -->
 </body>
 
 </html>
