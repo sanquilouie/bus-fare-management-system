@@ -39,12 +39,14 @@ $menuItems = [
     ],
     'Conductor' => [
         'before' => [
-            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/conductor/dashboard.php'],
+            'Dashboard' => ['icon' => 'fa-tachometer-alt', 'url' => '/NewRam/pages/conductor/dashboard.php'],
+            'Bus Fare' => ['icon' => 'fa-money-bill-wave', 'url' => '/NewRam/pages/conductor/busfare.php'],
+            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/conductor/loadrfidconductor.php'],
+            'Load Transaction' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/conductor/translogscon.php'],
+            'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/conductor/loadtranscon.php'],
         ],
         'dropdown' => [],
-        'after' => [
-            'Trip Reports' => ['icon' => 'fa-list', 'url' => '/NewRam/pages/conductor/trips.php'],
-        ]
+        'after' => []
     ],
     'Cashier' => [
         'before' => [

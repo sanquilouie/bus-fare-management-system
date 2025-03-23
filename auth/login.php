@@ -19,7 +19,7 @@ function getRedirectURL($role)
       case 'User':
          return '../pages/user/dashboard.php';
       case 'Conductor':
-         return 'conductor/conductordashboard.php';
+         return '../pages/conductor/dashboard.php';
       default:
          return 'index.php';
    }
