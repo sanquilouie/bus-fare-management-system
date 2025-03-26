@@ -163,7 +163,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'User')) {
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then(() => {
-                                window.location = '/NewRam/pages/user/dashboard.php'; // Redirect to profile page
+                                window.location = '/NewRam/pages/user/update_pass.php'; // Redirect to profile page
                             });
                         } else {
                             Swal.fire({

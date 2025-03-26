@@ -420,6 +420,7 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
 </head>
 
 <body>
@@ -793,6 +794,9 @@ $conn->close();
                 inputPlaceholder: 'Scan your RFID here',
                 didOpen: () => {
                     const inputField = Swal.getInput();
+                    if (inputField) {
+                        activeInput = inputField;  // Track the Swal input
+                        inputField.focus();
                     inputField.addEventListener('keydown', async (event) => {
                         // Check if the Enter key is pressed
                         if (event.key === 'Enter') {
@@ -816,6 +820,7 @@ $conn->close();
                             }
                         }
                     });
+                }
                 }
             });
         }
@@ -935,22 +940,22 @@ $conn->close();
 
             Swal.fire({
                 html: `
-        <h3>Receipt</h3>
-        <strong>Transaction Number:</strong> ${transactionNumber}<br>
-        <strong>Bus No.:</strong> ${busNumber}<br>
-        <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
-        <strong>Time:</strong> ${new Date().toLocaleTimeString()}<br>
-        <strong>From:</strong> ${fromRoute.route_name}<br>
-        <strong>To:</strong> ${toRoute.route_name}<br>
-        <strong>Distance:</strong> ${distance} km<br>
-        <strong>Driver:</strong> ${driverName}<br> <!-- Added Driver Name -->
-        <strong>CONDUCTOR:</strong> ${conductorName}<br>
-        <strong>Passenger Type:</strong> ${fareType}<br>
-        <strong>Payment Method:</strong> ${paymentMethod}<br>
-         <strong>Passenger/s:</strong> ${passengerQuantity}<br> <!-- Added Passenger Quantity -->
-        <div style="font-size: 22px; font-weight: bold;">₱${totalFare}</div><br>
-        <p>Thank you for riding with us!</p>
-        `,
+                    <h3>Receipt</h3>
+                    <strong>Transaction Number:</strong> ${transactionNumber}<br>
+                    <strong>Bus No.:</strong> ${busNumber}<br>
+                    <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
+                    <strong>Time:</strong> ${new Date().toLocaleTimeString()}<br>
+                    <strong>From:</strong> ${fromRoute.route_name}<br>
+                    <strong>To:</strong> ${toRoute.route_name}<br>
+                    <strong>Distance:</strong> ${distance} km<br>
+                    <strong>Driver:</strong> ${driverName}<br> <!-- Added Driver Name -->
+                    <strong>CONDUCTOR:</strong> ${conductorName}<br>
+                    <strong>Passenger Type:</strong> ${fareType}<br>
+                    <strong>Payment Method:</strong> ${paymentMethod}<br>
+                    <strong>Passenger/s:</strong> ${passengerQuantity}<br> <!-- Added Passenger Quantity -->
+                    <div style="font-size: 22px; font-weight: bold;">₱${totalFare}</div><br>
+                    <p>Thank you for riding with us!</p>
+                    `,
                 didClose: () => {
                     // Trigger the PHP print function here using an AJAX request
 

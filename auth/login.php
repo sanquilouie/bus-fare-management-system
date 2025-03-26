@@ -74,7 +74,7 @@ if (isset($_POST['Login'])) {
     document.addEventListener('DOMContentLoaded', function () {
         Swal.fire({
             title: 'Login Successfully',
-            text: 'Welcome, " . htmlspecialchars($row['fullname']) . "! Your role is: " . htmlspecialchars($row['role']) . "',
+            text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
             icon: 'success',
             showConfirmButton: false,
             timer: 1000
@@ -107,6 +107,7 @@ if (isset($_POST['Login'])) {
    <link rel="stylesheet" href="../assets/css/login.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="/NewRam/assets/js/NFCScanner.js"></script>
    <style>
       body {
          background: url('../assets/images/bus1.jpg') no-repeat center center fixed;
@@ -305,8 +306,7 @@ if (isset($_POST['Login'])) {
             icon.classList.add("fa-eye");
          }
       }
-    
-
+   
      
    </script>
 </head>
@@ -321,26 +321,24 @@ if (isset($_POST['Login'])) {
    </header>
 
    <div class="wrapper">
-   <p>Login Form</p>
-   <div class="form-container">
-      <form method="POST" action="#" class="login">
-         <?php echo $msg; ?>
-         <div class="field">
-            <input type="text" name="username" placeholder="Account Number/Email" required>
+      <p>Login Form</p>
+      <div class="form-container">
+         <form method="POST" action="#" class="login">
+            <?php echo $msg; ?>
+            <div class="field">
+               <input type="text" name="username" placeholder="Account Number/Email" required>
+            </div>
+            <div class="field">
+               <input type="password" name="password" placeholder="Password" id="pass2" required>
+               <i class="fas fa-eye" id="togglePassword2" onclick="togglePassword('pass2', 'togglePassword2')"></i>
+            </div>
+            <input type="submit" name="Login" value="Log in" class="btn">
+            <button onclick="window.location.href='userregister.php'" class="btn">Sign up</button>
+         </form>
+         <div class="forgot-link">
+            <p>Forgot Password? <a href="forgotpassword.php">Click here</a></p>
          </div>
-         <div class="field">
-            <input type="password" name="password" placeholder="Password" id="pass2" required>
-            <i class="fas fa-eye" id="togglePassword2" onclick="togglePassword('pass2', 'togglePassword2')"></i>
-         </div>
-         <input type="submit" name="Login" value="Log in" class="btn">
-         <button onclick="window.location.href='userregister.php'" class="btn">Sign up</button>
-       
-      </form>
-     
-      <div class="forgot-link">
-      <p>Forgot Password? <a href="forgotpassword.php">Click here</a></p>
       </div>
-   </div>
    </div>
 </body>
 

@@ -99,10 +99,19 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                             title: 'Scan RFID',
                             input: 'text',
                             inputPlaceholder: 'Enter RFID code',
-                            showCancelButton: true
+                            showCancelButton: true,
+                            didOpen: () => {
+                                const inputField = Swal.getInput();
+                                if (inputField) {
+                                    activeInput = inputField;  // Track the Swal input
+                                    inputField.focus();  // Ensure it has focus
+                                }
+                            }
                         });
+
                         rfid = rfidInput;
                     }
+
 
                     const loadAmount = document.getElementById('loadAmount').value;
 

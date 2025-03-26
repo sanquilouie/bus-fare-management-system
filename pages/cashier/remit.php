@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
     <title>Conductor Remittance</title>
 </head>
 
@@ -77,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                 <form id="remittanceForm" method="POST" action="">
                     <label for="rfid_scan" class="form-label">RFID Scan:</label>
                     <input type="text" class="form-control" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required
-                        value="<?= htmlspecialchars($rfid_scan) ?>" class="form-label">
+                        value="<?= htmlspecialchars($rfid_scan) ?>" class="form-label" oninput="fetchDetails()">>
 
                     <label for="bus_no" class="form-label">Bus No:</label>
                     <input type="text" class="form-control" id="bus_no" name="bus_no" required value="<?= htmlspecialchars($bus_number) ?>" readonly>
@@ -117,13 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
         </div>
     </div>
     <script>
-        document.getElementById('rfid_scan').addEventListener('input', function () {
-            var rfid = document.getElementById('rfid_scan').value;
-            if (rfid.length >= 6) {
-                document.getElementById('remittanceForm').submit();
-            }
-        });
-
         document.getElementById('toggleDeductions').addEventListener('click', function () {
             const deductions = document.getElementById('deductions');
             if (deductions.style.display === 'none') {

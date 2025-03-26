@@ -219,7 +219,6 @@ while ($row = mysqli_fetch_assoc($revenueByDateResult)) {
     </div>
     </div>
     </div>
-    <script src="../js/sidebar.js"></script>
     <script>
         // Revenue chart
         const revenueData = <?php echo json_encode($revenueData); ?>;

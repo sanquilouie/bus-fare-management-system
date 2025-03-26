@@ -127,79 +127,79 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
 
 <div id="main-content" class="container mt-5">
-        <h2>Load User</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <h3 class="text-center">Total Users: <span class="badge bg-secondary"><?php echo $userCount; ?></span></h3>
-                <div class="mb-4">
-                    <form id="searchForm" method="POST">
-                        <input type="text" name="account_number" placeholder="Enter Account Number" required autofocus>
-                        <input type="hidden" name="search_account" value="1">
-                        <button type="submit">Search</button>
-                    </form>
-                </div>
+    <h2>Load User</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h3 class="text-center">Total Users: <span class="badge bg-secondary"><?php echo $userCount; ?></span></h3>
+            <div class="mb-4">
+                <form id="searchForm" method="POST">
+                    <input type="text" name="account_number" placeholder="Enter Account Number" required autofocus>
+                    <input type="hidden" name="search_account" value="1">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
 
-                <div id="searchResult" class="text-center"></div>
+            <div id="searchResult" class="text-center"></div>
 
-                <div class="modal fade" id="loadBalanceModal" tabindex="-1" aria-labelledby="loadBalanceModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="loadBalanceModalLabel">Load Balance</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3 text-center">
-                                    <!-- Predefined Load Buttons -->
-                                    <div class="d-flex flex-wrap justify-content-center gap-2">
-                                        <?php
-                                        $loadAmounts = [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000];
-                                        foreach ($loadAmounts as $amount) {
-                                            echo '<button type="button" class="btn btn-outline-primary m-1 load-amount-btn" data-amount="' . $amount . '">₱' . $amount . '</button>';
-                                        }
-                                        ?>
-                                    </div>
+            <div class="modal fade" id="loadBalanceModal" tabindex="-1" aria-labelledby="loadBalanceModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="loadBalanceModalLabel">Load Balance</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3 text-center">
+                                <!-- Predefined Load Buttons -->
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <?php
+                                    $loadAmounts = [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000];
+                                    foreach ($loadAmounts as $amount) {
+                                        echo '<button type="button" class="btn btn-outline-primary m-1 load-amount-btn" data-amount="' . $amount . '">₱' . $amount . '</button>';
+                                    }
+                                    ?>
                                 </div>
-                                <form id="loadBalanceForm" method="POST">
-                                    <div class="mb-3">
-                                        <label for="balance" class="form-label">Enter Custom Load Amount</label>
-                                        <input type="number" id="balance" name="balance" class="form-control"
-                                            placeholder="Enter Load" required>
-                                    </div>
-                                    <input type="hidden" id="user_account_number" name="user_account_number">
-                                    <button type="submit" class="btn btn-primary">Load</button>
-                                </form>
                             </div>
+                            <form id="loadBalanceForm" method="POST">
+                                <div class="mb-3">
+                                    <label for="balance" class="form-label">Enter Custom Load Amount</label>
+                                    <input type="number" id="balance" name="balance" class="form-control"
+                                        placeholder="Enter Load" required>
+                                </div>
+                                <input type="hidden" id="user_account_number" name="user_account_number">
+                                <button type="submit" class="btn btn-primary">Load</button>
+                            </form>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="modal fade" id="deductBalanceModal" tabindex="-1" aria-labelledby="deductBalanceModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="deductBalanceModalLabel">Deduct Balance</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="deductBalanceForm" method="POST">
-                                    <div class="mb-3">
-                                        <label for="deduct_balance" class="form-label">Balance to Deduct</label>
-                                        <input type="number" id="deduct_balance" name="deduct_balance" class="form-control"
-                                            placeholder="Enter Amount to Deduct" required>
-                                    </div>
-                                    <input type="hidden" id="deduct_user_account_number" name="deduct_user_account_number">
-                                    <button type="submit" class="btn btn-danger">Deduct</button>
-                                </form>
-                            </div>
+            <div class="modal fade" id="deductBalanceModal" tabindex="-1" aria-labelledby="deductBalanceModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deductBalanceModalLabel">Deduct Balance</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="deductBalanceForm" method="POST">
+                                <div class="mb-3">
+                                    <label for="deduct_balance" class="form-label">Balance to Deduct</label>
+                                    <input type="number" id="deduct_balance" name="deduct_balance" class="form-control"
+                                        placeholder="Enter Amount to Deduct" required>
+                                </div>
+                                <input type="hidden" id="deduct_user_account_number" name="deduct_user_account_number">
+                                <button type="submit" class="btn btn-danger">Deduct</button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
     <script>
 
             document.addEventListener('DOMContentLoaded', () => {

@@ -563,7 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
             showSlide(currentSlide);
         }, 5000);
 
-
+       
 
     </script>
 
