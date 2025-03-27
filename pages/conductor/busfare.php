@@ -348,7 +348,7 @@ window.onload = function() {
                       'background-color: #f9f9f9;' +
                       '\" class=\"swal2-input\">' +
                       '" . implode('', array_map(function($driver) {
-                          return "<option value=\"{$driver['firstname']} {$driver['lastname']} {$driver['account_number']}\">{$driver['firstname']} {$driver['lastname']}</option>";
+                          return "<option value=\"{$driver['firstname']} {$driver['lastname']}\">{$driver['firstname']} {$driver['lastname']}</option>";
                       }, $drivers)) . "' +
                       '</select><br><br>',
                 showCancelButton: false,
@@ -432,7 +432,7 @@ $conn->close();
     ?>
         
         <div id="main-content" class="container mt-5">
-        <h1 class="text-center text-primary">Bus Fare Calculator</h1>
+        <h2>Bus Fare Calculator</h2>
         <form id="fareForm" class="mt-4">
             <!-- KM Display -->
             <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
@@ -930,58 +930,68 @@ $conn->close();
         }
 
         let receiptShown = false;
-
+        
         function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity) {
-            if (receiptShown) return; // Prevent showing the receipt again
+    if (receiptShown) return; // Prevent duplicate receipt
+            
+    receiptShown = true;
+    const driverName = "<?= $_SESSION['driver_name'] ?>";  // PHP variable for driver name
+    
+    const busNumber = "<?= $bus_number; ?>"; 
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
 
-            receiptShown = true;
-            const driverName = "<?= $_SESSION['driver_name'] ?>";  // PHP variable for driver name
-            const busNumber = "<?= $bus_number; ?>";  // PHP variable for bus number
+    const receiptText = `
+      ZARAGOZA RAMSTAR
+  TRANSPORT COOPERATIVE
+  BUS NO.         : ${busNumber}
+  DATE            : ${date}
+  TIME            : ${time}
+  FROM            : ${fromRoute.route_name}
+  TO              : ${toRoute.route_name}
+  DISTANCE        : ${distance} km
+  DRIV. NAME      : ${driverName}
+  COND. NAME      : ${conductorName}
+  PASSENGER TYPE  : ${fareType}
+  PAYMENT METHOD  : ${paymentMethod}
+  PASSENGER(S)    : ${passengerQuantity}
+  TOTAL FARE      : ₱${totalFare}
+    ${transactionNumber}
+  Thank you for riding with us!
+  `;
 
-            Swal.fire({
-                html: `
-                    <h3>Receipt</h3>
-                    <strong>Transaction Number:</strong> ${transactionNumber}<br>
-                    <strong>Bus No.:</strong> ${busNumber}<br>
-                    <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
-                    <strong>Time:</strong> ${new Date().toLocaleTimeString()}<br>
-                    <strong>From:</strong> ${fromRoute.route_name}<br>
-                    <strong>To:</strong> ${toRoute.route_name}<br>
-                    <strong>Distance:</strong> ${distance} km<br>
-                    <strong>Driver:</strong> ${driverName}<br> <!-- Added Driver Name -->
-                    <strong>CONDUCTOR:</strong> ${conductorName}<br>
-                    <strong>Passenger Type:</strong> ${fareType}<br>
-                    <strong>Payment Method:</strong> ${paymentMethod}<br>
-                    <strong>Passenger/s:</strong> ${passengerQuantity}<br> <!-- Added Passenger Quantity -->
-                    <div style="font-size: 22px; font-weight: bold;">₱${totalFare}</div><br>
-                    <p>Thank you for riding with us!</p>
-                    `,
-                didClose: () => {
-                    // Trigger the PHP print function here using an AJAX request
-
-                    $.post('print_receipt.php', {
-                        fromRoute: fromRoute,
-                        toRoute: toRoute,
-                        fareType: fareType,
-                        totalFare: totalFare,
-                        conductorName: conductorName,
-                        driverName: driverName, // Pass driver name to print if needed
-                        busNumber: busNumber,
-                        transactionNumber: transactionNumber,
-                        distance: distance,
-                        paymentMethod: paymentMethod,
-                        passengerQuantity: passengerQuantity
-                    }, function (response) {
-                        console.log("Receipt printed successfully!");
-                        location.reload();
-                    }).fail(function () {
-                        console.error("Failed to print receipt.");
-                    });
-                }
-            }).then(() => {
-                //location.reload(); // Reload the page after the receipt is acknowledged
-            });
+    Swal.fire({
+        html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
+        didClose: () => {
+            if (window.AndroidPrinter) {
+                console.log("Printing receipt...");
+                AndroidPrinter.printText(
+                    transactionNumber,
+                    busNumber,
+                    driverName,
+                    conductorName,
+                    totalFare,
+                    date,
+                    time,
+                    fromRoute.route_name,
+                    toRoute.route_name,
+                    distance,
+                    fareType,
+                    paymentMethod,
+                    passengerQuantity
+                ); 
+            } else {
+                console.error("AndroidPrinter interface not available");
+            }
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         }
+    });
+}
+
+
+
 
     </script>
 </body>

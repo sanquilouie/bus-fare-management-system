@@ -26,10 +26,10 @@ if (isset($_POST['bus_number']) && isset($_POST['driver_name'])) {
         status = ' In Transit' 
     WHERE bus_number = '$bus_number'
 ";
-
+echo "<script>console.log(" . json_encode($_SESSION) . ");</script>";
     if (mysqli_query($conn, $update_bus_data)) {
         // Redirect to the conductor dashboard or another page after saving
-        header("Location: /NewRam/pages/superadmin/conductor/busfare.php");
+        header("Location: /NewRam/pages/conductor/busfare.php");
         exit();
     } else {
         // Handle database error
