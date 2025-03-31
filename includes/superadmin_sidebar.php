@@ -8,7 +8,15 @@ $menuItems = [
         'dropdown_superadmin' => [
             'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/superadmin/dashboard.php'],
             'Registration' => ['icon' => 'fa-users-cog', 'url' => '/NewRam/pages/superadmin/admin/register.php'],
-            'Accounts' => ['icon' => 'fa-user-tie', 'url' => '/NewRam/pages/superadmin/admin/activate.php'],
+            'Accounts' => [
+                'icon' => 'fa-user-tie', 
+                'url' => '#',
+                'submenu' => [
+                    'Activate' => ['icon' => 'fa-user-check', 'url' => '/NewRam/pages/superadmin/admin/features/activate_users.php'],
+                    'Deactivate' => ['icon' => 'fa-user-slash', 'url' => '/NewRam/pages/superadmin/admin/features/disable_users.php'],
+                    'Transfer Funds' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/superadmin/admin/features/transfer_user_funds.php'],
+                ]
+            ],
             'Revenue' => ['icon' => 'fa-coins', 'url' => '/NewRam/pages/superadmin/admin/revenue.php'],
             'Fare Update' => ['icon' => 'fa-money-bill-wave', 'url' => '/NewRam/pages/superadmin/admin/fareupdate.php'],
             'Reg Bus Info' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/superadmin/admin/businfo.php'],
@@ -16,6 +24,7 @@ $menuItems = [
             'Registered Bus Info' => ['icon' => 'fa-list', 'url' => '/NewRam/pages/superadmin/admin/viewregbus.php'],
             'Activity Log' => ['icon' => 'fa-history', 'url' => '/NewRam/pages/superadmin/admin/activity_logs.php'],
         ],
+
         'dropdown_cashier' => [
             'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/superadmin/cashier/loadrfidadmin.php'],
             'Remit' => ['icon' => 'fa-wallet', 'url' => '/NewRam/pages/superadmin/cashier/remitcashier.php'],
@@ -152,16 +161,34 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
                     <ul class="nav flex-column ms-3">
                         <?php foreach ($menu['dropdown_superadmin'] as $label => $item): ?>
                             <li class="nav-item">
-                                <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
-                                    <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
-                                </a>
+                                <?php if (isset($item['submenu'])): ?>
+                                    <!-- Parent Dropdown -->
+                                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#<?= str_replace(' ', '', $label); ?>Menu" aria-expanded="false">
+                                        <i class="fa <?= $item['icon']; ?> me-2"></i> <?= $label; ?> <i class="fa fa-chevron-down ms-auto"></i>
+                                    </a>
+                                    <div class="collapse" id="<?= str_replace(' ', '', $label); ?>Menu">
+                                        <ul class="nav flex-column ms-3">
+                                            <?php foreach ($item['submenu'] as $subLabel => $subItem): ?>
+                                                <li class="nav-item">
+                                                    <a class="nav-link <?= ($currentPage == $subItem['url']) ? 'active' : ''; ?>" href="<?= $subItem['url']; ?>">
+                                                        <i class="fa <?= $subItem['icon']; ?>"></i> <?= $subLabel; ?>
+                                                    </a>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php else: ?>
+                                    <!-- Regular Menu Item -->
+                                    <a class="nav-link <?= ($currentPage == $item['url']) ? 'active' : ''; ?>" href="<?= $item['url']; ?>">
+                                        <i class="fa <?= $item['icon']; ?>"></i> <?= $label; ?>
+                                    </a>
+                                <?php endif; ?>
                             </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
             </li>
         <?php endif; ?>
-
         <?php if (!empty($menu['dropdown_cashier'])): ?>
             <li class="nav-item">
                 <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#cashierMenu" aria-expanded="false">

@@ -119,7 +119,6 @@ $totalRevenue = array_sum($dailyRevenue);
     <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
 
     <div id="chart"></div>
-    <script src="../js/sidebar.js"></script>
     <script>
         window.onload = function () {
             const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;

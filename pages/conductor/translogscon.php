@@ -16,7 +16,7 @@ $stmt->fetch();
 $stmt->close(); // Close the prepared statement after fetching user data
 
 // Pagination Setup
-$limit = 15; // Number of records per page
+$limit = 10; // Number of records per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Get current page from query string
 $offset = ($page - 1) * $limit; // Calculate the offset
 
@@ -95,8 +95,6 @@ $transactions = fetchTransactions($conn, $limit, $offset);
     <div id="main-content" class="container mt-5">
         <h2 class="text-center">Transaction Logs</h2>
 
-      
-
         <!-- Transactions Table -->
         <table id="transactionTable" class="table table-bordered mt-4">
             <thead class="thead-light">
@@ -150,7 +148,7 @@ $transactions = fetchTransactions($conn, $limit, $offset);
 
     </div>
 
-    <script src="../js/sidebar.js"></script>
+
 </body>
 
 </html>

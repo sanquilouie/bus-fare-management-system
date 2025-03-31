@@ -8,6 +8,15 @@ ini_set('display_errors', 1);
 
 function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
 {
+
+    //Fetch Conductor ID
+    $query = "SELECT id FROM useracc WHERE account_number = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $_SESSION['account_number']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $id = $result->fetch_assoc()['id'] ?? null;
+
     // Fetch session variables for bus_number and conductor_id
     $busNumber = 'Cashier';
     $conductorId = isset($_SESSION['account_number']) ? $_SESSION['account_number'] : null;
@@ -26,7 +35,7 @@ function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
         $updateQuery = "UPDATE useracc SET balance = balance + $balanceToLoad WHERE account_number = '$userAccountNumber'";
         if (mysqli_query($conn, $updateQuery)) {
             // Log the transaction
-            $logQuery = "INSERT INTO transactions (account_number, amount, transaction_type, bus_number, conductor_id) VALUES ('$userAccountNumber', $balanceToLoad, 'load', '$busNumber', '$conductorId')";
+            $logQuery = "INSERT INTO transactions (user_id, account_number, amount, transaction_type, bus_number, conductor_id) VALUES ($id, '$userAccountNumber', $balanceToLoad, 'load', '$busNumber', '$conductorId')";
             mysqli_query($conn, $logQuery);
             return ['success' => '₱' . number_format($balanceToLoad, 2) . ' loaded successfully.'];
         } else {

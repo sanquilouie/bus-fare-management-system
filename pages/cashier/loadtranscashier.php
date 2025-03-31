@@ -120,7 +120,11 @@ $totalRevenue = array_sum($dailyRevenue);
                     </div>
                 </form>
                 <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
-                <script>
+                <div id="chart"></div>
+            </div>
+        </div>
+    </div>    
+    <script>
         window.onload = function () {
             const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;
             updateChart(dailyRevenue);
@@ -157,11 +161,6 @@ $totalRevenue = array_sum($dailyRevenue);
             const chart = new ApexCharts(document.querySelector("#chart"), options);
             chart.render();
         }
-
-
     </script>
-            </div>
-        </div>
-    </div>    
 </body>
 </html>
