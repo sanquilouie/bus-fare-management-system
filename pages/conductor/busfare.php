@@ -55,11 +55,8 @@ if (!isset($_SESSION['passengers'])) {
 // Function to fetch balance based on RFID
 // Function to log passenger entry
 
-
 function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName,$driverac, $busNumber, $transactionNumber, $conn)
 {
-
-
     $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name,driver_name,bus_number, transaction_number) VALUES (?,?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("ssssssss", $rfid, $fromRoute, $toRoute, $fare, $conductorName,$driverac, $busNumber, $transactionNumber);
@@ -282,7 +279,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['removeAllPassengers']))
     exit;
 }
 
-
+include '../../actions/bus_fare_config.php';
 
 $conn->close();
 
@@ -309,6 +306,8 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="/NewRam/assets/js/NFCScanner.js"></script>
+
+
 </head>
 
 <body>
@@ -333,19 +332,13 @@ $conn->close();
                     <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
                 </div>
             </div>
-
             <!-- Route Selection -->
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="fromRoute" class="form-label">From</label>
-                    <select id="fromRoute" name="fromRoute" class="form-select">
-                        <option value="" disabled selected>Select Starting Point</option>
-                        <?php foreach ($routes as $route): ?>
-                            <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
-                                <?= htmlspecialchars($route['route_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                        <p id="fromRoute"></p>
+                        <h2 id="displayRouteName"></h2>
+                        <h2 id="location"></h2>
                 </div>
                 <div class="col-md-6">
                     <label for="toRoute" class="form-label">To</label>
@@ -394,11 +387,6 @@ $conn->close();
         </form>
         <!-- Fare Result -->
 
-
-
-
-
-
         <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
             <!-- Card for Distance -->
             <div class="card shadow-sm text-center p-3 mx-2">
@@ -442,6 +430,106 @@ $conn->close();
     </div>
     <script>
 
+        //From Route
+        const stops = [
+        { name: "CABANATUAN TERMINAL / LAKEWOOD AVE", lat: 15.473341, lng: 120.960389, radius: 1000.00 },
+        { name: "LAKEWOOD/PACIFIC", lat: 15.461379, lng: 120.949922, radius: 750.00 },
+        { name: "SUMACAB", lat: 15.446563, lng: 120.944619, radius: 1000.00 },
+        { name: "STA. ROSA INTERSECTION", lat: 15.429285, lng: 120.940039, radius: 1000.00 },
+        { name: "LAFUENTE", lat: 15.422566, lng: 120.920982, radius: 1200.00 },
+    ];
+
+    // Function to calculate distance between two coordinates (Haversine formula)
+    function getDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLng = (lng2 - lng1) * (Math.PI / 180);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in meters
+    }
+
+    // Function to check which stop the bus is near
+    function getCurrentStop(lat, lng) {
+        for (let stop of stops) {
+            let distance = getDistance(lat, lng, stop.lat, stop.lng);
+            if (distance < stop.radius) {
+                return stop.name; // Bus is within the stop's radius
+            }
+        }
+        return "Unknown Location"; // Not near any stop
+    }
+
+    // Function to get the bus's live GPS location
+    function getBusLocation() {
+        if (navigator.geolocation) {
+            console.log("Geolocation is supported.");
+        } else {
+            console.log("Geolocation is not supported.");
+        }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            let latitude = position.coords.latitude;
+            let longitude = position.coords.longitude;
+            let currentStop = getCurrentStop(latitude, longitude);
+
+            console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+            console.log(`Current Stop: ${currentStop}`);
+            // Send the current stop to the backend to query the database
+            fetch('../../actions/get_fare_routes.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ currentStop: currentStop })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Response Data:", data);
+                // Check if there's an error in the response
+                if (data.error) {
+                    document.getElementById("location").innerText = data.error;
+                } else {
+                    // Store the entire JSON in the hidden fromRoute element
+                    document.getElementById("fromRoute").innerText = JSON.stringify(data, null, 2); // Formatting with 2 spaces
+                    
+                    // Hide the fromRoute element
+                    document.getElementById("fromRoute").style.display = 'none';
+
+                    // Display the route_name separately
+                    document.getElementById("displayRouteName").innerText = data.route_name || "Route name not available";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                //document.getElementById("location").innerText = "Error retrieving route data.";
+                //document.getElementById("coords").innerText = "Latitude: ---, Longitude: ---";
+            });
+        },
+        (error) => {
+            console.error("Error getting location:", error);
+            //document.getElementById("location").innerText = "Error getting location.";
+            //document.getElementById("coords").innerText = "Latitude: ---, Longitude: ---";
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+
+
+    // Call function every 10 seconds to update location
+    setInterval(getBusLocation, 3000);
+
+    // Run the function once when the page loads
+    getBusLocation();
+
         const baseFare = <?php echo $base_fare; ?>;
         const additionalFare = <?php echo $additional_fare; ?>;
         const driverName = "<?= $_SESSION['driver_name'] ?>";  // PHP variable for driver name
@@ -452,12 +540,13 @@ $conn->close();
         document.getElementById('passengerQuantity').addEventListener('change', updateDistance);
 
         function updateDistance() {
-            const fromRouteValue = document.getElementById('fromRoute').value;
+            const fromRouteValue = document.getElementById('fromRoute').innerText;
             const toRouteValue = document.getElementById('toRoute').value;
             const kmLabel = document.getElementById('kmLabel');
             const fareLabel = document.getElementById('fareLabel');
             const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10); // Get passenger quantity
-
+            console.log("From Route: ", fromRouteValue);
+            console.log("To Route: ", toRouteValue);
             if (fromRouteValue && toRouteValue) {
                 try {
                     const fromRoute = JSON.parse(fromRouteValue);

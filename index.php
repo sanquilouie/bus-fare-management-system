@@ -292,6 +292,7 @@
             </div>
             <a href="auth/login.php" class="login-button">Log In</a>
             <button id="register-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">How to register?</button>
+            <a href="pages/gpstest.php" class="register-link">GPS Test</a>
         </div>
     </header>
 
