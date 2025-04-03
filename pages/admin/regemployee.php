@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $phone = $_POST['contactnumber'];
     $birthday = $_POST['birthday'];
+    $province = $_POST['province'];
+    $municipality = $_POST['municipality'];
+    $barangay = $_POST['barangay'];
     $address = $_POST['address'];
     $gender = $_POST['gender'];
     $license = $_POST['driverLicense'] ?? null; // Use null coalescing for optional field
@@ -49,19 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Set default role and activation status
     $role = $employeeType;
     $activated = 1;
-    $createdAt = date('Y-m-d H:i:s');
 
     // Prepare the SQL query
     $query = "INSERT INTO useracc (
         account_number, firstname, middlename, lastname, email, contactnumber, birthday, age, gender,
-        address, password, role, created_at, is_activated, driverLicense
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        province, municipality, barangay, address, password, role, is_activated, driverLicense
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     // Prepare the statement
     if ($stmt = $conn->prepare($query)) {
         // Bind parameters
-        $stmt->bind_param("ssssssssssssiss", $accountNumber, $firstName, $middleName, $lastName, $email, 
-            $phone, $birthday, $age, $gender, $address, $password, $role, $createdAt, $activated, $license);
+        $stmt->bind_param("sssssssssssssssis", $accountNumber, $firstName, $middleName, $lastName, $email, 
+            $phone, $birthday, $age, $gender, $province, $municipality, $barangay, $address, $password, $role, $activated, $license);
 
         // Execute the query
         if ($stmt->execute()) {
@@ -123,6 +125,7 @@ ob_end_flush();
             /* Padding to align text with country code */
         }
     </style>
+    <script src="../../assets/js/register.js"></script>
 </head>
 <body>
     <?php
@@ -197,12 +200,32 @@ ob_end_flush();
                 </div>
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                    <label for="address" class="form-label required">Address</label>
-                        <textarea class="form-control" id="address" rows="2" name="address" placeholder="Enter address" required></textarea>
+                <div class="row mb-3">   
+                        <div class="col-md-6">
+                            <label for="address" class="form-label">Address</label>
+                            <input type="text" class="form-control" id="address" name="address" placeholder="Purok#/Street/Sitio"> 
+                        </div>
+                        <div class="col-md-6">
+                            <label for="province" class="form-label">Province</label>
+                            <select class="form-select" id="province" name="province">
+                                <option value="">-- Select Province --</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="municipality" class="form-label">Municipality</label>
+                            <select class="form-select" id="municipality" name="municipality">
+                                <option value="">-- Select Municipality --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="barangay" class="form-label">Barangay</label>
+                            <select class="form-select" id="barangay" name="barangay">
+                                <option value="">-- Select Barangay --</option>
+                            </select>
+                        </div>
+                    </div>
 
                 <!-- Conditional fields for Driver -->
                 <div id="driverFields" class="driver-fields" style="display:none;">

@@ -35,6 +35,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
     <style>
         /* Center the content vertically and horizontally */
         .container-center {
@@ -93,72 +94,85 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         });
 
         document.getElementById('scanRFIDBtn').addEventListener('click', async () => { 
-            try {
-                // First, prompt for the user account number
-                const { value: userAccountNumber } = await Swal.fire({
-                    title: 'Enter Account Number',
-                    input: 'text',
-                    inputPlaceholder: 'Enter the account number',
-                    showCancelButton: true
-                });
-
-                // If account number is provided, check if RFID scan is needed
-                if (userAccountNumber) {
-                    let rfid = userAccountNumber;
-
-                    // If RFID is required, prompt for it
-                    if (!userAccountNumber) {
-                        const { value: rfidInput } = await Swal.fire({
-                            title: 'Scan RFID',
-                            input: 'text',
-                            inputPlaceholder: 'Enter RFID code',
-                            showCancelButton: true
-                        });
-                        rfid = rfidInput;
-                    }
-
-                    const loadAmount = document.getElementById('loadAmount').value;
-
-                    // Confirm the load transaction
-                    const { isConfirmed } = await Swal.fire({
-                        title: 'Confirm Load',
-                        text: `You are about to load ₱${loadAmount} to account number ${userAccountNumber}. Do you want to proceed?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, proceed',
-                        cancelButtonText: 'Cancel'
-                    });
-
-                    // If confirmed, send the request to load balance
-                    if (isConfirmed) {
-                        const formData = new FormData();
-                        formData.append('loadAmount', loadAmount);
-                        formData.append('user_account_number', userAccountNumber);
-                        if (rfid) formData.append('rfid', rfid);  // Append RFID if it's available
-
-                        const response = await fetch('../../actions/load_balance.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        const result = await response.json();
-
-                        if (result.success) {
-                            Swal.fire('Success', `Load successful: ${result.success}`, 'success').then(() => {
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 800); // 2 seconds delay before reload
-                            });
-                        } else {
-                            Swal.fire('Error', result.error, 'error');
-                        }
-                    }
+    try {
+        // First, prompt for the user account number
+        const { value: userAccountNumber } = await Swal.fire({
+            title: 'Enter Account Number',
+            input: 'text',
+            inputPlaceholder: 'Enter the account number',
+            showCancelButton: true,
+            didOpen: () => {
+                const inputField = Swal.getInput();
+                if (inputField) {
+                    activeInput = inputField;  // Track Swal input
+                    inputField.focus();
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire('Error', 'There was an error processing your request.', 'error');
             }
         });
+
+        if (!userAccountNumber) return; // Exit if no input
+
+        let rfid = userAccountNumber;
+
+        // If RFID is required, prompt for it
+        const { value: rfidInput } = await Swal.fire({
+            title: 'Scan RFID',
+            input: 'text',
+            inputPlaceholder: 'Enter RFID code',
+            showCancelButton: true,
+            didOpen: () => {
+                const inputField = Swal.getInput();
+                if (inputField) {
+                    activeInput = inputField;  // Track Swal input
+                    inputField.focus();
+                }
+            }
+        });
+
+        if (!rfidInput) return;
+        rfid = rfidInput;
+
+        const loadAmount = document.getElementById('loadAmount').value;
+
+        // Confirm the load transaction
+        const { isConfirmed } = await Swal.fire({
+            title: 'Confirm Load',
+            text: `You are about to load ₱${loadAmount} to account number ${userAccountNumber}. Do you want to proceed?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, proceed',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (isConfirmed) {
+            const formData = new FormData();
+            formData.append('loadAmount', loadAmount);
+            formData.append('user_account_number', userAccountNumber);
+            if (rfid) formData.append('rfid', rfid);
+
+            const response = await fetch('../../actions/load_balance.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                Swal.fire('Success', `Load successful: ${result.success}`, 'success').then(() => {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 800);
+                });
+            } else {
+                Swal.fire('Error', result.error, 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire('Error', 'There was an error processing your request.', 'error');
+    }
+});
+
     </script>
 
 </body>

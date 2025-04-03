@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
 </head>
 <body>
     <?php
@@ -88,49 +89,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </body>
 <script>
     function confirmTransferDisable(userId) {
-    $('#actionModal').modal('hide');
+        $('#actionModal').modal('hide');
 
-    // Set the user_id in the hidden form input for submitting
-    $('#actionForm').find('input[name="user_id"]').val(userId);
+        // Set the user_id in the hidden form input for submitting
+        $('#actionForm').find('input[name="user_id"]').val(userId);
 
-    Swal.fire({
-        title: 'Enter New Account Number',
-        input: 'text',
-        inputLabel: 'New Account Number for Fund Transfer',
-        inputPlaceholder: 'Enter account number...',
-        showCancelButton: true,
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'Please enter a new account number!';
-            }
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const newAccountNumber = result.value;
-            $.ajax({
-                url: '../../../actions/transfer_and_disabled.php',
-                method: 'POST',
-                data: { user_id: userId, new_account_number: newAccountNumber },
-                success: function (response) {
-                    const result = JSON.parse(response);
-                    if (result.success) {
-                        $('#userTableBody').html(result.tableData);
-                        // Display the new account number in the success message
-                        Swal.fire('Transfered!', `Funds have been transferred successfully to new RFID: ${newAccountNumber}.`, 'success').then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire('Error!', result.message, 'error');
-                    }
-                },
-                error: function () {
-                    Swal.fire('Error!', 'There was an error disabling the user.', 'error');
+        Swal.fire({
+            title: 'Enter New Account Number',
+            input: 'text',
+            inputLabel: 'New Account Number for Fund Transfer',
+            inputPlaceholder: 'Enter account number...',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm',
+            cancelButtonText: 'Cancel',
+            didOpen: () => {
+                const inputField = Swal.getInput();
+                if (inputField) {
+                    activeInput = inputField; // Track Swal input
+                    inputField.focus();
                 }
-            });
-        }
-    });
+            },
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Please enter a new account number!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const newAccountNumber = result.value;
+                $.ajax({
+                    url: '../../../actions/transfer_and_disabled.php',
+                    method: 'POST',
+                    data: { user_id: userId, new_account_number: newAccountNumber },
+                    success: function (response) {
+                        const result = JSON.parse(response);
+                        if (result.success) {
+                            $('#userTableBody').html(result.tableData);
+                            Swal.fire('Transferred!', `Funds have been transferred successfully to new RFID: ${newAccountNumber}.`, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', result.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'There was an error disabling the user.', 'error');
+                    }
+                });
+            }
+        });
 }
 
 $(document).ready(function () {

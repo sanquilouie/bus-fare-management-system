@@ -31,6 +31,7 @@ $lastname = $_SESSION['lastname'];
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
 
     <title>Registration Form</title>
     <style>
@@ -109,7 +110,14 @@ $lastname = $_SESSION['lastname'];
                         </div>
                         <div class="col-md-6">
                             <label for="suffix" class="form-label">Suffix</label>
-                            <input type="text" class="form-control" id="suffix" name="suffix">
+                            <select class="form-select" id="suffix" name="suffix">
+                                <option value="">-- Select Suffix --</option>
+                                <option value="Jr">Jr.</option>
+                                <option value="Sr">Sr.</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                                <option value="V">V</option>
+                            </select>
                         
                         </div>
                     </div>
@@ -161,9 +169,9 @@ $lastname = $_SESSION['lastname'];
                             <div id="emailFeedback" class="invalid-feedback"></div>
                         </div>
                         <div class="col-md-6">
-                            <label for="phone" class="form-label required">Contact Number</label>
+                            <label for="phone" class="form-label">Contact Number</label>
                             <div class="form-group position-relative">
-                                <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder="" required
+                                <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder=""
                                     pattern="\d{10}" maxlength="10" />
                                 <span class="position-absolute top-50 start-0 translate-middle-y ps-2 text-muted">+63</span>
                             </div>

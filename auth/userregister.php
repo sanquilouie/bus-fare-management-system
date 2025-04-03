@@ -228,8 +228,128 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             transform: scale(1);
         }
     </style>
+    
 
-    <script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="../index.php">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container mt-5 register-container">
+        <h2>Registration Form</h2>
+        <form method="POST" action="" id="registrationForm" enctype="multipart/form-data">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="firstname" class="form-label">
+                        First Name <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="firstname" name="firstname" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="lastname" class="form-label">
+                        Last Name <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="middlename" class="form-label">Middle Name</label>
+                    <input type="text" class="form-control" id="middlename" name="middlename">
+                </div>
+                <div class="col-md-6">
+                    <label for="suffix" class="form-label">Suffix</label>
+                    <select class="form-select" id="suffix" name="suffix">
+                        <option value="">-- Select Suffix --</option>
+                        <option value="Jr.">Jr.</option>
+                        <option value="Sr.">Sr.</option>
+                        <option value="III">III</option>
+                        <option value="IV">IV</option>
+                        <option value="V">V</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="birthday" class="form-label">
+                        Birthday <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" class="form-control" id="birthday" name="birthday" required max="2017-12-31" />
+                </div>
+                <div class="col-md-6">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="">-- Select Gender --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="address" name="address" placeholder="Purok/Sitio/Street">
+                </div>
+                <div class="col-md-6">
+                    <label for="province" class="form-label">Province</label>
+                    <select class="form-select" id="province" name="province">
+                        <option value="">-- Select Province --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="municipality" class="form-label">Municipality</label>
+                    <select class="form-select" id="municipality" name="municipality">
+                        <option value="">-- Select Municipality --</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="barangay" class="form-label">Barangay</label>
+                    <select class="form-select" id="barangay" name="barangay">
+                        <option value="">-- Select Barangay --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="email" class="form-label">
+                        Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <div id="emailFeedback" class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">
+                        Contact Number
+                    </label>
+                    <div class="form-group d-flex">
+                        <span class="border-end country-code px-2">+63</span>
+                        <input type="text" class="form-control" id="phone" name="contactnumber" placeholder="" maxlength="10" />
+                    </div>
+                    <div id="contactError" class="invalid-feedback" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="form-row mt-4">
+                <button type="submit" class="register">Register</button>
+            </div>
+        </form>
+    </div>
+    <script src="js/main.js"></script>
+
+
+</body>
+<script>
         document.addEventListener('DOMContentLoaded', function () {
             const nameFields = ['firstname', 'middlename', 'lastname', 'suffix'];
 
@@ -258,7 +378,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (contactValue.length === 11) {
                     $.ajax({
                         type: "POST",
-                        url: "/admin/check_contact.php",
+                        url: "../actions/check_contact.php",
                         data: { contactnumber: contactValue },
                         dataType: "json",
                         success: function (response) {
@@ -287,7 +407,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Check if email is not empty
                 if (email) {
                     $.ajax({
-                        url: '/admin/check_email.php', // Path to your PHP script
+                        url: '../actions/check_email.php', // Path to your PHP script
                         type: 'POST',
                         data: { email: email },
                         dataType: 'json',
@@ -336,25 +456,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             });
 
-
-            // Load provinces on page load
-            $.ajax({
-                url: 'https://psgc.gitlab.io/api/provinces', // API URL for provinces
-                method: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    // Populate the province dropdown
-                    $.each(data, function (index, province) {
-                        $('#province').append($('<option>', {
-                            value: province.code,
-                            text: province.name
-                        }));
-                    });
-                },
-                error: function () {
-                    console.error('Error fetching provinces');
-                }
-            });
             $(document).ready(function () {
                 let confirmationShown = false; // To track confirmation dialog
 
@@ -383,33 +484,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 });
             });
-
-            // When a province is selected, fetch municipalities
-            $('#province').change(function () {
-                let provinceCode = $(this).val();
-                if (provinceCode) {
-                    $.ajax({
-                        url: 'https://psgc.gitlab.io/api/municipalities?province=' + provinceCode,
-                        method: 'GET',
-                        dataType: 'json',
-                        success: function (data) {
-                            // Clear previous municipalities
-                            $('#municipality').empty().append('<option>Select Municipality</option>');
-                            $.each(data, function (index, municipality) {
-                                $('#municipality').append($('<option>', {
-                                    value: municipality.code,
-                                    text: municipality.name
-                                }));
-                            });
-                        },
-                        error: function () {
-                            console.error('Error fetching municipalities');
-                        }
-                    });
-                } else {
-                    $('#municipality').empty().append('<option>Select Municipality</option>');
-                }
-            });
         });
 
         const today = new Date();
@@ -421,125 +495,92 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Set the minimum date in the input field
         document.getElementById("birthday").setAttribute("min", formattedDate);
 
+        $(document).ready(function () {
+            // Load provinces on page load
+            $.ajax({
+                url: 'https://psgc.gitlab.io/api/provinces', // API URL for provinces
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // Populate the province dropdown
+                    data.sort((a, b) => a.name.localeCompare(b.name));
+                    $.each(data, function (index, province) {
+                        $('#province').append($('<option>', {
+                            value: province.code,
+                            text: province.name
+                        }));
+                    });
+                },
+                error: function () {
+                    console.error('Error fetching provinces');
+                }
+            });
+
+            // When a province is selected, fetch municipalities
+            $('#province').change(function () {
+                const provinceCode = $(this).val();
+                $('#municipality').empty().append('<option value="">-- Select Municipality --</option>');
+                $('#barangay').empty().append('<option value="">-- Select Barangay --</option>');
+
+                if (provinceCode) {
+                    $.ajax({
+                        url: 'https://psgc.gitlab.io/api/cities-municipalities', // API URL for municipalities
+                        method: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            // Filter municipalities by province code
+                            const municipalities = data.filter(municipality => municipality.provinceCode === provinceCode);
+                            municipalities.sort((a, b) => a.name.localeCompare(b.name));
+                            if (municipalities.length > 0) {
+                                $.each(municipalities, function (index, municipality) {
+                                    $('#municipality').append($('<option>', {
+                                        value: municipality.code,
+                                        text: municipality.name
+                                    }));
+                                });
+                            } else {
+                                console.warn('No municipalities found for this province.');
+                            }
+                        },
+                        error: function () {
+                            console.error('Error fetching municipalities');
+                        }
+                    });
+                }
+            });
+
+            // When a municipality is selected, fetch barangays
+            $('#municipality').change(function () {
+                const municipalityCode = $(this).val();
+                $('#barangay').empty().append('<option value="">-- Select Barangay --</option>');
+
+                if (municipalityCode) {
+                    // Adjusted barangay API call
+                    $.ajax({
+                        url: `https://psgc.gitlab.io/api/barangays`, // Ensure this endpoint is correct
+                        method: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            // Filter barangays by municipality code
+                            const barangays = data.filter(barangay => barangay.municipalityCode === municipalityCode);
+                            barangays.sort((a, b) => a.name.localeCompare(b.name));
+                            if (barangays.length > 0) {
+                                $.each(barangays, function (index, barangay) {
+                                    $('#barangay').append($('<option>', {
+                                        value: barangay.code,
+                                        text: barangay.name
+                                    }));
+                                });
+                            } else {
+                                console.warn('No barangays found for this municipality.');
+                            }
+                        },
+                        error: function () {
+                            console.error('Error fetching barangays');
+                        }
+                    });
+                }
+            });
+        });
     </script>
-
-</head>
-
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="../index.php">Home</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container mt-5 register-container">
-        <h2>Registration Form</h2>
-        <form method="POST" action="" id="registrationForm" enctype="multipart/form-data">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="firstname" class="form-label">
-                        First Name <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" class="form-control" id="firstname" name="firstname" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="lastname" class="form-label">
-                        Last Name <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" class="form-control" id="lastname" name="lastname" required>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="middlename" class="form-label">Middle Name</label>
-                    <input type="text" class="form-control" id="middlename" name="middlename">
-                </div>
-                <div class="col-md-6">
-                    <label for="suffix" class="form-label">Suffix</label>
-                    <input type="text" class="form-control" id="suffix" name="suffix">
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="birthday" class="form-label">
-                        Birthday <span class="text-danger">*</span>
-                    </label>
-                    <input type="date" class="form-control" id="birthday" name="birthday" required max="2017-12-31" />
-                </div>
-                <div class="col-md-6">
-                    <label for="gender" class="form-label">Gender</label>
-                    <select class="form-select" id="gender" name="gender" required>
-                        <option value="">-- Select Gender --</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" name="address">
-                </div>
-                <div class="col-md-6">
-                    <label for="province" class="form-label">Province</label>
-                    <select class="form-select" id="province" name="province">
-                        <option value="">-- Select Province --</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="municipality" class="form-label">Municipality</label>
-                    <select class="form-select" id="municipality" name="municipality">
-                        <option value="">-- Select Municipality --</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label for="barangay" class="form-label">Barangay</label>
-                    <select class="form-select" id="barangay" name="barangay">
-                        <option value="">-- Select Barangay --</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="email" class="form-label">
-                        Email <span class="text-danger">*</span>
-                    </label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                    <div id="emailFeedback" class="invalid-feedback"></div>
-                </div>
-                <div class="col-md-6">
-                    <label for="phone" class="form-label">
-                        Contact Number <span class="text-danger">*</span>
-                    </label>
-                    <div class="form-group d-flex">
-                        <span class="border-end country-code px-2">+63</span>
-                        <input type="text" class="form-control" id="phone" name="contactnumber" placeholder="" required
-                            maxlength="10" />
-                    </div>
-                    <div id="contactError" class="invalid-feedback" style="display: none;"></div>
-                </div>
-            </div>
-
-
-
-
-
-            <div class="form-row mt-4">
-                <button type="submit" class="register">Register</button>
-            </div>
-        </form>
-    </div>
-    <script src="js/main.js"></script>
-
-
-</body>
-
 </html>

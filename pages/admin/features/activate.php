@@ -273,7 +273,6 @@ h5{
                             <th>Account Number</th>
                             <th>Balance</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody">
@@ -290,18 +289,7 @@ h5{
                                 <td><?php echo htmlspecialchars($row['account_number']); ?></td>
                                 <td>₱<?php echo number_format($row['balance'], 2); ?></td>
                                 <td><?php echo isset($row['is_activated']) ? ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') : 'N/A'; ?>
-                                </td>
-                                <td>
-                                    <form id="actionForm<?php echo $row['id']; ?>" method="POST">
-                                        <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#actionModal"
-                                            onclick="prepareActions(<?php echo $row['id']; ?>, <?php echo $row['is_activated']; ?>)">
-                                            Action
-                                        </button>
-                                    </form>
-                                </td>
-                              
+                                </td>                              
                             </tr>
                         <?php endwhile; ?>
                     </tbody>

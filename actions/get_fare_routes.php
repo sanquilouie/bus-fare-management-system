@@ -26,7 +26,7 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     echo json_encode($row);
 } else {
-    echo json_encode(['error' => 'Badtrip']);
+    echo json_encode(['error' => 'No Location Detected']);
 }
 
 
