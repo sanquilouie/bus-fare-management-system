@@ -61,24 +61,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ?>
 <div id="main-content" class="container-fluid mt-5">
     <h2>Disable Users</h2>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Firstname</th>
-                    <th>Lastname</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="userTableBody"></tbody>
-        </table>
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Firstname</th>
+                            <th>Lastname</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+            <nav>
+                <ul class="pagination" id="pagination"></ul>
+            </nav>
+        </div>
     </div>
-    <nav>
-        <ul class="pagination" id="pagination"></ul>
-    </nav>
 </div>
-
+</body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function () {
@@ -183,7 +187,6 @@ $(document).on("click", ".disable-user", function () {
 });
 
 </script>
-</body>
 </html>
 <?php
 ob_end_flush();

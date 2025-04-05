@@ -156,25 +156,29 @@ function sendActivationEmail($user_id, $account_number)
     ?>
     <div id="main-content" class="container-fluid mt-5">
         <h2>Activate Users</h2>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Firstname</th>
-                        <th>Lastname</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody"></tbody>
-            </table>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+                <nav>
+                    <ul class="pagination" id="pagination"></ul>
+                </nav>
+            </div>
         </div>
-        <nav>
-            <ul class="pagination" id="pagination"></ul>
-        </nav>
     </div>
-
-    <script>
+</body>
+<script>
     $(document).ready(function () {
     function loadUsers(page = 1) {
         $.ajax({
@@ -282,8 +286,6 @@ $(document).on("click", ".enable-user", function () {
     });
 });
 </script>
-
-</body>
 </html>
 
 <?php

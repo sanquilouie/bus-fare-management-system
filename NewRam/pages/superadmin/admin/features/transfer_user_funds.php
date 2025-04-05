@@ -56,34 +56,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ?>
     <div id="main-content" class="container-fluid mt-5">
         <h2>Transfer Funds</h2>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <?php if (isset($_SESSION['message'])): ?>
+                    <div class="alert alert-info">
+                        <?php
+                        echo $_SESSION['message'];
+                        unset($_SESSION['message']); // Clear message after displaying
+                        ?>
+                    </div>
+                <?php endif; ?>
 
-        <!-- Feedback Message -->
-        <?php if (isset($_SESSION['message'])): ?>
-            <div class="alert alert-info">
-                <?php
-                echo $_SESSION['message'];
-                unset($_SESSION['message']); // Clear message after displaying
-                ?>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Account Number</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+                <nav>
+                    <ul class="pagination" id="pagination"></ul>
+                </nav>
             </div>
-        <?php endif; ?>
-
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Firstname</th>
-                        <th>Lastname</th>
-                        <th>Account Number</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody"></tbody>
-            </table>
         </div>
-        <nav>
-            <ul class="pagination" id="pagination"></ul>
-        </nav>
     </div>
 </body>
 <script>

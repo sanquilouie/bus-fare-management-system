@@ -175,7 +175,7 @@ $userResult = mysqli_query($conn, $userQuery);
     <div id="main-content" class="container-fluid mt-5">
         <h2>Accounts</h2>
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <h3> Registered Users Awaiting Activation: <?php echo $userActivateCount; ?> Registered Users: <?php echo $userCount; ?> </h3>
                 <form method="POST" action="">
                     <div class="input-group mb-3">

@@ -83,48 +83,48 @@ $transactions = fetchTransactions($conn);
     <!-- Page Content  -->
 
     <div class="container-fluid mt-5">
-        <h2 class="text-center">Transaction Logs</h2>
-        <table id="transactionTable" class="table table-bordered mt-4">
-            <thead class="thead-light">
-                <tr>
-                    <th>Account Number</th>
-                    <th>User Name</th>
-                    <th>Amount</th>
-                    <th>Transaction Type</th>
-                    <th>Transaction Time</th>
-                    <th>Loaded By</th>
-                    <th>Role of Loader</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (mysqli_num_rows($transactions) > 0): ?>
-                    <?php while ($row = mysqli_fetch_assoc($transactions)): ?>
+        <h2>Transaction Logs</h2>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <table id="transactionTable" class="table table-bordered mt-4">
+                    <thead class="thead-light">
                         <tr>
-                            <td><?php echo $row['account_number']; ?></td>
-                            <td><?php echo htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?></td>
-                            <td><?php echo number_format($row['amount'], 2); ?></td>
-                            <td><?php echo htmlspecialchars(ucfirst($row['transaction_type'])); ?></td>
-                            <td>
-                                <?php echo date('F-d-Y h:i:s A', strtotime($row['transaction_date'])); ?>
-                            </td>
-                            <td>
-                                <?php echo htmlspecialchars($row['conductor_firstname'] . ' ' . $row['conductor_lastname']); ?>
-                            </td>
-                            <td><?php echo htmlspecialchars($row['loaded_by_role']); ?></td>
+                            <th>Account Number</th>
+                            <th>User Name</th>
+                            <th>Amount</th>
+                            <th>Transaction Type</th>
+                            <th>Transaction Time</th>
+                            <th>Loaded By</th>
+                            <th>Role of Loader</th>
                         </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="7" class="text-center">No transaction records found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        <?php if (mysqli_num_rows($transactions) > 0): ?>
+                            <?php while ($row = mysqli_fetch_assoc($transactions)): ?>
+                                <tr>
+                                    <td><?php echo $row['account_number']; ?></td>
+                                    <td><?php echo htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?></td>
+                                    <td><?php echo number_format($row['amount'], 2); ?></td>
+                                    <td><?php echo htmlspecialchars(ucfirst($row['transaction_type'])); ?></td>
+                                    <td>
+                                        <?php echo date('F-d-Y h:i:s A', strtotime($row['transaction_date'])); ?>
+                                    </td>
+                                    <td>
+                                        <?php echo htmlspecialchars($row['conductor_firstname'] . ' ' . $row['conductor_lastname']); ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row['loaded_by_role']); ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="7" class="text-center">No transaction records found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    </div>
-    <script>
-
-    </script>
 </body>
 
 </html>
