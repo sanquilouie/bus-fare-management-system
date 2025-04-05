@@ -394,9 +394,7 @@
             </div>
         </div>
     </footer>
-
     <script>
-
     </script>
     <script>
         let currentSlide = 0;
@@ -404,7 +402,6 @@
         const totalSlides = slides.length;
         const prevButton = document.getElementById('prev');
         const nextButton = document.getElementById('next');
-
         function showSlide(index) {
             slides.forEach((slide, i) => {
                 slide.classList.remove('active');
@@ -413,7 +410,6 @@
                 }
             });
         }
-
         prevButton.addEventListener('click', () => {
             currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
             showSlide(currentSlide);
