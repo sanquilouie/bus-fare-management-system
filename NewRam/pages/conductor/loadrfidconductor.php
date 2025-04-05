@@ -25,12 +25,15 @@ $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRecords / $perPage);
 
 // Fetch paginated data
-$sql = "SELECT t.id, t.account_number, CONCAT(u.firstname, ' ', u.lastname) AS name, t.amount
+$sql = "SELECT t.id, 
+        t.account_number, 
+        CONCAT(u.firstname, ' ', u.lastname) AS name, 
+        t.amount,
+        t.status
         FROM transactions t
         JOIN useracc u ON t.account_number = u.account_number
         ORDER BY t.transaction_date DESC
-        LIMIT $offset, $perPage
-";
+        LIMIT $offset, $perPage";
 
 $result = $conn->query($sql);
 ?>
@@ -55,6 +58,7 @@ $result = $conn->query($sql);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
     
     <style>
         .btn-group {
@@ -96,39 +100,41 @@ $result = $conn->query($sql);
                 </form>
         <!-- Transactions Table -->
         <table id="transactionTable" class="table table-bordered mt-4">
-            <thead class="thead-light">
+    <thead class="thead-light">
+        <tr>
+            <th>Transaction #</th>
+            <th>Account #</th>
+            <th>Passenger Name</th>
+            <th>Load Amount</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (mysqli_num_rows($result) > 0): ?>
+            <?php while ($row = mysqli_fetch_assoc($result)): ?>
                 <tr>
-                    <th>Transaction #</th>
-                    <th>Account #</th>
-                    <th>Passenger Name</th>
-                    <th>Load Amount</th>
-                    <th>Action</th>
+                    <td><?php echo $row['id']; ?></td>
+                    <td><?php echo $row['account_number']; ?></td>
+                    <td><?php echo htmlspecialchars($row['name']); ?></td>
+                    <td><?php echo number_format($row['amount'], 2); ?></td>
+                    <td>
+                        <!-- Disable the Edit button if the status is 'edited' -->
+                        <button class="btn btn-warning btn-sm edit-btn" 
+                            data-account="<?php echo $row['id']; ?>" 
+                            data-amount="<?php echo $row['amount']; ?>"
+                            <?php echo ($row['status'] === 'edited') ? 'disabled' : ''; ?>>
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php if (mysqli_num_rows($result) > 0): ?>
-                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                        <tr>
-                            <td><?php echo $row['id']; ?></td>
-                            <td><?php echo $row['account_number']; ?></td>
-                            <td><?php echo($row['name']); ?></td>
-                            <td><?php echo number_format($row['amount'], 2); ?></td>
-                            <td>
-                                <button class="btn btn-warning btn-sm edit-btn" 
-                                    data-account="<?php echo $row['id']; ?>" 
-                                    data-amount="<?php echo $row['amount']; ?>">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="7" class="text-center">No transaction records found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="5" class="text-center">No transaction records found.</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
 
         <!-- Pagination -->
         <nav aria-label="Page navigation">

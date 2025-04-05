@@ -339,6 +339,7 @@ $conn->close();
                         <p id="fromRoute"></p>
                         <h2 id="displayRouteName"></h2>
                         <h2 id="location"></h2>
+                        <h2 id="isgeo"></h2>
                 </div>
                 <div class="col-md-6">
                     <label for="toRoute" class="form-label">To</label>
@@ -436,7 +437,7 @@ $conn->close();
         { name: "LAKEWOOD/PACIFIC", lat: 15.461379, lng: 120.949922, radius: 750.00 },
         { name: "SUMACAB", lat: 15.446563, lng: 120.944619, radius: 1000.00 },
         { name: "STA. ROSA INTERSECTION", lat: 15.429285, lng: 120.940039, radius: 1000.00 },
-        { name: "LAFUENTE", lat: 15.422566, lng: 120.920982, radius: 1200.00 },
+        { name: "LAFUENTE", lat: 15.422566, lng: 120.920982, radius: 5200.00 },
     ];
 
     // Function to calculate distance between two coordinates (Haversine formula)
@@ -467,7 +468,7 @@ $conn->close();
         if (navigator.geolocation) {
             console.log("Geolocation is supported.");
         } else {
-            console.log("Geolocation is not supported.");
+            console.log("Geolocation is NOT supported.");
         }
 
     navigator.geolocation.getCurrentPosition(
@@ -489,7 +490,6 @@ $conn->close();
             .then(response => response.json())
             .then(data => {
                 console.log("Response Data:", data);
-                // Check if there's an error in the response
                 if (data.error) {
                     document.getElementById("location").innerText = data.error;
                 } else {
@@ -525,7 +525,7 @@ $conn->close();
 
 
     // Call function every 10 seconds to update location
-    setInterval(getBusLocation, 3000);
+    setInterval(getBusLocation, 10000);
 
     // Run the function once when the page loads
     getBusLocation();
@@ -585,7 +585,7 @@ $conn->close();
         }
 
         function validateRoutes() {
-            const fromRoute = document.getElementById('fromRoute').value;
+            const fromRoute = document.getElementById('fromRoute').innerText;
             const toRoute = document.getElementById('toRoute').value;
 
             if (!fromRoute || !toRoute) {
@@ -744,7 +744,7 @@ $conn->close();
         }
 
         function promptRFIDInput() {
-            const fromRouteValue = document.getElementById('fromRoute').value;
+            const fromRouteValue = document.getElementById('fromRoute').innerText;
             const toRouteValue = document.getElementById('toRoute').value;
             const distance = Math.abs(fromRoute.post - toRoute.post);
             const transactionNumber = generateTransactionNumber();
@@ -780,7 +780,7 @@ $conn->close();
                             const rfid = inputField.value.trim();
                             if (rfid) {
                                 // If RFID is entered, automatically process the fare
-                                const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
+                                const fromRoute = JSON.parse(document.getElementById('fromRoute').innerText);
                                 const toRoute = JSON.parse(document.getElementById('toRoute').value);
                                 const fareType = document.getElementById('fareType').value;
                                 const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
@@ -820,7 +820,7 @@ $conn->close();
                 }).then((result) => {
                     if (result.isConfirmed) {
                         const rfid = '';
-                        const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
+                        const fromRoute = JSON.parse(document.getElementById('fromRoute').innerText);
                         const toRoute = JSON.parse(document.getElementById('toRoute').value);
                         const fareType = document.getElementById('fareType').value;
                         const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);

@@ -125,7 +125,7 @@ ob_end_flush();
             /* Padding to align text with country code */
         }
     </style>
-    <script src="../../assets/js/register.js"></script>
+    
 </head>
 <body>
     <?php
@@ -187,7 +187,7 @@ ob_end_flush();
                     </div>
                 <div class="col-md-4">
                         <label for="dob" class="form-label required">Date of Birth</label>
-                        <input type="date" class="form-control" id="dob" name="birthday" required>
+                        <input type="date" class="form-control" id="dob" name="dob" required>
                 </div>
                 <div class="col-md-4">   
                         <label for="gender" class="form-label required">Gender</label>
@@ -265,7 +265,7 @@ ob_end_flush();
     </div>
 </div>
 
-
+<script src="../../assets/js/register.js"></script>
 <script>
 
 function checkSubmitButton() {
@@ -282,6 +282,11 @@ function checkSubmitButton() {
 }
 
 $(document).ready(function () {
+    var today = new Date();
+    today.setFullYear(today.getFullYear() - 18);  // Subtract 18 years
+    document.getElementById("dob").setAttribute("max", today.toISOString().split('T')[0]);
+
+
   let registerButton = $('.btn-primary');
   $('#phone').on('input', function () {
     var contactValue = $(this).val().replace(/[^0-9]/g, '').substring(0, 11);
@@ -357,7 +362,7 @@ $(document).ready(function () {
     // Define the form element
     const form = $("form"); // or use $('#yourFormId') if your form has an ID
 
-    $('.primary').click(function (event) {
+    $('.btn-primary').click(function (event) {
         event.preventDefault(); // Prevent the default form submission
 
         if (!confirmationShown) {
@@ -373,7 +378,19 @@ $(document).ready(function () {
                 confirmButtonText: 'Yes, register!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.submit(); // Now, submit the form
+                    // Show success message
+                    Swal.fire({
+                        title: 'Registration Successful!',
+                        text: 'You have been successfully registered.',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Okay',
+                        timer: 1000, // The message will stay for 5 seconds
+                        timerProgressBar: true,
+                    }).then(() => {
+                        // After the success message closes, submit the form
+                        form.submit();  // Submit the form here
+                    });
                 }
             });
         }
@@ -409,6 +426,6 @@ $(document).ready(function () {
     });
 });
 </script>
-<?php include '../../actions/swal_success_message.php'; ?>
+<?php //include '../../actions/swal_success_message.php'; ?>
 </body>
 </html>

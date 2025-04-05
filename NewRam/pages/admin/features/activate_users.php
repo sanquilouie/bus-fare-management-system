@@ -142,67 +142,138 @@ function sendActivationEmail($user_id, $account_number)
     include '../../../includes/footer.php';
     ?>
     <div id="main-content" class="container mt-5">
-        <h2>Activate Users</h2>
+    <h2>Activate Users</h2>
 
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Firstname</th>
-                        <th>Lastname</th>
-                        <th>Account Number</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($row = mysqli_fetch_assoc($inactiveUsersResult)): ?>
-                        <tr>
-                            <td><?php echo $row['id']; ?></td>
-                            <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-                            <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-                            <td>
-                                <?php if (!$row['account_number']): ?>
-                                    <form method="POST" action="activate_users.php">
-                                        <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                        <input type="text" name="account_number" placeholder="Enter Account Number" required
-                                            class="form-control">
-                                        <button type="submit" class="btn btn-success mt-2">Activate</button>
-                                    </form>
-                                <?php else: ?>
-                                    <?php echo $row['account_number']; ?>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($row['account_number']): ?>
-                                    <form method="POST" action="activate_users.php">
-                                        <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                        <button type="submit" class="btn btn-success">Activate</button>
-                                    </form>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+    <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Account Number</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        if (mysqli_num_rows($inactiveUsersResult) > 0) {
+            while ($row = mysqli_fetch_assoc($inactiveUsersResult)): ?>
+                <tr>
+                    <td><?php echo $row['id']; ?></td>
+                    <td><?php echo htmlspecialchars($row['firstname']); ?></td>
+                    <td><?php echo htmlspecialchars($row['lastname']); ?></td>
+                    <td>
+                        <?php if (!$row['account_number']): ?>
+                            <!-- If no account number, show "No Account Number" text -->
+                            No Account Number
+                        <?php else: ?>
+                            <?php echo $row['account_number']; ?>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!$row['account_number']): ?>
+                            <!-- If no account number, show a form to enter one -->
+                            <form method="POST" action="activate_users.php">
+                                <button type="button" class="btn btn-success" onclick="askForAccountNumber(<?php echo $row['id']; ?>)">Activate</button>
+                            </form>
+                        <?php else: ?>
+                            <!-- If there's an account number, show the Activate button -->
+                            <form method="POST" action="activate_users.php">
+                                <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
+                                <button type="button" class="btn btn-success activate-btn">Activate</button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endwhile;
+        } else {
+            // If no rows are found, display "No Data to display"
+            echo '<tr><td colspan="5" class="text-center">No Data to display</td></tr>';
+        }
+        ?>
+    </tbody>
+</table>
+
     </div>
+</div>
+
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            <?php if (isset($_SESSION['message'])): ?>
-                const message = <?php echo json_encode($_SESSION['message']); ?>;
-                Swal.fire({
-                    icon: message.type, // 'success' or 'error'
-                    title: message.type === 'success' ? 'Success!' : 'Error!',
-                    text: message.text,
-                    timer: 4000,
-                    showConfirmButton: false,
-                    position: 'center'
-                });
-                <?php unset($_SESSION['message']); ?>
-            <?php endif; ?>
+    function askForConfirmationAndActivate(event, form) {
+        event.preventDefault(); 
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You are about to activate this user.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, activate!',
+            cancelButtonText: 'No, cancel',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
         });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const activateButtons = document.querySelectorAll('.activate-btn');
+
+        activateButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                const form = this.closest('form');
+                askForConfirmationAndActivate(event, form);
+            });
+        });
+    });
+
+
+        function askForAccountNumber(userId) {
+            Swal.fire({
+                title: 'Enter Account Number',
+                input: 'text',
+                inputLabel: 'Account Number',
+                inputPlaceholder: 'Enter account number here',
+                showCancelButton: true,
+                confirmButtonText: 'Activate',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to enter an account number!';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const accountNumber = result.value;
+
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    formData.append('account_number', accountNumber);
+
+                    fetch('../../../actions/activate_users_noaccountnumber.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('User Activated', 'The user has been activated with the account number.', 'success')
+                            .then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', 'There was an error activating the user.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Something went wrong with the activation process.', 'error');
+                    });
+                }
+            });
+    }
     </script>
 
 </body>
@@ -210,5 +281,5 @@ function sendActivationEmail($user_id, $account_number)
 </html>
 
 <?php
-ob_end_flush(); // End output buffering
+ob_end_flush();
 ?>

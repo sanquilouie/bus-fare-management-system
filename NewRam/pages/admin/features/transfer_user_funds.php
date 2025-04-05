@@ -4,7 +4,7 @@ ob_start(); // Start output buffering
 include '../../../includes/connection.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../index.php");
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -50,26 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="/NewRam/assets/js/NFCScanner.js"></script>
 </head>
 <body>
-    <?php
-        include '../../../includes/topbar.php';
-        include '../../../includes/sidebar2.php';
-        include '../../../includes/footer.php';
+<?php
+    include '../../../includes/topbar.php';
+    include '../../../includes/sidebar2.php';
+    include '../../../includes/footer.php';
     ?>
     <div id="main-content" class="container mt-5">
         <h2>Transfer Funds</h2>
-
-        <!-- Feedback Message -->
-        <?php if (isset($_SESSION['message'])): ?>
-            <div class="alert alert-info">
-                <?php
-                echo $_SESSION['message'];
-                unset($_SESSION['message']); // Clear message after displaying
-                ?>
-            </div>
-        <?php endif; ?>
-
-        <div class="table-responsive">
-            <table class="table table-striped">
+            <div class="table-responsive">
+                <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -89,34 +78,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </body>
 <script>
     function confirmTransferDisable(userId) {
-        $('#actionModal').modal('hide');
+    $('#actionModal').modal('hide');
 
-        // Set the user_id in the hidden form input for submitting
-        $('#actionForm').find('input[name="user_id"]').val(userId);
+    // Set the user_id in the hidden form input for submitting
+    $('#actionForm').find('input[name="user_id"]').val(userId);
 
+    Swal.fire({
+    title: 'Enter New Account Number',
+    input: 'text',
+    inputLabel: 'New Account Number for Fund Transfer',
+    inputPlaceholder: 'Enter account number...',
+    showCancelButton: true,
+    confirmButtonText: 'Confirm',
+    cancelButtonText: 'Cancel',
+    inputValidator: (value) => {
+        if (!value) {
+            return 'Please enter a new account number!';
+        }
+    }
+}).then((result) => {
+    if (result.isConfirmed) {
+        const newAccountNumber = result.value;
+
+        // Ask for confirmation before submitting
         Swal.fire({
-            title: 'Enter New Account Number',
-            input: 'text',
-            inputLabel: 'New Account Number for Fund Transfer',
-            inputPlaceholder: 'Enter account number...',
+            title: 'Are you sure?',
+            text: `Are you sure you want to transfer funds to account number ${newAccountNumber}?`,
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
-            didOpen: () => {
-                const inputField = Swal.getInput();
-                if (inputField) {
-                    activeInput = inputField; // Track Swal input
-                    inputField.focus();
-                }
-            },
-            inputValidator: (value) => {
-                if (!value) {
-                    return 'Please enter a new account number!';
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const newAccountNumber = result.value;
+            confirmButtonText: 'Yes, Transfer!',
+            cancelButtonText: 'No, Cancel'
+        }).then((confirmResult) => {
+            if (confirmResult.isConfirmed) {
                 $.ajax({
                     url: '../../../actions/transfer_and_disabled.php',
                     method: 'POST',
@@ -124,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     success: function (response) {
                         const result = JSON.parse(response);
                         if (result.success) {
-                            $('#userTableBody').html(result.tableData);
+                            // Display the new account number in the success message
                             Swal.fire('Transferred!', `Funds have been transferred successfully to new RFID: ${newAccountNumber}.`, 'success').then(() => {
                                 location.reload();
                             });
@@ -138,8 +131,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 });
             }
         });
+    }
+});
 }
-
 $(document).ready(function () {
     function loadUsers(page = 1) {
         $.ajax({

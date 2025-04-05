@@ -83,7 +83,7 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
     include '../../../includes/footer.php';
     ?>
 <div id="main-content" class="container mt-5">
-        <h1>Revenue Report</h1>
+        <h2>Revenue Report</h2>
 
         <!-- Filter Form -->
         <form id="filterForm" method="POST">

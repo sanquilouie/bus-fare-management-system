@@ -30,23 +30,19 @@ $totalPages = ceil($totalRows / $limit); // Calculate total pages
 function fetchTransactions($conn, $limit, $offset)
 {
     $transactionQuery = "SELECT 
-    t.id, 
-    u.firstname, 
-    u.lastname, 
-    u.account_number, 
+    t.account_number AS user_account_number, 
+    CONCAT(u.firstname, ' ', u.lastname) AS user_fullname, 
     t.amount, 
     t.transaction_type, 
     t.transaction_date, 
-    t.conductor_id, 
-    c.firstname AS conductor_firstname, 
-    c.lastname AS conductor_lastname, 
-    c.account_number AS conductor_account_number,
-    c.role AS loaded_by_role
+    CONCAT(c.firstname, ' ', c.lastname) AS loaded_by,
+    c.role AS loaded_by_role 
     FROM transactions t
-    JOIN useracc u ON t.user_id = u.id
-    LEFT JOIN useracc c ON t.conductor_id = c.account_number
-    ORDER BY t.transaction_date DESC
-    LIMIT ? OFFSET ?";
+    JOIN useracc u ON t.account_number = u.account_number
+    LEFT JOIN useracc c ON BINARY TRIM(t.conductor_id) = BINARY TRIM(c.account_number)
+    ORDER BY t.transaction_date DESC LIMIT ? OFFSET ?";
+
+    
 
     $stmt = $conn->prepare($transactionQuery);
     $stmt->bind_param('ii', $limit, $offset); // Bind limit and offset
@@ -112,12 +108,12 @@ $transactions = fetchTransactions($conn, $limit, $offset);
                 <?php if (mysqli_num_rows($transactions) > 0): ?>
                     <?php while ($row = mysqli_fetch_assoc($transactions)): ?>
                         <tr>
-                            <td><?php echo $row['account_number']; ?></td>
-                            <td><?php echo htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?></td>
+                            <td><?php echo $row['user_account_number']; ?></td>
+                            <td><?php echo htmlspecialchars($row['user_fullname']); ?></td>
                             <td><?php echo number_format($row['amount'], 2); ?></td>
                             <td><?php echo htmlspecialchars(ucfirst($row['transaction_type'])); ?></td>
                             <td><?php echo date('F-d-Y h:i:s A', strtotime($row['transaction_date'])); ?></td>
-                            <td><?php echo htmlspecialchars($row['conductor_firstname'] . ' ' . $row['conductor_lastname']); ?></td>
+                            <td><?php echo htmlspecialchars($row['loaded_by']); ?></td>
                             <td><?php echo htmlspecialchars($row['loaded_by_role']); ?></td>
                         </tr>
                     <?php endwhile; ?>

@@ -236,7 +236,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <header>
         <nav>
             <ul>
-                <li><a href="../index.php">Home</a></li>
+                <li><a href="../../index.php">Home</a></li>
             </ul>
         </nav>
     </header>
@@ -267,8 +267,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="suffix" class="form-label">Suffix</label>
                     <select class="form-select" id="suffix" name="suffix">
                         <option value="">-- Select Suffix --</option>
-                        <option value="Jr.">Jr.</option>
-                        <option value="Sr.">Sr.</option>
+                        <option value="Jr">Jr.</option>
+                        <option value="Sr">Sr.</option>
                         <option value="III">III</option>
                         <option value="IV">IV</option>
                         <option value="V">V</option>

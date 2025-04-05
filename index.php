@@ -290,9 +290,8 @@
             <div class="logo">
                 <h1>Ramstar Bus Transportation Cooperative</h1>
             </div>
-            <a href="auth/login.php" class="login-button">Log In</a>
+            <a href="NewRam/auth/login.php" class="login-button">Log In</a>
             <button id="register-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">How to register?</button>
-            <a href="pages/gpstest.php" class="register-link">GPS Test</a>
         </div>
     </header>
 
@@ -315,7 +314,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <a href="auth/userregister.php" class="register-link">Go to Registration</a>
+        <a href="NewRam/auth/userregister.php" class="register-link">Go to Registration</a>
       </div>
     </div>
   </div>
@@ -325,13 +324,13 @@
     <section class="hero">
         <div class="slider">
             <div class="slide active">
-                <img src="assets/images/slider4.png" alt="Slide 1">
+                <img src="NewRam/assets/images/slider4.png" alt="Slide 1">
             </div>
             <div class="slide">
-                <img src="assets/images/slider2.jpg" alt="Slide 2">
+                <img src="NewRam/assets/images/slider2.jpg" alt="Slide 2">
             </div>
             <div class="slide">
-                <img src="assets/images/slider3.jpg" alt="Slide 3">
+                <img src="NewRam/assets/images/slider3.jpg" alt="Slide 3">
             </div>
 
             <div class="navigation">
@@ -343,22 +342,22 @@
 
     <section class="scrollable">
         <div class="scrollable-item">
-            <img src="assets/images/discounts.jpg" alt="Feature 1">
+            <img src="NewRam/assets/images/discounts.jpg" alt="Feature 1">
             <h3>Affordable Fares</h3>
             <p>Enjoy discounts on your trips.</p>
         </div>
         <div class="scrollable-item">
-            <img src="assets/images/bus1.jpg" alt="Feature 2">
+            <img src="NewRam/assets/images/bus1.jpg" alt="Feature 2">
             <h3>Comfortable Buses</h3>
             <p>Ride in style and comfort.</p>
         </div>
         <div class="scrollable-item">
-            <img src="assets/images/route.jpg" alt="Feature 3">
+            <img src="NewRam/assets/images/route.jpg" alt="Feature 3">
             <h3>Convenient Routes</h3>
             <p>Track easily.</p>
         </div>
         <div class="scrollable-item">
-            <img src="assets/images/cashback.jpg" alt="Feature 1">
+            <img src="NewRam/assets/images/cashback.jpg" alt="Feature 1">
             <h3>Exclusive Cashback</h3>
             <p>Enjoy Cashback every load.</p>
         </div>

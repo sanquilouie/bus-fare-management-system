@@ -112,25 +112,6 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 
         if (!userAccountNumber) return; // Exit if no input
 
-        let rfid = userAccountNumber;
-
-        // If RFID is required, prompt for it
-        const { value: rfidInput } = await Swal.fire({
-            title: 'Scan RFID',
-            input: 'text',
-            inputPlaceholder: 'Enter RFID code',
-            showCancelButton: true,
-            didOpen: () => {
-                const inputField = Swal.getInput();
-                if (inputField) {
-                    activeInput = inputField;  // Track Swal input
-                    inputField.focus();
-                }
-            }
-        });
-
-        if (!rfidInput) return;
-        rfid = rfidInput;
 
         const loadAmount = document.getElementById('loadAmount').value;
 
@@ -148,7 +129,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             const formData = new FormData();
             formData.append('loadAmount', loadAmount);
             formData.append('user_account_number', userAccountNumber);
-            if (rfid) formData.append('rfid', rfid);
+            if (userAccountNumber) formData.append('rfid', userAccountNumber);
 
             const response = await fetch('../../actions/load_balance.php', {
                 method: 'POST',

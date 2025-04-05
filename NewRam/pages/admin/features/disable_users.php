@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <th>ID</th>
                     <th>Firstname</th>
                     <th>Lastname</th>
+                    <th>Account Number</th>
                     <th>Action</th>
                 </tr>
             </thead>

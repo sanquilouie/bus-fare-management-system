@@ -315,7 +315,7 @@ if (isset($_POST['Login'])) {
    <header>
       <nav>
          <ul>
-            <li><a href="../index.php">Home</a></li>
+            <li><a href="../../index.php">Home</a></li>
          </ul>
       </nav>
    </header>
