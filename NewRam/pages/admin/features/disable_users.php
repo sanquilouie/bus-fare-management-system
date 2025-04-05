@@ -59,25 +59,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         include '../../../includes/sidebar2.php';
         include '../../../includes/footer.php';
     ?>
-<div id="main-content" class="container mt-5">
+<div id="main-content" class="container-fluid mt-5">
     <h2>Disable Users</h2>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Firstname</th>
-                    <th>Lastname</th>
-                    <th>Account Number</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="userTableBody"></tbody>
-        </table>
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Firstname</th>
+                            <th>Lastname</th>
+                            <th>Account Number</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+            <nav>
+                <ul class="pagination" id="pagination"></ul>
+            </nav>
+        </div>
     </div>
-    <nav>
-        <ul class="pagination" id="pagination"></ul>
-    </nav>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -107,43 +107,45 @@ while ($row = $aggregatedFeedbackResult->fetch_assoc()) {
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Feedbacks for Bus, Driver, and Conductor</h2>
-
-        <?php if (!empty($aggregatedFeedbacks)): ?>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Bus Number</th>
-                        <th>Driver Name</th>
-                        <th>Conductor Name</th>
-                        <th>Feedback Count</th>
-                        <th>Average Rating</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($aggregatedFeedbacks as $feedback): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($feedback['bus_number'] ?? 'N/A'); ?></td>
-                            <td><?php echo htmlspecialchars($feedback['driver_name'] ?? 'N/A'); ?></td>
-                            <td><?php echo htmlspecialchars($feedback['conductor_name'] ?? 'N/A'); ?></td>
-                            <td><?php echo $feedback['feedback_count']; ?></td>
-                            <td>
-                                <span class="star-rating">
-                                    <?php for ($i = 0; $i < round($feedback['average_rating']); $i++): ?>
-                                        &#9733; <!-- Star symbol -->
-                                    <?php endfor; ?>
-                                </span>
-                                (<?php echo number_format($feedback['average_rating'], 1); ?>)
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <div class="alert alert-info text-center">No feedbacks available</div>
-        <?php endif; ?>
-    </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <?php if (!empty($aggregatedFeedbacks)): ?>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Bus Number</th>
+                                <th>Driver Name</th>
+                                <th>Conductor Name</th>
+                                <th>Feedback Count</th>
+                                <th>Average Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($aggregatedFeedbacks as $feedback): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($feedback['bus_number'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($feedback['driver_name'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($feedback['conductor_name'] ?? 'N/A'); ?></td>
+                                    <td><?php echo $feedback['feedback_count']; ?></td>
+                                    <td>
+                                        <span class="star-rating">
+                                            <?php for ($i = 0; $i < round($feedback['average_rating']); $i++): ?>
+                                                &#9733; <!-- Star symbol -->
+                                            <?php endfor; ?>
+                                        </span>
+                                        (<?php echo number_format($feedback['average_rating'], 1); ?>)
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <div class="alert alert-info text-center">No feedbacks available</div>
+                <?php endif; ?>
+            </div>
         </div>
+    </div>
 </body>
 </html>

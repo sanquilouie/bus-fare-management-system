@@ -81,7 +81,7 @@ $transactions = fetchTransactions($conn);
 
     <!-- Page Content  -->
 
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Transaction Logs</h2>
         <div class="row justify-content-center">
             <div class="col-md-10">

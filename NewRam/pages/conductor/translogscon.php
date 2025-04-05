@@ -88,7 +88,7 @@ $transactions = fetchTransactions($conn, $limit, $offset);
     ?>
 
     <!-- Page Content  -->
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2 class="text-center">Transaction Logs</h2>
 
         <!-- Transactions Table -->

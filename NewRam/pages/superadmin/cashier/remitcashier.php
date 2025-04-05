@@ -190,10 +190,10 @@ $stmt->close(); // Close statement
         include '../../../includes/superadmin_sidebar.php';
         include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Conductor Remittance</h2>
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <form id="remittanceForm" method="POST" action="">
                     <label for="rfid_input" class="form-label">Scan RFID:</label>
                     <input type="text" class="form-control" id="rfid_input" name="rfid_input" placeholder="Scan RFID here" autofocus>

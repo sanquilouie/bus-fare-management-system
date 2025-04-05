@@ -101,7 +101,7 @@ $totalRevenue = array_sum($dailyRevenue);
         include '../../includes/footer.php';
     ?>
 
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
     <h1 class="mt-4">Daily Revenue Report</h1>
     <form method="POST" class="mb-4">
         <div class="form-group">

@@ -194,7 +194,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'User')) {
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <h2>Update Password</h2>

@@ -82,7 +82,7 @@ $transactions = fetchTransactions($conn);
 
     <!-- Page Content  -->
 
-    <div class="container mt-5">
+    <div class="container-fluid mt-5">
         <h2 class="text-center">Transaction Logs</h2>
         <table id="transactionTable" class="table table-bordered mt-4">
             <thead class="thead-light">

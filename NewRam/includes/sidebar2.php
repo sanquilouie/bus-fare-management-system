@@ -85,43 +85,52 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
 
     <style>
     .wrapper {
-        display: flex;
-        min-height: 100vh;
-    }
-    #main-content {
-        transition: margin-left 0.3s ease;
-        padding-top: 60px;
-        padding-bottom: 65px;
-    }
-    .sidebar {
-        z-index: 100;
-        width: 300px;
-        background: #ffffff;
-        border-right: 1px solid #e5e7eb;
-        height: 100vh;
-        position: fixed;
-        left: 0;
-        top: 60px;
-        transition: transform 0.3s;
-        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.05);
-        overflow-y: auto;
-    }
+    display: flex;
+    min-height: 100vh;
+}
 
-    .sidebar.collapsed {
-        transform: translateX(-100%);
-    }
+#main-content {
+    transition: margin-left 0.3s ease;
+    padding-top: 60px;
+    padding-bottom: 65px;
+    margin-left: 0; /* Default margin */
+}
 
-    .toggle-btn {
-        position: fixed;
-        left: 310px;
-        top: 60px;
-        z-index: 1000;
-        transition: left 0.3s;
-    }
+.sidebar {
+    z-index: 100;
+    width: 300px;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 60px;
+    transition: transform 0.3s, width 0.3s;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+}
 
-    .toggle-btn.collapsed {
-        left: 20px;
-    }
+.sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 0; /* Sidebar collapsed width */
+}
+
+#main-content.sidebar-expanded {
+    margin-left: 300px; /* When sidebar is expanded */
+}
+
+.toggle-btn {
+    position: fixed;
+    left: 310px;
+    top: 60px;
+    z-index: 1000;
+    transition: left 0.3s;
+}
+
+.toggle-btn.collapsed {
+    left: 20px;
+}
+
 
     .nav-link {
         color: #4b5563;
@@ -158,7 +167,10 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
         }
         .top-bar h4 {
         color: #3e64ff;
-  } 
+        } 
+        #main-content {
+            margin-left: 0 !important; /* Ensure it doesn't shift when sidebar is collapsed */
+        }
     }
 
     </style>
@@ -217,11 +229,20 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
     
     <script>
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.querySelector('.toggle-btn');
-            sidebar.classList.toggle('collapsed');
-            toggleBtn.classList.toggle('collapsed');
-        }
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.querySelector('.toggle-btn');
+    const mainContent = document.getElementById('main-content');
+    
+    sidebar.classList.toggle('collapsed');
+    toggleBtn.classList.toggle('collapsed');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        mainContent.classList.remove('sidebar-expanded');
+    } else {
+        mainContent.classList.add('sidebar-expanded');
+    }
+}
+
     </script>
 </body>
 </html>

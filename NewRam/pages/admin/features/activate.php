@@ -227,7 +227,7 @@ h5{
 
     <!-- Page Content  -->
 
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
     <h3>
     <a href="#" id="awaitingActivation" class="clickable-count">
         Awaiting Activation: <?php echo $userActivateCount; ?> (Disabled)

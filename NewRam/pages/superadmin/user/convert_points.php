@@ -56,10 +56,10 @@ $availablePoints = $user['points'];
         include '../../../includes/superadmin_sidebar.php';
         include '../../../includes/footer.php';
     ?>
-     <div id="main-content" class="container mt-5">
+     <div id="main-content" class="container-fluid mt-5">
         <h2>Convert Points to Balance</h2>
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <div class="card-body">
                     <?php if (isset($_SESSION['success_message'])): ?>
                         <script>

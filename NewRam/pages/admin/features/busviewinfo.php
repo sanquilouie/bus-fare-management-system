@@ -141,33 +141,36 @@ $busData[] = [
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-4">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Bus Fare and Passengers Report for Today</h2>
-        <!-- Display the bus data -->
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Bus Number</th>
-                    <th>Total Fare Collected Today</th>
-                    <th>Number of Passengers</th>
-                    <th>Driver</th>
-                    <th>Conductor</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($busData as $data): ?>
-                    <tr>
-                    <td><?php echo htmlspecialchars($data['status']); ?></td>
-                        <td><?php echo htmlspecialchars($data['bus_number']); ?></td>
-                        <td>₱<?php echo number_format($data['total_fare'], 2); ?></td>
-                        <td><?php echo $data['passenger_count']; ?></td>
-                        <td><?php echo htmlspecialchars($data['driverName']); ?></td>
-                        <td><?php echo htmlspecialchars($data['conductorName']); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Bus Number</th>
+                            <th>Total Fare Collected Today</th>
+                            <th>Number of Passengers</th>
+                            <th>Driver</th>
+                            <th>Conductor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($busData as $data): ?>
+                            <tr>
+                            <td><?php echo htmlspecialchars($data['status']); ?></td>
+                                <td><?php echo htmlspecialchars($data['bus_number']); ?></td>
+                                <td>₱<?php echo number_format($data['total_fare'], 2); ?></td>
+                                <td><?php echo $data['passenger_count']; ?></td>
+                                <td><?php echo htmlspecialchars($data['driverName']); ?></td>
+                                <td><?php echo htmlspecialchars($data['conductorName']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </body>
 </html>

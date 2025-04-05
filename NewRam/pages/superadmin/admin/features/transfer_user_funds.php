@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         include '../../../../includes/superadmin_sidebar.php';
         include '../../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Transfer Funds</h2>
 
         <!-- Feedback Message -->

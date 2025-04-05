@@ -148,7 +148,7 @@ $recentTripsStmt->close(); // Close the statement
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="dashboard">

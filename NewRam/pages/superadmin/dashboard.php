@@ -208,7 +208,7 @@ $recentTripsStmt->close(); // Close the statement
     ?>
 
     <!-- Page Content -->
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="dashboard">

@@ -68,7 +68,7 @@ $conductor_id = $_SESSION['driver_account_number']; // Get conductor ID from ses
         include '../../../includes/footer.php';
     ?>
 
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Load User</h2>
         <div class="row justify-content-center">
             <div class="col-md-10">

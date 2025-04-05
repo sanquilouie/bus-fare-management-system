@@ -318,7 +318,7 @@ $conn->close();
         include '../../includes/footer.php';
     ?>
         
-        <div id="main-content" class="container mt-5">
+        <div id="main-content" class="container-fluid mt-5">
         <h2>Bus Fare Calculator</h2>
         <form id="fareForm" class="mt-4">
             <!-- KM Display -->

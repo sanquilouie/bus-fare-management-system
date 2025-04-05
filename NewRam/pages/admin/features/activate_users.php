@@ -141,62 +141,64 @@ function sendActivationEmail($user_id, $account_number)
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container mt-5">
-    <h2>Activate Users</h2>
-
-    <div class="table-responsive">
-    <table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Firstname</th>
-            <th>Lastname</th>
-            <th>Account Number</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php 
-        if (mysqli_num_rows($inactiveUsersResult) > 0) {
-            while ($row = mysqli_fetch_assoc($inactiveUsersResult)): ?>
-                <tr>
-                    <td><?php echo $row['id']; ?></td>
-                    <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-                    <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-                    <td>
-                        <?php if (!$row['account_number']): ?>
-                            <!-- If no account number, show "No Account Number" text -->
-                            No Account Number
-                        <?php else: ?>
-                            <?php echo $row['account_number']; ?>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <?php if (!$row['account_number']): ?>
-                            <!-- If no account number, show a form to enter one -->
-                            <form method="POST" action="activate_users.php">
-                                <button type="button" class="btn btn-success" onclick="askForAccountNumber(<?php echo $row['id']; ?>)">Activate</button>
-                            </form>
-                        <?php else: ?>
-                            <!-- If there's an account number, show the Activate button -->
-                            <form method="POST" action="activate_users.php">
-                                <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
-                                <button type="button" class="btn btn-success activate-btn">Activate</button>
-                            </form>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-            <?php endwhile;
-        } else {
-            // If no rows are found, display "No Data to display"
-            echo '<tr><td colspan="5" class="text-center">No Data to display</td></tr>';
-        }
-        ?>
-    </tbody>
-</table>
-
+    <div id="main-content" class="container-fluid mt-5">
+        <h2>Activate Users</h2>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Account Number</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            if (mysqli_num_rows($inactiveUsersResult) > 0) {
+                                while ($row = mysqli_fetch_assoc($inactiveUsersResult)): ?>
+                                    <tr>
+                                        <td><?php echo $row['id']; ?></td>
+                                        <td><?php echo htmlspecialchars($row['firstname']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['lastname']); ?></td>
+                                        <td>
+                                            <?php if (!$row['account_number']): ?>
+                                                <!-- If no account number, show "No Account Number" text -->
+                                                No Account Number
+                                            <?php else: ?>
+                                                <?php echo $row['account_number']; ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if (!$row['account_number']): ?>
+                                                <!-- If no account number, show a form to enter one -->
+                                                <form method="POST" action="activate_users.php">
+                                                    <button type="button" class="btn btn-success" onclick="askForAccountNumber(<?php echo $row['id']; ?>)">Activate</button>
+                                                </form>
+                                            <?php else: ?>
+                                                <!-- If there's an account number, show the Activate button -->
+                                                <form method="POST" action="activate_users.php">
+                                                    <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
+                                                    <button type="button" class="btn btn-success activate-btn">Activate</button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endwhile;
+                            } else {
+                                // If no rows are found, display "No Data to display"
+                                echo '<tr><td colspan="5" class="text-center">No Data to display</td></tr>';
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
 
     <script>

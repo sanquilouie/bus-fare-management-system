@@ -162,9 +162,9 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
     ?>
 
     <!-- Main Content -->
-    <div id="main-content" class="container mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
-            <div class="col-md-12">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <div class="dashboard">
                     <div class="dashboard-item" onclick="window.location.href='features/activate.php';">
                         <i class="fas fa-users fa-2x"></i>
@@ -186,6 +186,8 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
                         <h3>Total Buses</h3>
                         <p><?php echo $busCount; ?></p>
                     </div>
+                </div>
+                <div class="dashboard">
                     <div class="dashboard-charts" onclick=" window.location.href='revenue.php';">
                         <h3>Monthly Revenue Chart</h3>
                         <div id="revenueChart"></div>
@@ -198,6 +200,7 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
             </div>
         </div>
     </div>
+
     <script>
         // Monthly Revenue Chart
         var options = {
