@@ -106,6 +106,7 @@ if (isset($_POST['Login'])) {
    <title>Login</title>
    <link rel="stylesheet" href="../assets/css/login.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+   <link rel="stylesheet" href="https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css">
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script src="/NewRam/assets/js/NFCScanner.js"></script>
    <style>
@@ -167,7 +168,7 @@ if (isset($_POST['Login'])) {
 
       .field input:focus {
          outline: none;
-         border-color: #3498db;
+         border-color: #3498ab;
       }
 
       .field i {
@@ -259,7 +260,6 @@ if (isset($_POST['Login'])) {
          background: #f1c40f;
          transform: scale(1);
       }
-
       @media (max-width: 768px) {
          header nav ul li a {
             font-size: 18px;
@@ -292,23 +292,6 @@ if (isset($_POST['Login'])) {
 }
 
    </style>
-   <script>
-      function togglePassword(inputId, iconId) {
-         var input = document.getElementById(inputId);
-         var icon = document.getElementById(iconId);
-         if (input.type === "password") {
-            input.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-         } else {
-            input.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-         }
-      }
-   
-     
-   </script>
 </head>
 
 <body>
@@ -320,26 +303,64 @@ if (isset($_POST['Login'])) {
       </nav>
    </header>
 
-   <div class="wrapper">
-      <p>Login Form</p>
-      <div class="form-container">
-         <form method="POST" action="#" class="login">
-            <?php echo $msg; ?>
-            <div class="field">
-               <input type="text" name="username" placeholder="Account Number/Email" required>
-            </div>
-            <div class="field">
-               <input type="password" name="password" placeholder="Password" id="pass2" required>
-               <i class="fas fa-eye" id="togglePassword2" onclick="togglePassword('pass2', 'togglePassword2')"></i>
-            </div>
-            <input type="submit" name="Login" value="Log in" class="btn">
-            <button onclick="window.location.href='userregister.php'" class="btn">Sign up</button>
-         </form>
-         <div class="forgot-link">
-            <p>Forgot Password? <a href="forgotpassword.php">Click here</a></p>
-         </div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+        <div class="card border border-light-subtle rounded-3 shadow-sm" style="background-color: rgba(255, 255, 255, 0.7);">
+          <div class="card-body p-3 p-md-4 p-xl-5">
+          <h2 class="fw-bold text-center mb-4" style="color: rgb(215, 185, 75);">Login Form</h2>
+            <form method="POST" action="#" class="login">
+              <div class="row gy-2 overflow-hidden">
+                <div class="col-12">
+                  <div class="form-floating mb-3">
+                    <input type="text" class="form-control" name="username" id="username" placeholder="Account Number/Email" required>
+                    <label for="username" class="form-label">Account Number/Email</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-floating mb-3 position-relative">
+                     <input type="password" class="form-control" name="password" id="pass2" placeholder="Password" required>
+                     <label for="password" class="form-label">Password</label>
+                     <i class="fa fa-eye-slash position-absolute" id="togglePassword" style="right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                  </div>
+               </div>
+                <div class="col-12">
+                  <div class="d-grid">
+                    <button class="btn btn-primary btn-lg" type="submit" name="Login">Log in</button>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="d-grid">
+                    <button class="btn btn-primary btn-lg" type="submit" onclick="window.location.href='userregister.php'">Sign Up</button>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <p class="m-0 text-secondary text-center">Forgot Password? <a href="forgotpassword.php" class="link-primary text-decoration-none">Click Here</a></p>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-   </div>
+    </div>
+  </div>
 </body>
+<script>
+  // Toggle the password visibility
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    var passwordField = document.getElementById('password');
+    var icon = document.getElementById('togglePassword');
+
+    if (passwordField.type === "password") {
+      passwordField.type = "text"; // Show password
+      icon.classList.remove("fa-eye-slash");
+      icon.classList.add("fa-eye");
+    } else {
+      passwordField.type = "password"; // Hide password
+      icon.classList.remove("fa-eye");
+      icon.classList.add("fa-eye-slash");
+    }
+  });
+</script>
 
 </html>
