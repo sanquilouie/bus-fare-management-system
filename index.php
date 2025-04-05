@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
     * {
         margin: 0;
@@ -32,6 +33,7 @@
     }
 
     header {
+        width: 100%;
         background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
         color: white;
         padding: 20px 0;
@@ -39,6 +41,9 @@
     }
 
     header .logo h1 {
+        margin: 0;
+        text-align: center;
+        flex-grow: 1;
         font-size: 36px;
         font-weight: bold;
         letter-spacing: 1px;
@@ -55,6 +60,7 @@
         border-radius: 25px;
         cursor: pointer;
         transition: all 0.3s ease-in-out;
+        margin-left: 10px;
     }
 
     header .login-button:hover,
@@ -304,7 +310,13 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
+.swal2-html-container .left-align {
+  text-align: left;
+  padding-left: 20px;  /* Optional: Adds a bit of padding to the left */
+}
+.swal2-html-container li {
+  margin-bottom: 5px
+}
     </style>
 </head>
 
@@ -313,39 +325,42 @@
         <div class="spinner"></div>
     </div>
     <header>
-        <div class="container">
+        <div class="container d-flex justify-content-between align-items-center">
             <div class="logo">
                 <h1>Ramstar Bus Transportation Cooperative</h1>
             </div>
-            <a href="NewRam/auth/login.php" class="login-button">Log In</a>
-            <button id="register-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">How to register?</button>
+            <div class="header-buttons d-flex">
+                <a href="NewRam/auth/login.php" class="login-button">Log In</a>
+                <button id="register-button" type="button" class="btn btn-primary">How to register?</button>
+            </div>
         </div>
     </header>
 
+
     <!-- Modal -->
-<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-            <div>
-                <h5 class="modal-title">How to Register</h5>
-                <p>Follow these steps to create your account:</p>
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">How to Register</h5>
+                        <p>Follow these steps to create your account:</p>
+                    </div>
             </div>
-      </div>
-      <div class="modal-body">
-        <ul>
-                <li>Visit the registration page.</li>
-                <li>Fill in your personal details (Full name, email, contact number, etc.).</li>
-                <li>Click on the "Register" button to complete the process.</li>
-            </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <a href="NewRam/auth/userregister.php" class="register-link">Go to Registration</a>
-      </div>
+            <div class="modal-body">
+                <ul>
+                        <li>Visit the registration page.</li>
+                        <li>Fill in your personal details (Full name, email, contact number, etc.).</li>
+                        <li>Click on the "Register" button to complete the process.</li>
+                    </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="NewRam/auth/userregister.php" class="register-link">Go to Registration</a>
+            </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 
     <section class="hero">
@@ -421,7 +436,10 @@
             </div>
         </div>
     </footer>
-    <script>
+    
+
+</body>
+<script>
         window.addEventListener("load", function () {
     const loader = document.getElementById("loader");
     loader.style.opacity = "0";
@@ -458,9 +476,30 @@
         }, 5000);
 
        
+        document.getElementById('register-button').addEventListener('click', function() {
+            Swal.fire({
+                title: 'How to Register',
+                html: `
+                <p>Follow these steps to create your account:</p>
+                <ul class="left-align">
+                    <li>Visit the registration page.</li>
+                    <li>Fill in your personal details (Full name, email, contact number, etc.).</li>
+                    <li>Click on the "Register" button to complete the process.</li>
+                </ul>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Go to Registration',
+                cancelButtonText: 'Close',
+                reverseButtons: true,
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                window.location.href = 'NewRam/auth/userregister.php';  // Redirect to registration page
+                }
+            });
+        });
+
 
     </script>
-
-</body>
-
 </html>
