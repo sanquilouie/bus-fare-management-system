@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include '../../includes/connection.php';
-
+var_dump($_POST);
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Get form values and sanitize inputs
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $lastName = $_POST['lastName'];
     $email = $_POST['email'];
     $phone = $_POST['contactnumber'];
-    $birthday = $_POST['birthday'];
+    $birthday = $_POST['dob'];
     $province = $_POST['province'];
     $municipality = $_POST['municipality'];
     $barangay = $_POST['barangay'];
@@ -129,7 +129,7 @@ ob_end_flush();
 </head>
 <body>
     <?php
-        include '../../includes/topbar.php';
+        //include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
@@ -265,8 +265,32 @@ ob_end_flush();
     </div>
 </div>
 
-<script src="../../assets/js/register.js"></script>
+<script src="../../assets/js/address_api.js"></script>
 <script>
+
+const licenseInput = document.getElementById("driverLicense");
+
+licenseInput.addEventListener("input", function(e) {
+  // Remove hyphens only
+  let raw = e.target.value.replace(/-/g, "");
+
+  // Limit to 11 characters total
+  raw = raw.substring(0, 11);
+
+  // Format: XXX-XX-XXXXX
+  let formatted = '';
+  if (raw.length > 0) {
+    formatted += raw.substring(0, 3);
+  }
+  if (raw.length > 3) {
+    formatted += '-' + raw.substring(3, 5);
+  }
+  if (raw.length > 5) {
+    formatted += '-' + raw.substring(5, 11);
+  }
+
+  e.target.value = formatted;
+});
 
 function checkSubmitButton() {
     var emailValid = !$('#email').hasClass('is-invalid');
@@ -367,7 +391,6 @@ $(document).ready(function () {
 
         if (!confirmationShown) {
             confirmationShown = true;
-
             Swal.fire({
                 title: 'Confirm Registration?',
                 text: "Are you sure you want to register?",
@@ -384,7 +407,6 @@ $(document).ready(function () {
                         text: 'You have been successfully registered.',
                         icon: 'success',
                         confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'Okay',
                         timer: 1000, // The message will stay for 5 seconds
                         timerProgressBar: true,
                     }).then(() => {

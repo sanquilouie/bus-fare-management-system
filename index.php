@@ -324,13 +324,13 @@
     <section class="hero">
         <div class="slider">
             <div class="slide active">
-                <img src="NewRam/assets/images/slider4.png" alt="Slide 1">
+                <img src="NewRam/assets/images/slider4.png" alt="Slide 1" loading="lazy">
             </div>
             <div class="slide">
-                <img src="NewRam/assets/images/slider2.jpg" alt="Slide 2">
+                <img src="NewRam/assets/images/slider2.jpg" alt="Slide 2" loading="lazy">
             </div>
             <div class="slide">
-                <img src="NewRam/assets/images/slider3.jpg" alt="Slide 3">
+                <img src="NewRam/assets/images/slider3.jpg" alt="Slide 3" loading="lazy">
             </div>
 
             <div class="navigation">
@@ -342,22 +342,22 @@
 
     <section class="scrollable">
         <div class="scrollable-item">
-            <img src="NewRam/assets/images/discounts.jpg" alt="Feature 1">
+            <img src="NewRam/assets/images/discounts.jpg" alt="Feature 1" loading="lazy">
             <h3>Affordable Fares</h3>
             <p>Enjoy discounts on your trips.</p>
         </div>
         <div class="scrollable-item">
-            <img src="NewRam/assets/images/bus1.jpg" alt="Feature 2">
+            <img src="NewRam/assets/images/bus1.jpg" alt="Feature 2" loading="lazy">
             <h3>Comfortable Buses</h3>
             <p>Ride in style and comfort.</p>
         </div>
         <div class="scrollable-item">
-            <img src="NewRam/assets/images/route.jpg" alt="Feature 3">
+            <img src="NewRam/assets/images/route.jpg" alt="Feature 3" loading="lazy">
             <h3>Convenient Routes</h3>
             <p>Track easily.</p>
         </div>
         <div class="scrollable-item">
-            <img src="NewRam/assets/images/cashback.jpg" alt="Feature 1">
+            <img src="NewRam/assets/images/cashback.jpg" alt="Feature 1" loading="lazy">
             <h3>Exclusive Cashback</h3>
             <p>Enjoy Cashback every load.</p>
         </div>
