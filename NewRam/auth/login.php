@@ -310,6 +310,7 @@ if (isset($_POST['Login'])) {
           <div class="card-body p-3 p-md-4 p-xl-5">
           <h2 class="fw-bold text-center mb-4" style="color: rgb(215, 185, 75);">Login Form</h2>
             <form method="POST" action="#" class="login">
+               <?php echo $msg; ?>
               <div class="row gy-2 overflow-hidden">
                 <div class="col-12">
                   <div class="form-floating mb-3">
@@ -348,7 +349,7 @@ if (isset($_POST['Login'])) {
 <script>
   // Toggle the password visibility
   document.getElementById('togglePassword').addEventListener('click', function() {
-    var passwordField = document.getElementById('password');
+    var passwordField = document.getElementById('pass2');
     var icon = document.getElementById('togglePassword');
 
     if (passwordField.type === "password") {
@@ -362,5 +363,4 @@ if (isset($_POST['Login'])) {
     }
   });
 </script>
-
 </html>

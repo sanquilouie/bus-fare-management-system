@@ -79,7 +79,7 @@ $transactions = fetchTransactions($conn, $accountNumber, $limit, $offset);
     ?>
     <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
-            <div class="col-md-12">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <h2>Load Transaction Logs</h2>
                 <div class="table-responsive">
                 <table class="table table-bordered mt-4">
