@@ -347,13 +347,19 @@ $conn->close();
 <?php if ($otp_sent) { ?>
 <div class="form-container">
     <h2>Verify OTP</h2>
-    <form method="POST">
+    <form id="reset-password-form" method="POST">
         <input type="hidden" name="action" value="verify_otp">
         <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>"> <!-- Include email for verification -->
+        
         <label for="otp">Enter OTP:</label>
         <input type="text" name="otp" required>
+        
         <label for="new_password">New Password:</label>
-        <input type="password" name="new_password" required>
+        <input type="password" name="new_password" id="new_password" required>
+        
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" name="confirm_password" id="confirm_password" required>
+        
         <button type="submit">Reset Password</button>
     </form>
 </div>
@@ -374,6 +380,10 @@ $conn->close();
             title: 'Password Reset Successful!',
             text: 'Your password has been updated successfully.',
             confirmButtonText: 'OK'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = 'login.php';
+            }
         });
     <?php } elseif ($error_message) { ?>
         Swal.fire({
@@ -383,5 +393,21 @@ $conn->close();
             confirmButtonText: 'OK'
         });
     <?php } ?>
+
+    document.getElementById("reset-password-form").onsubmit = function(event) {
+        var newPassword = document.getElementById("new_password").value;
+        var confirmPassword = document.getElementById("confirm_password").value;
+
+        // Check if passwords match
+        if (newPassword !== confirmPassword) {
+            event.preventDefault(); // Prevent form submission
+            Swal.fire({
+                icon: 'error',
+                title: 'Password Mismatch',
+                text: 'The passwords do not match. Please try again.',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
 </script>
     </body>
