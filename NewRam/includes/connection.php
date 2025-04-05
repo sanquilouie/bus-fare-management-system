@@ -1,11 +1,21 @@
 <?php
 // connection.php
 
-// Database configuration
-$dbhost = 'localhost';
-$dbuser = 'REDACTED_DB_USER';
-$dbpass = 'REDACTED_DB_PASSWORD';
-$dbname = 'REDACTED_DB_NAME';
+// config.php
+
+if ($_SERVER['HTTP_HOST'] === 'localhost') {
+    // Local
+    $dbhost = 'localhost';
+    $dbuser = 'REDACTED_DB_USER';
+    $dbpass = 'REDACTED_DB_PASSWORD';
+    $dbname = 'REDACTED_DB_NAME';
+} else {
+    // Live
+    $dbhost = 'localhost';
+	$dbuser = 'REDACTED_DB_USER';
+	$dbpass = 'REDACTED_DB_PASSWORD';
+	$dbname = 'REDACTED_DB_NAME';
+}
 
 // Mysqli connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
