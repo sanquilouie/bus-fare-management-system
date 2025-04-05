@@ -288,7 +288,7 @@
     <header>
         <div class="container">
             <div class="logo">
-                <h1>Ramstar Bus Transportation Cooperative</h1>
+                <h1>Ramstar Bus Transportation Cooperativeeee</h1>
             </div>
             <a href="NewRam/auth/login.php" class="login-button">Log In</a>
             <button id="register-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">How to register?</button>
