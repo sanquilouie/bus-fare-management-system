@@ -111,23 +111,21 @@ $stmt->fetch();
     <!-- Page Content -->
     <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title text-primary">Past Months' Total Load</h2>
                         <div id="pastMonthsChart"></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-10 mt-5">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm mt-5 mb-5">
                     <div class="card-body">
                         <h2 class="card-title text-primary">Today's Total Load</h2>
                         <div id="revenueChart"></div>
                     </div>
                 </div>
             </div>
+            
         </div>
     </div>
     <script>

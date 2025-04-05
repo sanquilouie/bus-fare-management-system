@@ -39,7 +39,7 @@ $account_number = $_SESSION['account_number']; // Fetch account number from sess
     <div id="main-content" class="container-fluid mt-5">
         <h2>Transaction Logs</h2>
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
