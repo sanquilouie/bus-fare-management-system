@@ -102,24 +102,28 @@ $totalRevenue = array_sum($dailyRevenue);
     ?>
 
     <div id="main-content" class="container-fluid mt-5">
-    <h1 class="mt-4">Daily Revenue Report</h1>
-    <form method="POST" class="mb-4">
-        <div class="form-group">
-            <label for="selected_date">Select Date:</label>
-            <input type="date" id="selected_date" name="selected_date" class="form-control"
-                value="<?php echo htmlspecialchars($selectedDate); ?>">
+        <h2>Daily Revenue Report</h2>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <form method="POST" class="mb-4">
+                    <div class="form-group">
+                        <label for="selected_date">Select Date:</label>
+                        <input type="date" id="selected_date" name="selected_date" class="form-control"
+                            value="<?php echo htmlspecialchars($selectedDate); ?>">
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" id="show_whole_month" name="show_whole_month" class="form-check-input" <?php echo $showWholeMonth ? 'checked' : ''; ?>>
+                        <label for="show_whole_month" class="form-check-label">Show Whole Month</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </form>
+                <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
+                <div id="chart"></div>
+            </div>
         </div>
-        <div class="form-group form-check">
-            <input type="checkbox" id="show_whole_month" name="show_whole_month" class="form-check-input" <?php echo $showWholeMonth ? 'checked' : ''; ?>>
-            <label for="show_whole_month" class="form-check-label">Show Whole Month</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Generate Report</button>
-    </form>
-
-    <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
-
-    <div id="chart"></div>
-    <script>
+    </div>
+</body>
+<script>
         window.onload = function () {
             const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;
             updateChart(dailyRevenue);
@@ -159,8 +163,4 @@ $totalRevenue = array_sum($dailyRevenue);
 
 
     </script>
-    </div>
-    </div>
-</body>
-
 </html>

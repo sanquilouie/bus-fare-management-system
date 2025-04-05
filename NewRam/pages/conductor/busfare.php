@@ -318,116 +318,96 @@ $conn->close();
         include '../../includes/footer.php';
     ?>
         
-        <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5">
         <h2>Bus Fare Calculator</h2>
-        <form id="fareForm" class="mt-4">
-            <!-- KM Display -->
-            <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
-                <div class="card shadow-sm text-center p-3">
-                    <h5 class="form-label mb-2" style="color: #007BFF;">Distance (KM)</h5>
-                    <span id="kmLabel" class="h4 text-primary font-weight-bold">0 km</span>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+                <form id="fareForm" class="mt-4">
+                    <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
+                        <div class="card shadow-sm text-center p-3">
+                            <h5 class="form-label mb-2" style="color: #007BFF;">Distance (KM)</h5>
+                            <span id="kmLabel" class="h4 text-primary font-weight-bold">0 km</span>
+                        </div>
+                        <div class="card shadow-sm text-center p-3">
+                            <h5 class="form-label mb-2" style="color: #007BFF;">Total Fare (₱)</h5>
+                            <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
+                        </div>
+                    </div>
+                    <!-- Route Selection -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="fromRoute" class="form-label">From</label>
+                                <p id="fromRoute"></p>
+                                <h2 id="displayRouteName"></h2>
+                                <h2 id="location"></h2>
+                                <h2 id="isgeo"></h2>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="toRoute" class="form-label">To</label>
+                            <select id="toRoute" name="toRoute" class="form-select">
+                                <option value="" disabled selected>Select Destination</option>
+                                <?php foreach ($routes as $route): ?>
+                                    <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
+                                        <?= htmlspecialchars($route['route_name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fare Type and Passenger Quantity -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="fareType" class="form-label">Fare Type</label>
+                            <select id="fareType" name="fareType" class="form-select">
+                                <option value="regular">Regular</option>
+                                <option value="discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="passengerQuantity" class="form-label">Number of Passengers</label>
+                            <input type="number" id="passengerQuantity" name="passengerQuantity" class="form-control" value="1"
+                                min="1" max="10">
+                        </div>
+                    </div>
+                </form>
+                <!-- Fare Result -->
+
+                <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
+                    <!-- Card for Distance -->
+                    <div class="card shadow-sm text-center p-3 mx-2">
+                        <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
+                        <button class="btn btn-primary mt-3" onclick="processPayment('cash')">Cash</button>
+                    </div>
+
+                    <!-- RFID Payment Button -->
+                    <div class="card shadow-sm text-center p-3 mx-2">
+                        <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
+                        <button class="btn btn-success mt-3" onclick="promptRFIDInput()">RFID</button>
+                    </div>
                 </div>
-                <div class="card shadow-sm text-center p-3">
-                    <h5 class="form-label mb-2" style="color: #007BFF;">Total Fare (₱)</h5>
-                    <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
+                <div class="card shadow-sm mb-5">
+                    <div class="card-header d-flex align-items-center">
+                        <h4 class="mb-0">Passenger Destinations</h4>
+                        <button class="btn btn-danger ms-auto" onclick="removeAllPassengers()">Remove All Passengers</button>
+                    </div>
+                    <div class="card-body">
+                        <table id="destinationTable" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Destination</th>
+                                    <th>Number of Passengers</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Destination rows will be inserted here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-            <!-- Route Selection -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="fromRoute" class="form-label">From</label>
-                        <p id="fromRoute"></p>
-                        <h2 id="displayRouteName"></h2>
-                        <h2 id="location"></h2>
-                        <h2 id="isgeo"></h2>
-                </div>
-                <div class="col-md-6">
-                    <label for="toRoute" class="form-label">To</label>
-                    <select id="toRoute" name="toRoute" class="form-select">
-                        <option value="" disabled selected>Select Destination</option>
-                        <?php foreach ($routes as $route): ?>
-                            <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
-                                <?= htmlspecialchars($route['route_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Fare Type and Passenger Quantity -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="fareType" class="form-label">Fare Type</label>
-                    <select id="fareType" name="fareType" class="form-select">
-                        <option value="regular">Regular</option>
-                        <option value="discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label for="passengerQuantity" class="form-label">Number of Passengers</label>
-                    <input type="number" id="passengerQuantity" name="passengerQuantity" class="form-control" value="1"
-                        min="1" max="10">
-                </div>
-            </div>
-
-            <!-- RFID Scan Input 
-            <div class="row mb-3">
-                <div class="col-md-6 offset-md-3">
-                    <label for="rfidInput" class="form-label">Scan RFID</label>
-                    <input type="text" id="rfidInput" name="rfidInput" class="form-control"
-                        placeholder="Scan your RFID here">
-                </div>
-            </div>
-             Calculate Button 
-            <div class="row">
-                <div class="col-md-6 offset-md-3">
-                    <button type="button" id="calculateFare" class="btn btn-primary btn-lg shadow-sm">Calculate
-                        Fare</button>
-                </div>
-            </div> -->
-        </form>
-        <!-- Fare Result -->
-
-        <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
-            <!-- Card for Distance -->
-            <div class="card shadow-sm text-center p-3 mx-2">
-                <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
-                <button class="btn btn-primary mt-3" onclick="processPayment('cash')">Cash</button>
-            </div>
-
-            <!-- RFID Payment Button -->
-            <div class="card shadow-sm text-center p-3 mx-2">
-                <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
-                <button class="btn btn-success mt-3" onclick="promptRFIDInput()">RFID</button>
-            </div>
-        </div>
-
-        <div class="card shadow-sm mb-5">
-            <div class="card-header d-flex align-items-center">
-                <h4 class="mb-0">Passenger Destinations</h4>
-                <button class="btn btn-danger ms-auto" onclick="removeAllPassengers()">Remove All Passengers</button>
-            </div>
-
-
-
-
-            <div class="card-body">
-
-                <table id="destinationTable" class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Destination</th>
-                            <th>Number of Passengers</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Destination rows will be inserted here dynamically -->
-                    </tbody>
-                </table>
             </div>
         </div>
-    </div>
     </div>
     <script>
 
