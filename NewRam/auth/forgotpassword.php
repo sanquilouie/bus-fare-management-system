@@ -325,7 +325,7 @@ $conn->close();
 <header>
       <nav>
          <ul>
-            <li><a href="../index.php">Home</a></li>
+            <li><a href="../../index.php">Home</a></li>
          </ul>
       </nav>
    </header>
