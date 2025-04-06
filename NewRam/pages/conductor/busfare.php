@@ -432,7 +432,7 @@ $conn->close();
             { name: "STO ROSARIO OLD", lat: 15.444027, lng: 120.742117, radius: 850.00 },
             { name: "CONTROL", lat: 15.444621, lng: 120.726495, radius: 850.00 },
             { name: "LAPAZ (SN. ISIDRO)", lat: 15.448766, lng: 120.711335, radius: 850.00 },
-            { name: "CARAMUTAN", lat: 15.457213, lng: 120.697859, radius: 850000.00 },
+            { name: "CARAMUTAN", lat: 15.457213, lng: 120.697859, radius: 850.00 },
             { name: "LAUNGCUPANG", lat: 15.465145, lng: 120.684345, radius: 850.00 },
             { name: "AMUCAO", lat: 15.480365, lng: 120.684689, radius: 850.00 },
             { name: "BALINGCANAWAY", lat: 15.489629, lng: 120.671643, radius: 850.00 },
