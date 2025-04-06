@@ -77,7 +77,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
         map.addControl(drawControl);
         map.on('draw:created', function (e) {
             const layer = e.layer;
-            drawnItems.addLayer(layer); 
+            drawnItems.addLayer(layer);
 
             Swal.fire({
                 title: 'Enter a name for this route:',
@@ -111,8 +111,24 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
                             })
                         })
                         .then(response => response.json())
-                        .then(data => console.log('Polygon saved:', data))
-                        .catch(error => console.error('Error:', error));
+                        .then(data => {
+                            console.log('Polygon saved:', data);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Route Saved!',
+                                text: 'Your route has been added successfully.',
+                                confirmButtonText: 'OK'
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'There was an issue saving the route.',
+                                confirmButtonText: 'OK'
+                            });
+                        });
                     }
                 }
             });
@@ -122,7 +138,6 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
             const updatedLayers = e.layers;
             updatedLayers.eachLayer(function (layer) {
                 const coordinates = JSON.stringify(layer.getLatLngs());
-
                 const routeName = layer.route_name;
 
                 fetch('../../actions/update_polygon.php', {
@@ -137,8 +152,24 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
                     })
                 })
                 .then(response => response.json())
-                .then(data => console.log('Polygon updated:', data))
-                .catch(error => console.error('Error:', error));
+                .then(data => {
+                    console.log('Polygon updated:', data);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Route Updated!',
+                        text: 'Your route has been updated successfully.',
+                        confirmButtonText: 'OK'
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'There was an issue updating the route.',
+                        confirmButtonText: 'OK'
+                    });
+                });
             });
         });
 
