@@ -63,10 +63,13 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
         const drawControl = new L.Control.Draw({
             edit: {
                 featureGroup: drawnItems,
+                remove: true
             },
             draw: {
                 polygon: true,
+                polyline: false,
                 circle: false,
+                circlemarker: false,
                 rectangle: false,
                 marker: false
             }
@@ -136,6 +139,71 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
                 .then(response => response.json())
                 .then(data => console.log('Polygon updated:', data))
                 .catch(error => console.error('Error:', error));
+            });
+        });
+
+        map.on('draw:deleted', function (e) {
+            const deletedLayers = e.layers;
+            const totalDeleted = deletedLayers.getLayers().length;
+
+            if (totalDeleted > 1) {
+                let timerInterval;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Delete One at a Time',
+                    html: 'Reverting in <b></b> seconds...',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        const b = Swal.getHtmlContainer().querySelector('b');
+                        timerInterval = setInterval(() => {
+                            b.textContent = Math.ceil(Swal.getTimerLeft() / 1000);
+                        }, 100);
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval);
+                    }
+                }).then(() => {
+                    location.reload(); // Revert deletion
+                });
+
+                return;
+            }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deletedLayers.eachLayer(function (layer) {
+                        const routeId = layer.route_id;
+                        if (routeId) {
+                            fetch('../../actions/delete_polygon.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ route_id: routeId })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Polygon deleted:', data);
+                                Swal.fire('Deleted!', 'Route has been removed.', 'success');
+                            })
+                            .catch(error => {
+                                console.error('Error deleting polygon:', error);
+                                Swal.fire('Error!', 'Failed to delete route.', 'error');
+                            });
+                        }
+                    });
+                } else {
+                    location.reload();
+                }
             });
         });
 
