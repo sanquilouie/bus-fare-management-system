@@ -205,6 +205,7 @@ $recentTripsStmt->close(); // Close the statement
         include '../../includes/topbar.php';
         include '../../includes/superadmin_sidebar.php';
         include '../../includes/footer.php';
+        include '../..//includes/loader.php';
     ?>
 
     <!-- Page Content -->

@@ -174,7 +174,7 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
         document.getElementById('generatePdfBtn').addEventListener('click', function () {
             const formData = new FormData(document.getElementById('filterForm'));
 
-            fetch('generate_pdf.php', {
+            fetch('../../actions/generate_pdf.php', {
                 method: 'POST',
                 body: formData,
             })

@@ -106,6 +106,7 @@ $stmt->fetch();
         include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
+        include '../..//includes/loader.php';
     ?>
 
     <!-- Page Content -->

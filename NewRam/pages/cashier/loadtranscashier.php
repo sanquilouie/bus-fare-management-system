@@ -4,13 +4,13 @@ include '../../includes/connection.php';
 require '../../libraries/fpdf/fpdf.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../../index.php");
+    header("Location: ../../../index.php");
     exit();
 }
 
 // Check if the user is logged in
 if (!isset($_SESSION['email'])) {
-    header("Location: ../../index.php");
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -115,9 +115,13 @@ $totalRevenue = array_sum($dailyRevenue);
                         <input type="checkbox" id="show_whole_month" name="show_whole_month" class="form-check-input" <?php echo $showWholeMonth ? 'checked' : ''; ?>>
                         <label for="show_whole_month" class="form-check-label">Show Whole Month</label>
                     </div>
-                    <div class="text-center mt-2">
-                        <button type="submit" class="btn btn-primary">Generate Report</button>
+                    <div class="text-center mt-2 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary" id="generateBtn">Generate Report</button>
+                        <a href="#" class="btn btn-success ms-2 disabled" id="downloadBtn">Download PDF</a>
                     </div>
+
+                    
+
                 </form>
                 <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
                 <div id="chart"></div>
@@ -125,42 +129,72 @@ $totalRevenue = array_sum($dailyRevenue);
         </div>
     </div>    
     <script>
-        window.onload = function () {
-            const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;
-            updateChart(dailyRevenue);
-        };
+       document.addEventListener('DOMContentLoaded', () => {
+    const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;
+    updateChart(dailyRevenue);
+    toggleButtons(); // Moved this here
+});
 
-        function updateChart(dailyRevenue) {
-            const categories = <?php echo json_encode($showWholeMonth ? range(1, 31) : [$selectedDay]); ?>;
+function updateChart(dailyRevenue) {
+    const categories = <?php echo json_encode($showWholeMonth ? range(1, 31) : [$selectedDay]); ?>;
 
-            const options = {
-                chart: {
-                    type: 'bar',
-                    height: 350
-                },
-                series: [{
-                    name: 'Revenue',
-                    data: dailyRevenue
-                }],
-                xaxis: {
-                    categories: categories
-                },
-                title: {
-                    text: 'Daily Revenue',
-                    align: 'center'
-                },
-                dataLabels: {
-                    enabled: true
-                },
-                tooltip: {
-                    shared: true,
-                    intersect: false
-                }
-            };
-
-            const chart = new ApexCharts(document.querySelector("#chart"), options);
-            chart.render();
+    const options = {
+        chart: {
+            type: 'bar',
+            height: 350
+        },
+        series: [{
+            name: 'Revenue',
+            data: dailyRevenue
+        }],
+        xaxis: {
+            categories: categories
+        },
+        title: {
+            text: 'Daily Revenue',
+            align: 'center'
+        },
+        dataLabels: {
+            enabled: true
+        },
+        tooltip: {
+            shared: true,
+            intersect: false
         }
+    };
+
+    const chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+}
+
+function toggleButtons() {
+    const dateInput = document.getElementById('selected_date');
+    const checkbox = document.getElementById('show_whole_month');
+    const generateBtn = document.getElementById('generateBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    const dateSelected = dateInput.value.trim() !== '';
+    const checkboxChecked = checkbox.checked;
+
+    const shouldEnable = dateSelected || checkboxChecked;
+
+    generateBtn.disabled = !shouldEnable;
+
+    if (shouldEnable) {
+        downloadBtn.classList.remove('disabled');
+        const selectedDate = dateInput.value;
+        const wholeMonth = checkboxChecked ? '1' : '0';
+        downloadBtn.href = `../../actions/download_revenue_pdf.php?date=${selectedDate}&whole_month=${wholeMonth}`;
+    } else {
+        downloadBtn.classList.add('disabled');
+        downloadBtn.href = '#';
+    }
+}
+
+
+document.getElementById('selected_date').addEventListener('input', toggleButtons);
+document.getElementById('show_whole_month').addEventListener('change', toggleButtons);
+
     </script>
 </body>
 </html>

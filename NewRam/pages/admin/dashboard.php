@@ -159,6 +159,7 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
         include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
+        include '../..//includes/loader.php';
     ?>
 
     <!-- Main Content -->

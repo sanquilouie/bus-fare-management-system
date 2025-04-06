@@ -147,6 +147,7 @@ $recentTripsStmt->close(); // Close the statement
         include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
+        include '../..//includes/loader.php';
     ?>
     <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">

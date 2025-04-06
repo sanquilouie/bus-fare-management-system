@@ -287,29 +287,7 @@
         }
     }
 
-    #loader {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: white;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #f44336;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
 .swal2-html-container .left-align {
   text-align: left;
   padding-left: 20px;  /* Optional: Adds a bit of padding to the left */
@@ -321,9 +299,9 @@
 </head>
 
 <body>
-    <div id="loader">
-        <div class="spinner"></div>
-    </div>
+    <?php
+        include 'NewRam/includes/loader.php';
+    ?>
     <header>
         <div class="container d-flex justify-content-between align-items-center">
             <div class="logo">
@@ -440,12 +418,7 @@
 
 </body>
 <script>
-        window.addEventListener("load", function () {
-    const loader = document.getElementById("loader");
-    loader.style.opacity = "0";
-    loader.style.transition = "opacity 0.5s ease";
-    setTimeout(() => loader.style.display = "none", 500);
-  });
+
 
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');

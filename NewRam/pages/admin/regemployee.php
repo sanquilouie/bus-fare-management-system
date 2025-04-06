@@ -129,7 +129,7 @@ ob_end_flush();
 </head>
 <body>
     <?php
-        //include '../../includes/topbar.php';
+        include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
