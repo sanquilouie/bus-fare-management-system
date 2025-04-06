@@ -414,7 +414,7 @@ $conn->close();
         let polygons = [];  // Array to hold the polygons (loaded from the database)
 
         // Fetch the polygon data from the database (assuming you have coordinates and names in the database)
-        fetch('../actions/load_polygons.php')
+        fetch('../../actions/load_polygons.php')
             .then(response => response.json())
             .then(data => {
                 data.forEach(route => {
