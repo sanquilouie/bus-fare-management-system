@@ -24,6 +24,7 @@ $menuItems = [
             'Registration' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/admin/register.php'],
             'Reg Employee' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/admin/regemployee.php'],
             'Revenue' => ['icon' => 'fa-cogs', 'url' => '/NewRam/pages/admin/revenue.php'],
+            'Bus Routes' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/admin/bus_routes.php'],
         ],
         'dropdown' => [
             'Activate Account' => ['icon' => 'fa-user-check', 'url' => '/NewRam/pages/admin/features/activate_users.php'],
