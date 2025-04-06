@@ -476,6 +476,8 @@ function getBusLocation() {
                 .then(data => {
                     console.log("Response Data:", data);
                     if (data.error) {
+                        document.getElementById("fromRoute").innerText = JSON.stringify(data, null, 2);
+                        document.getElementById("fromRoute").style.display = 'none';
                         document.getElementById("displayRouteName").innerText = data.error;
                     } else {
                         document.getElementById("fromRoute").innerText = JSON.stringify(data, null, 2);
