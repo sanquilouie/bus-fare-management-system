@@ -3,101 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Fare System - Location Tracking</title>
+    <title>Map with Interactive Pins and Radius</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        h2 {
-            color: #333;
-        }
-        #location, #coords {
-            font-size: 20px;
-            font-weight: bold;
-            color: green;
+        #map {
+            height: 600px;
         }
     </style>
 </head>
 <body>
-<h1>Bus Fare System</h1>
-<h2 id="location">Current Stop: Loading...</h2>
-<h2 id="coords">Latitude: ---, Longitude: ---</h2>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script>
+        const map = L.map('map').setView([15.486759, 120.593508], 12);
 
-<script>
-    // Predefined bus stops with latitude, longitude, and radius
-    const stops = [
-        { name: "Terminal", lat: 15.4740, lng: 120.9609, radius: 1207 },
-        { name: "Pacific", lat: 15.4573, lng: 120.9465, radius: 1207 },
-        { name: "Sumacab", lat: 15.4425, lng: 120.9432, radius: 482.80 },
-        { name: "Sta. Rosa", lat: 15.4319, lng: 120.9384, radius: 804.67 },
-        { name: "La Fuente", lat: 15.4289, lng: 120.9283, radius: 965.60 },
-        { name: "Louie", lat: 15.373645, lng: 120.922214, radius: 321.87 },
-    ];
+        // Tile layer for the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-    // Function to calculate distance between two coordinates (Haversine formula)
-    function getDistance(lat1, lng1, lat2, lng2) {
-        const R = 6371000; // Earth's radius in meters
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLng = (lng2 - lng1) * (Math.PI / 180);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in meters
-    }
+        // Group to hold all the drawn items
+        const drawnItems = new L.FeatureGroup().addTo(map);
 
-    // Function to check which stop the bus is near
-    function getCurrentStop(lat, lng) {
-        for (let stop of stops) {
-            let distance = getDistance(lat, lng, stop.lat, stop.lng);
-            if (distance < stop.radius) {
-                return stop.name; // Bus is within the stop's radius
-            }
-        }
-        return "Unknown Location"; // Not near any stop
-    }
-
-    // Function to get the bus's live GPS location
-    function getBusLocation() {
-        if (!navigator.geolocation) {
-            document.getElementById("location").innerText = "Geolocation is not supported.";
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                let latitude = position.coords.latitude;
-                let longitude = position.coords.longitude;
-                let currentStop = getCurrentStop(latitude, longitude);
-
-                console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-                console.log(`Current Stop: ${currentStop}`);
-
-                // Update the webpage with the current stop and coordinates
-                document.getElementById("location").innerText = `${currentStop}`;
-                document.getElementById("coords").innerText = `Latitude: ${latitude}, Longitude: ${longitude}`;
+        // Initialize the draw control
+        const drawControl = new L.Control.Draw({
+            draw: {
+                circle: true,  // Allow drawing of circles
+                marker: true,  // Allow drawing of markers
+                polyline: false,
+                polygon: false,
+                rectangle: false
             },
-            (error) => {
-                console.error("Error getting location:", error);
-                document.getElementById("location").innerText = "Error getting location.";
-                document.getElementById("coords").innerText = "Latitude: ---, Longitude: ---";
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
+            edit: {
+                featureGroup: drawnItems,  // Group to hold all drawn items
+                remove: true                // Enable removing objects
             }
-        );
-    }
+        });
+        map.addControl(drawControl);
 
-    // Call function every 10 seconds to update location
-    setInterval(getBusLocation, 10000);
+        // Array for storing the stops data
+        let stops = [
+            { name: "CABANATUAN TERMINAL / LAKEWOOD AVE", lat: 15.482336, lng: 120.963543, radius: 1422.13 },
+            { name: "LAKEWOOD/PACIFIC", lat: 15.463518, lng: 120.951269, radius: 1040.00 },
+            { name: "SUMACAB", lat: 15.446907, lng: 120.942307, radius: 1040.24 },
+            { name: "STA. ROSA INTERSECTION", lat: 15.424403, lng: 120.941106, radius: 1427.11 },
+            { name: "LAFUENTE", lat: 15.429033, lng: 120.920953, radius: 750.00 },
+            { name: "SAN JOSEPH", lat: 15.431681, lng: 120.907221, radius: 750.00 },
+            { name: "DEEP WELL (STA ROSA)", lat: 15.434088, lng: 120.893279, radius: 750.00 },
+            { name: "STO ROSARIO (SN. PEDRO)", lat: 15.435372, lng: 120.878870, radius: 800.00 },
+            { name: "INSPECTOR", lat: 15.438229, lng: 120.864360, radius: 800.00 },
+            { name: "RAJAL (SUR NORTE)", lat: 15.443359, lng: 120.849920, radius: 800.00 },
+            { name: "RAJAL CENTRO", lat: 15.445013, lng: 120.834470, radius: 800.00 },
+            { name: "MALABON", lat: 15.446675, lng: 120.819707, radius: 800.00 },
+            { name: "H. ROMERO", lat: 15.447336, lng: 120.804945, radius: 800.00 },
+            { name: "CARMEN (PANTOC)", lat: 15.449047, lng: 120.789871, radius: 800.00 },
+            { name: "STA CRUZ", lat: 15.447006, lng: 120.774390, radius: 850.00 },
+            { name: "ZARAGOZA (SN. ISIDRO)", lat: 15.443365, lng: 120.758596, radius: 850.00 },
+            { name: "STO ROSARIO OLD", lat: 15.444027, lng: 120.742117, radius: 850.00 },
+            { name: "CONTROL", lat: 15.444621, lng: 120.726495, radius: 850.00 },
+            { name: "LAPAZ (SN. ISIDRO)", lat: 15.448766, lng: 120.711335, radius: 850.00 },
+            { name: "CARAMUTAN", lat: 15.457213, lng: 120.697859, radius: 850.00 },
+            { name: "LAUNGCUPANG", lat: 15.465145, lng: 120.684345, radius: 850.00 },
+            { name: "AMUCAO", lat: 15.480365, lng: 120.684689, radius: 850.00 },
+            { name: "BALINGCANAWAY", lat: 15.489629, lng: 120.671643, radius: 850.00 },
+            { name: "SAN MANUEL", lat: 15.486982, lng: 120.640743, radius: 850.00 },
+            { name: "SAN JOSE", lat: 15.491945, lng: 120.655850, radius: 850.00 },
+            { name: "MALIWALO", lat: 15.482019, lng: 120.626324, radius: 850.00 },
+            { name: "MATATALAIB", lat: 15.485659, lng: 120.610531, radius: 850.00 },
+            { name: "TARLAC TERMINAL / ST. MARYS (METRO TOWN)", lat: 15.486759, lng: 120.593508, radius: 1000.00 },
+        ];
 
-    // Run the function once when the page loads
-    getBusLocation();
-</script>
+        // Function to draw markers and circles
+        function addStopMarker(stop, index) {
+            const marker = L.marker([stop.lat, stop.lng], {
+                draggable: true  // Allow the marker to be moved
+            }).addTo(drawnItems);
 
+            // Draw a circle around the marker based on the radius
+            const circle = L.circle([stop.lat, stop.lng], {
+                color: 'blue',
+                fillColor: '#30f',
+                fillOpacity: 0.2,
+                radius: stop.radius
+            }).addTo(drawnItems);
+
+            // Bind a popup to the marker
+            marker.bindPopup(`<b>${stop.name}</b><br>Radius: ${stop.radius} meters`).openPopup();
+
+            // Update stop data when the marker or circle is moved or resized
+            marker.on('dragend', function (e) {
+                const updatedLatLng = e.target.getLatLng();
+                stop.lat = updatedLatLng.lat;
+                stop.lng = updatedLatLng.lng;
+                circle.setLatLng(updatedLatLng);
+                
+                // Update the stops array
+                stops[index] = { ...stop };  // Update the stop entry in the array
+                console.log(stops);  // You can remove this line, just for debugging
+            });
+
+            // Update radius when the circle is resized
+            circle.on('radiuschange', function (e) {
+                stop.radius = e.target.getRadius();
+                
+                // Update the stops array
+                stops[index] = { ...stop };  // Update the stop entry in the array
+                console.log(stops);  // You can remove this line, just for debugging
+            });
+        }
+
+        // Add all stops to the map
+        stops.forEach((stop, index) => addStopMarker(stop, index));
+
+        // Allow drawing of new markers and circles
+        map.on(L.Draw.Event.CREATED, function (event) {
+            const layer = event.layer;
+            drawnItems.addLayer(layer);
+        });
+    </script>
 </body>
 </html>
