@@ -411,118 +411,92 @@ $conn->close();
     </div>
     <script>
 
-        //From Route
-        const stops = [
-            { name: "CABANATUAN TERMINAL / LAKEWOOD AVE", lat: 15.482336, lng: 120.963543, radius: 1422.13 },
-            { name: "LAKEWOOD/PACIFIC", lat: 15.463518, lng: 120.951269, radius: 1040.00 },
-            { name: "SUMACAB", lat: 15.446907, lng: 120.942307, radius: 1040.24 },
-            { name: "STA. ROSA INTERSECTION", lat: 15.424403, lng: 120.941106, radius: 1427.11 },
-            { name: "LAFUENTE", lat: 15.429033, lng: 120.920953, radius: 750.00 },
-            { name: "SAN JOSEPH", lat: 15.431681, lng: 120.907221, radius: 750.00 },
-            { name: "DEEP WELL (STA ROSA)", lat: 15.434088, lng: 120.893279, radius: 750.00 },
-            { name: "STO ROSARIO (SN. PEDRO)", lat: 15.435372, lng: 120.878870, radius: 800.00 },
-            { name: "INSPECTOR", lat: 15.438229, lng: 120.864360, radius: 800.00 },
-            { name: "RAJAL (SUR NORTE)", lat: 15.443359, lng: 120.849920, radius: 800.00 },
-            { name: "RAJAL CENTRO", lat: 15.445013, lng: 120.834470, radius: 800.00 },
-            { name: "MALABON", lat: 15.446675, lng: 120.819707, radius: 800.00 },
-            { name: "H. ROMERO", lat: 15.447336, lng: 120.804945, radius: 800.00 },
-            { name: "CARMEN (PANTOC)", lat: 15.449047, lng: 120.789871, radius: 800.00 },
-            { name: "STA CRUZ", lat: 15.447006, lng: 120.774390, radius: 850.00 },
-            { name: "ZARAGOZA (SN. ISIDRO)", lat: 15.443365, lng: 120.758596, radius: 850.00 },
-            { name: "STO ROSARIO OLD", lat: 15.444027, lng: 120.742117, radius: 850.00 },
-            { name: "CONTROL", lat: 15.444621, lng: 120.726495, radius: 850.00 },
-            { name: "LAPAZ (SN. ISIDRO)", lat: 15.448766, lng: 120.711335, radius: 850.00 },
-            { name: "CARAMUTAN", lat: 15.457213, lng: 120.697859, radius: 850.00 },
-            { name: "LAUNGCUPANG", lat: 15.465145, lng: 120.684345, radius: 850.00 },
-            { name: "AMUCAO", lat: 15.480365, lng: 120.684689, radius: 850.00 },
-            { name: "BALINGCANAWAY", lat: 15.489629, lng: 120.671643, radius: 850.00 },
-            { name: "SAN MANUEL", lat: 15.486982, lng: 120.640743, radius: 850.00 },
-            { name: "SAN JOSE", lat: 15.491945, lng: 120.655850, radius: 850.00 }, 
-            { name: "MALIWALO", lat: 15.482019, lng: 120.626324, radius: 850.00 },
-            { name: "MATATALAIB", lat: 15.485659, lng: 120.610531, radius: 850.00 },
-            { name: "TARLAC TERMINAL / ST. MARYS (METRO TOWN)", lat: 15.486759, lng: 120.593508, radius: 1000.00 },
-        ];
+        let polygons = [];  // Array to hold the polygons (loaded from the database)
 
-
-    // Function to calculate distance between two coordinates (Haversine formula)
-    function getDistance(lat1, lng1, lat2, lng2) {
-        const R = 6371000; // Earth's radius in meters
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLng = (lng2 - lng1) * (Math.PI / 180);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in meters
-    }
-
-    // Function to check which stop the bus is near
-    function getCurrentStop(lat, lng) {
-        for (let stop of stops) {
-            let distance = getDistance(lat, lng, stop.lat, stop.lng);
-            if (distance < stop.radius) {
-                return stop.name; // Bus is within the stop's radius
-            }
-        }
-        return "Unknown Location"; // Not near any stop
-    }
-
-    // Function to get the bus's live GPS location
-    function getBusLocation() {
-        if (navigator.geolocation) {
-            console.log("Geolocation is supported.");
-        } else {
-            console.log("Geolocation is NOT supported.");
-        }
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            let latitude = position.coords.latitude;
-            let longitude = position.coords.longitude;
-            let currentStop = getCurrentStop(latitude, longitude);
-
-            console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-            console.log(`Current Stop: ${currentStop}`);
-            fetch('../../actions/get_fare_routes.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ currentStop: currentStop })
-            })
+        // Fetch the polygon data from the database (assuming you have coordinates and names in the database)
+        fetch('../actions/load_polygons.php')
             .then(response => response.json())
             .then(data => {
-                console.log("Response Data:", data);
-                if (data.error) {
-                    document.getElementById("location").innerText = data.error;
-                } else {
-                    document.getElementById("fromRoute").innerText = JSON.stringify(data, null, 2);
-                    document.getElementById("fromRoute").style.display = 'none';
-                    document.getElementById("displayRouteName").innerText = data.route_name || "Route name not available";
-                }
+                data.forEach(route => {
+                    const coordinates = JSON.parse(route.coordinates); // Coordinates from the DB
+                    const polygon = L.polygon(coordinates).addTo(map);
+                    polygon.route_id = route.route_id; // Store the route_id for later use
+                    polygon.route_name = route.route_name; // Store the route name
+
+                    // Store the polygon to use for checking if the bus is inside it
+                    polygons.push(polygon);
+
+                    // Bind a popup with the route name
+                    polygon.bindPopup(`<b>${route.route_name}</b>`);
+                });
             })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        },
-        (error) => {
-            console.error("Error getting location:", error);
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
+            .catch(error => console.error('Error loading polygons:', error));
+
+        // Function to check if the bus is inside a polygon
+        function getCurrentStop(lat, lng) {
+            for (let polygon of polygons) {
+                if (polygon.getBounds().contains([lat, lng])) {
+                    return polygon.route_name; // Return the route name of the polygon if the bus is inside
+                }
+            }
+            return "Unknown Location"; // Not inside any polygon
         }
-    );
-}
 
+        // Function to get the bus's live GPS location
+        function getBusLocation() {
+            if (navigator.geolocation) {
+                console.log("Geolocation is supported.");
+            } else {
+                console.log("Geolocation is NOT supported.");
+            }
 
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    let latitude = position.coords.latitude;
+                    let longitude = position.coords.longitude;
+                    let currentStop = getCurrentStop(latitude, longitude);
 
-    // Call function every 10 seconds to update location
-    setInterval(getBusLocation, 10000);
+                    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+                    console.log(`Current Stop: ${currentStop}`);
+                    fetch('../../actions/get_fare_routes.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ currentStop: currentStop })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Response Data:", data);
+                        if (data.error) {
+                            document.getElementById("location").innerText = data.error;
+                        } else {
+                            document.getElementById("fromRoute").innerText = JSON.stringify(data, null, 2);
+                            document.getElementById("fromRoute").style.display = 'none';
+                            document.getElementById("displayRouteName").innerText = data.route_name || "Route name not available";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        }
 
-    // Run the function once when the page loads
-    getBusLocation();
+        // Call function every 10 seconds to update location
+        setInterval(getBusLocation, 10000);
+
+        // Run the function once when the page loads
+        getBusLocation();
+
 
         const baseFare = <?php echo $base_fare; ?>;
         const additionalFare = <?php echo $additional_fare; ?>;
