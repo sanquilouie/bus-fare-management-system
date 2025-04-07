@@ -18,8 +18,6 @@ $driverac = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;  
 
 $conductorName = $firstname . ' ' . $lastname;
  
-
-
 // Fetch driver names from useracc where role is 'Driver'
 $drivers = [];
 $driverQuery = "SELECT account_number, firstname, lastname FROM useracc WHERE role = 'Driver'AND driverStatus = 'notdriving'";
@@ -282,12 +280,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['removeAllPassengers']))
 include '../../actions/bus_fare_config.php';
 
 $conn->close();
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -306,18 +302,13 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="/NewRam/assets/js/NFCScanner.js"></script>
-
-
 </head>
-
 <body>
-
-<?php
+    <?php
         include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
-    ?>
-        
+    ?>   
     <div id="main-content" class="container-fluid mt-5">
         <h2>Bus Fare Calculator</h2>
         <div class="row justify-content-center">
@@ -410,98 +401,121 @@ $conn->close();
         </div>
     </div>
     <script>
-
-// Function to fetch route and polygon data
-function getRouteData() {
-    return fetch('../../actions/load_polygon_to_busfare.php')
-        .then(response => response.json())
-        .then(data => {
-            return data; // Return the fetched data for further processing
-        })
-        .catch(error => console.error("Error fetching route data:", error));
-}
-
-// Function to check if a point is inside a polygon using the ray-casting algorithm
-function isInsidePolygon(lat, lng, polygon) {
-    let inside = false;
-    let x = lat, y = lng;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        let xi = polygon[i].lat, yi = polygon[i].lng;
-        let xj = polygon[j].lat, yj = polygon[j].lng;
-        let intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-    }
-    return inside;
-}
-
-function getBusLocation() {
-    if (navigator.geolocation) {
-        console.log("Geolocation is supported.");
-    } else {
-        console.log("Geolocation is NOT supported.");
+    function getRouteData() {
+        return fetch('../../actions/load_polygon_to_busfare.php')
+            .then(response => response.json())
+            .then(data => {
+                return data;
+            })
+            .catch(error => console.error("Error fetching route data:", error));
     }
 
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            let latitude = position.coords.latitude;
-            let longitude = position.coords.longitude;
+    function isInsidePolygon(lat, lng, polygon) {
+        let inside = false;
+        let x = lat, y = lng;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            let xi = polygon[i].lat, yi = polygon[i].lng;
+            let xj = polygon[j].lat, yj = polygon[j].lng;
+            let intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
 
-            getRouteData().then(stops => {
-                let currentStop = "Unknown Location";
+    function getBusLocation() {
+        if (navigator.geolocation) {
+            console.log("Geolocation is supported.");
+        } else {
+            console.log("Geolocation is NOT supported.");
+        }
 
-                for (let stop of stops) {
-                    if (stop.polygon && stop.polygon.length > 0) {
-                        let polygon = stop.polygon[0].map(coord => ({
-                            lat: parseFloat(coord.lat),
-                            lng: parseFloat(coord.lng)
-                        }));
-                        if (isInsidePolygon(latitude, longitude, polygon)) {
-                            currentStop = stop.route_name;
-                            break;
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                let latitude = position.coords.latitude;
+                let longitude = position.coords.longitude;
+
+                getRouteData().then(stops => {
+                    let currentStop = "Unknown Location";
+
+                    for (let stop of stops) {
+                        if (stop.polygon && stop.polygon.length > 0) {
+                            let polygon = stop.polygon[0].map(coord => ({
+                                lat: parseFloat(coord.lat),
+                                lng: parseFloat(coord.lng)
+                            }));
+                            if (isInsidePolygon(latitude, longitude, polygon)) {
+                                currentStop = stop.route_name;
+                                break;
+                            }
                         }
                     }
-                }
 
-                console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-                console.log(`Current Stop: ${currentStop}`);
+                    //console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+                    //console.log(`Current Stop: ${currentStop}`);
 
-                fetch('../../actions/get_fare_routes.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ currentStop: currentStop })
-                })
-                .then(response => response.json())
-                .then(data => {
+                    fetch('../../actions/get_fare_routes.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ currentStop: currentStop })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
                     console.log("Response Data:", data);
                     if (data.error) {
                         document.getElementById("fromRoute").innerText = {};
                         document.getElementById("fromRoute").style.display = 'none';
                         document.getElementById("displayRouteName").innerText = data.error;
                     } else {
+                        const routeName = data.route_name || "Route name not available";
+
                         document.getElementById("fromRoute").innerText = JSON.stringify(data, null, 2);
                         document.getElementById("fromRoute").style.display = 'none';
-                        document.getElementById("displayRouteName").innerText = data.route_name || "Route name not available";
+                        document.getElementById("displayRouteName").innerText = routeName;
+
+                        // Send the route name to the server to update the database
+                        fetch('../../actions/update_route.php', {  // Replace '/update_route.php' with the actual endpoint
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                route_name: routeName
+                            })
+                        })
+                        .then(response => {
+                            console.log('Raw response:', response);
+                            return response.json();  // This line may throw if response is not valid JSON
+                        })
+                        .then(responseData => {
+                            if (responseData.success) {
+                                console.log('Route name updated successfully!');
+                            } else {
+                                console.error('Failed to update route name.');
+                            }
+                        })
+                        .catch(error => console.error('Error updating route name:', error));
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                 });
-            });
-        },
-        (error) => {
-            console.error("Error getting location:", error);
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-        }
-    );
-}
-    setInterval(getBusLocation, 10000);
-    getBusLocation();
+
+                });
+            },
+            (error) => {
+                console.error("Error getting location:", error);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
+    }
+        setInterval(getBusLocation, 10000);
+        getBusLocation();
 
 
         const baseFare = <?php echo $base_fare; ?>;
@@ -578,7 +592,6 @@ function getBusLocation() {
                 const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>?dashboard=true', {
                     method: 'GET',
                 });
-
                 const data = await response.json();
                 if (data.status === 'success') {
                     updateDashboard(data);

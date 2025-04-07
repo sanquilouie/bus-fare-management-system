@@ -7,6 +7,7 @@ if (isset($_POST['bus_number']) && isset($_POST['driver_name'])) {
     $driver_account_number = $_SESSION['account_number']; // Ensure this is defined
     $bus_number = mysqli_real_escape_string($conn, $_POST['bus_number']);
     $driver_name = mysqli_real_escape_string($conn, $_POST['driver_name']);
+    $destination = mysqli_real_escape_string($conn, $_POST['direction']);
     $conductor_name = $_SESSION['firstname'] . ' ' . $_SESSION['lastname']; // Use session to get the conductor's name
     $email = $_SESSION['email']; // Ensure this is defined
 
@@ -23,7 +24,8 @@ if (isset($_POST['bus_number']) && isset($_POST['driver_name'])) {
     UPDATE businfo 
     SET driverName = '$driver_name', 
         conductorName = '$conductor_name', 
-        status = ' In Transit' 
+        status = ' In Transit',
+        destination  = '$destination' 
     WHERE bus_number = '$bus_number'
 ";
 echo "<script>console.log(" . json_encode($_SESSION) . ");</script>";
