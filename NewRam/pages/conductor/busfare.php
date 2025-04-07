@@ -271,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['removeAllPassengers']))
     exit;
 }
 
-include '../../actions/bus_fare_config.php';
+//include '../../actions/bus_fare_config.php';
 
 $conn->close();
 ?>
