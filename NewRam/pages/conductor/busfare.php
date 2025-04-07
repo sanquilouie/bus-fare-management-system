@@ -13,19 +13,15 @@ $bus_number = isset($_SESSION['bus_number']) ? $_SESSION['bus_number'] : 'Unknow
 $conductorac = isset($_SESSION['driver_account_number']) ? $_SESSION['driver_account_number'] : 'unknown conductor account number';
 $driverName = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : 'unknown driver name';
 $conductorName = isset($_SESSION['conductor_name']) ? $_SESSION['conductor_name'] : 'unknown conductor name';
-$driverac = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;  // Check if driver name is in session
-
+$driverac = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;
 
 $conductorName = $firstname . ' ' . $lastname;
  
-// Fetch driver names from useracc where role is 'Driver'
-$drivers = [];
-$driverQuery = "SELECT account_number, firstname, lastname FROM useracc WHERE role = 'Driver'AND driverStatus = 'notdriving'";
-$driverResult = $conn->query($driverQuery);
-
-while ($row = $driverResult->fetch_assoc()) {
-    $drivers[] = $row;
+if (!isset($bus_number) || !isset($driverac)) {
+    header("Location: set_bus.php");
+    exit();
 }
+
 
 // Fetch routes
 $routes = [];
@@ -52,7 +48,6 @@ if (!isset($_SESSION['passengers'])) {
 
 // Function to fetch balance based on RFID
 // Function to log passenger entry
-
 function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName,$driverac, $busNumber, $transactionNumber, $conn)
 {
     $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name,driver_name,bus_number, transaction_number) VALUES (?,?, ?, ?, ?, ?, ?, ?)";
@@ -61,6 +56,7 @@ function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName,$d
     $stmt->execute();
     $stmt->close();
 }
+
 function getUserBalance($rfid, $conn)
 {
     $query = "SELECT balance FROM useracc WHERE account_number = ?";
@@ -170,7 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['dashboard'])) {
     // Fetch passengers currently on board
     $passengers = $_SESSION['passengers'];
 
-    // Group passengers by destination and count them
     // Group passengers by destination and count them
     $destinationCount = [];
 
