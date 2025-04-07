@@ -44,6 +44,8 @@ window.onload = function() {
               '</form>',
         showCancelButton: false,
         confirmButtonText: 'Next',
+        backdrop: 'static',
+        allowOutsideClick: false,
         preConfirm: function() {
             return new Promise((resolve) => {
                 const selectedBus = document.getElementById('bus_number').value;
@@ -77,6 +79,8 @@ window.onload = function() {
                       '</select><br><br>',
                 showCancelButton: false,
                 confirmButtonText: 'Next',
+                backdrop: 'static',
+                allowOutsideClick: false,
                 preConfirm: function() {
                     return new Promise((resolve) => {
                         const selectedDriver = document.getElementById('driver_name').value;
@@ -109,6 +113,8 @@ window.onload = function() {
                               '</select><br><br>',
                         showCancelButton: false,
                         confirmButtonText: 'OK',
+                        backdrop: 'static',
+                        allowOutsideClick: false,
                         preConfirm: function() {
                             return new Promise((resolve) => {
                                 const selectedDirection = document.getElementById('direction').value;
