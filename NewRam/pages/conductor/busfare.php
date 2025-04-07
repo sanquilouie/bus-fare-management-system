@@ -22,7 +22,6 @@ if (!isset($bus_number) || !isset($driverac)) {
     exit();
 }
 
-
 // Fetch routes
 $routes = [];
 $query = "SELECT * FROM fare_routes";
@@ -305,7 +304,7 @@ $conn->close();
         include '../../includes/footer.php';
     ?>   
     <div id="main-content" class="container-fluid mt-5">
-        <h2>Bus Fare Calculator</h2>
+        <h2>Bus Fare Calculatorrr</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <form id="fareForm" class="mt-4">
