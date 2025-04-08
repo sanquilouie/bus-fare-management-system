@@ -19,9 +19,10 @@ $query = "SELECT
     c.lastname AS conductor_lastname, 
     c.account_number AS conductor_account_number,
     c.role AS loaded_by_role
-    FROM transactions t
+    FROM transactions t 
     JOIN useracc u ON t.user_id = u.id
     LEFT JOIN useracc c ON t.conductor_id = c.account_number
+    WHERE c.role = 'Cashier'
     ORDER BY t.transaction_date DESC
     LIMIT ? OFFSET ?";
 

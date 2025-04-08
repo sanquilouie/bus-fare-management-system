@@ -32,6 +32,7 @@ $menuItems = [
             'Transfer User Funds' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/admin/features/transfer_user_funds.php']
         ],
         'after' => [
+            'Load Transaction' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/admin/translogscon.php'],
             'Fare Update' => ['icon' => 'fa-arrow-up-1-9', 'url' => '/NewRam/pages/admin/fareupdate.php'],
             'Reg Bus Info' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/admin/businfo.php'],
             'View Bus Info' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/busviewinfo.php'],
