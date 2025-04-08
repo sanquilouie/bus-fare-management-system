@@ -70,7 +70,7 @@ if (!isset($_SESSION['account_number'])) {
                 <tbody>
                     <?php
                     // Query to get bus info where status = 'In Transit'
-                    $sql = "SELECT bus_number, plate_number, destination, current_stop FROM businfo WHERE status = ' In Transit'";
+                    $sql = "SELECT bus_number, plate_number, destination, current_stop FROM businfo WHERE status = 'assigned'";
                     $result = $conn->query($sql);
 
                     if ($result->num_rows > 0) {

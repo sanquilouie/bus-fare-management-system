@@ -83,6 +83,29 @@ function deductFare($rfid, $fare, $conn)
 
 // Handle the POST request to get the user balance and update balance after fare deduction
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['direction'])) {
+        $_SESSION['direction'] = $_POST['direction'];
+        $bus_number = $_SESSION['bus_number']; 
+    
+        $query = "UPDATE businfo 
+                  SET destination = ? 
+                  WHERE bus_number = ?";
+    
+        if ($stmt = $conn->prepare($query)) {
+            $stmt->bind_param("ss", $_SESSION['direction'], $bus_number);
+            if ($stmt->execute()) {
+                echo "Destination updated successfully.";
+            } else {
+                echo "Error updating destination: " . $stmt->error;
+            }
+            $stmt->close();
+        } else {
+            echo "Error preparing query: " . $db->error;
+        }
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+    
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (isset($data['fromRoute'], $data['toRoute'], $data['fareType'], $data['passengerQuantity'])) {
@@ -356,6 +379,19 @@ $conn->close();
                                 min="1" max="10">
                         </div>
                     </div>
+                    <div class="mb-3">
+                    <label for="direction" class="form-label">Direction</label>
+                    <select class="form-select" id="directionDropdown">
+                        <option disabled <?= !isset($_SESSION['direction']) ? 'selected' : '' ?>>Select Direction</option>
+                        <option value="East to West" <?= ($_SESSION['direction'] ?? '') === 'East to West' ? 'selected' : '' ?>>East to West</option>
+                        <option value="West to East" <?= ($_SESSION['direction'] ?? '') === 'West to East' ? 'selected' : '' ?>>West to East</option>
+                    </select>
+                </div>
+                </form>
+                
+
+                 <form id="directionForm" method="POST" style="display: none;">
+                    <input type="hidden" name="direction" id="directionInput">
                 </form>
                 <!-- Fare Result -->
 
@@ -396,6 +432,13 @@ $conn->close();
         </div>
     </div>
     <script>
+    document.getElementById('directionDropdown').addEventListener('change', function () {
+        const selected = this.value;
+        document.getElementById('directionInput').value = selected;
+        document.getElementById('directionForm').submit();
+    });
+
+
     function getRouteData() {
         return fetch('../../actions/load_polygon_to_busfare.php')
             .then(response => response.json())
