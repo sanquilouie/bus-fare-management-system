@@ -108,7 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 icon: 'success',
                 confirmButtonText: 'OK'
             }).then(() => {
-                window.location.href = '/Newram/pages/admin/register.php';
+                window.location.href = '/NewRam/pages/admin/register.php';
             });
         </script>
     <?php elseif ($error_message): ?>
