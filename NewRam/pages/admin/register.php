@@ -182,7 +182,7 @@ $lastname = $_SESSION['lastname'];
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="account_number" class="form-label">Account Number</label>
-                            <input type="text" class="form-control" id="account_number" name="account_number" readonly>
+                            <input type="text" class="form-control" id="account_number" name="account_number" required>
                         </div>
                         <input type="hidden" name="role" value="User">
                     </div>
