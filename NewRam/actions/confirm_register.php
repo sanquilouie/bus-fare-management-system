@@ -30,6 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $municipality_id = intval($_POST['municipality']);
     $barangay_id = intval($_POST['barangay']);
     $address = htmlspecialchars($_POST['address']);
+    $account_number = htmlspecialchars($_POST['account_number']);
     $role = 'User'; // Default role
     // Generate a random password
     $password = 'REDACTED_LEGACY_PASSWORD';
@@ -48,12 +49,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         try {
             $stmt = $conn->prepare("
                 INSERT INTO useracc 
-                (firstname, lastname, middlename, suffix, birthday, age, gender, email, contactnumber, province, municipality, barangay, address, password, balance, role) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (account_number, firstname, lastname, middlename, suffix, birthday, age, gender, email, contactnumber, province, municipality, barangay, address, password, balance, role) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $stmt->bind_param(
-                "ssssssisiiisssds",
+                "sssssssisiiisssds",
+                $account_number,
                 $firstname,
                 $lastname,
                 $middlename,

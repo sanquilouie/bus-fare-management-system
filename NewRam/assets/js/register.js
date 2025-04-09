@@ -116,24 +116,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            $('#account_number').on('input', function () {
-                var rfidValue = $(this).val();
-
-                if (rfidValue.length === 10) { // Adjust the length if needed
-                    Swal.fire({
-                        title: 'RFID Scanned!',
-                        text: 'Your RFID tag has been successfully scanned. Proceeding with registration...',
-                        icon: 'success',
-                        confirmButtonText: 'OK',
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Only submit the form after the user clicks 'OK'
-                            $('form').submit();
-                        }
-                    });
-                }
-            });
-
             // Birthday and age validation
             function calculateAge(birthday) {
                 let today = new Date();
