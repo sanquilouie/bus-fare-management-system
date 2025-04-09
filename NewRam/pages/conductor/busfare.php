@@ -331,13 +331,13 @@ $conn->close();
         <h2>Bus Fare Calculator</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
-            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <!--<div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                 <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
                 <label class="btn btn-outline-primary" for="btnradio1">Manual</label>
 
                 <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
                 <label class="btn btn-outline-primary" for="btnradio2">Auto</label>
-            </div>
+            </div> -->
                 <form id="fareForm" class="mt-4">
                     <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
                         <div class="card shadow-sm text-center p-3">
