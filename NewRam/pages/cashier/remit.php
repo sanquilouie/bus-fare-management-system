@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     $stmt = $conn->prepare("SELECT u.firstname, u.lastname, t.bus_number, SUM(t.amount) AS total_load
                             FROM useracc u
                             LEFT JOIN transactions t ON t.conductor_id = u.account_number
-                            WHERE u.account_number = ? GROUP BY u.account_number, t.bus_number");
+                            WHERE u.account_number = ? AND t.status != 'edited' GROUP BY u.account_number, t.bus_number");
     $stmt->bind_param("s", $rfid_scan);
     $stmt->execute();
     $stmt->bind_result($firstname, $lastname, $bus_number, $total_load);

@@ -1,9 +1,12 @@
 <?php
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require '../libraries/PHPMailer/src/PHPMailer.php';
+require '../libraries/PHPMailer/src/SMTP.php';
+require '../libraries/PHPMailer/src/Exception.php';
 
-include '../includes/connection.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+include "../includes/connection.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
@@ -23,7 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $account_number = $_POST['account_number'];
     $password = 'REDACTED_LEGACY_PASSWORD';
 
-
     $hashed_password = md5($password); // Hash the password
     $balance = 0; // Default balance
     $role = "User"; // Default role
@@ -36,7 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        // Email or contact number already exists
         echo "<script>alert('Email or contact number already registered.'); window.history.back();</script>";
         exit();
     }
@@ -44,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Insert new user into the database
     $stmt = $conn->prepare("INSERT INTO useracc (firstname, lastname, middlename, suffix, birthday, age, gender, email, contactnumber, province, municipality, barangay, address, password, balance, role, points) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    // Ensure you have 20 variables here
     $stmt->bind_param(
         "ssssssssiiiissdsd",
         $firstname,
@@ -67,6 +67,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     );
 
     if ($stmt->execute()) {
+        // Send confirmation email
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'portfolio@example.invalid'; // Your email
+            $mail->Password = 'REDACTED_SMTP_PASSWORD'; // App password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+            $mail->addAddress($email, $firstname . ' ' . $lastname);
+            $mail->isHTML(true);
+            $mail->Subject = 'Registration Received';
+            $mail->Body = "
+                <p>Hi $firstname,</p>
+                <p>Thank you for registering with Ramstar Bus Transportation.</p>
+                <p>Your account is pending activation. You will receive another email once it has been approved by the admin.</p>
+                <p>Best regards,<br>Ramstar Bus Transportation</p>
+            ";
+
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        }
+
         echo "<script>alert('Registration successful!'); window.location.href = 'login.php';</script>";
     } else {
         echo "<script>alert('Error: " . $stmt->error . "'); window.history.back();</script>";
@@ -76,6 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -261,7 +289,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="middlename" class="form-label">Middle Name</label>
-                    <input type="text" class="form-control" id="middlename" name="middlename">
+                    <input type="text" class="form-control" id="middlename" name="middlename" required>
                 </div>
                 <div class="col-md-6">
                     <label for="suffix" class="form-label">Suffix</label>
@@ -277,12 +305,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
 
             <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="birthday" class="form-label">
-                        Birthday <span class="text-danger">*</span>
-                    </label>
-                    <input type="date" class="form-control" id="birthday" name="birthday" required max="2017-12-31" />
-                </div>
+            <div class="col-md-6">
+                <label for="birthday" class="form-label">
+                    Birthday <span class="text-danger">*</span>
+                </label>
+                <input type="date" class="form-control" id="birthday" name="birthday" required />
+            </div>
                 <div class="col-md-6">
                     <label for="gender" class="form-label">Gender</label>
                     <select class="form-select" id="gender" name="gender" required>
@@ -296,7 +324,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" name="address" placeholder="Purok/Sitio/Street">
+                    <input type="text" class="form-control" id="address" name="address" placeholder="Purok/Sitio/Street" required>
                 </div>
                 <div class="col-md-6">
                     <label for="province" class="form-label">Province</label>
@@ -309,7 +337,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="municipality" class="form-label">Municipality</label>
-                    <select class="form-select" id="municipality" name="municipality">
+                    <select class="form-select" id="municipality" name="municipality" required> 
                         <option value="">-- Select Municipality --</option>
                     </select>
                 </div>
@@ -335,7 +363,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </label>
                     <div class="form-group d-flex">
                         <span class="border-end country-code px-2">+63</span>
-                        <input type="text" class="form-control" id="phone" name="contactnumber" placeholder="" maxlength="10" />
+                        <input type="text" class="form-control" id="phone" name="contactnumber" placeholder="" maxlength="10" required/>
                     </div>
                     <div id="contactError" class="invalid-feedback" style="display: none;"></div>
                 </div>
@@ -345,9 +373,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </form>
     </div>
-    <script src="js/main.js"></script>
-
-
 </body>
 <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -359,6 +384,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 });
             });
         });
+
+        document.getElementById("registrationForm").addEventListener("submit", function(e) {
+        e.preventDefault(); // Prevent form from submitting
+
+        Swal.fire({
+            title: 'Confirm Registration',
+            text: "Are you sure you want to submit this form?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, submit it!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.submit(); // Submit the form if confirmed
+            }
+        });
+    });
+
+    // Set max date so that user must be at least 7 years old
+    const birthdayInput = document.getElementById('birthday');
+    const today = new Date();
+    const year = today.getFullYear() - 10;
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const maxDate = `${year}-${month}-${day}`;
+
+    birthdayInput.max = maxDate;
 
         $(document).ready(function () {
             let confirmationShown = false; // To track confirmation dialog
@@ -433,67 +487,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $('#emailFeedback').remove();
                 }
             });
-
-
-
-            // Birthday and age validation
-            function calculateAge(birthday) {
-                let today = new Date();
-                let birthDate = new Date(birthday);
-                let age = today.getFullYear() - birthDate.getFullYear();
-                let monthDifference = today.getMonth() - birthDate.getMonth();
-                if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-                return age;
-            }
-
-            $('#birthday').change(function () {
-                let birthday = $(this).val();
-                if (birthday) {
-                    let age = calculateAge(birthday);
-                    $('#age').val(age);
-                }
-            });
-
-            $(document).ready(function () {
-                let confirmationShown = false; // To track confirmation dialog
-
-                // Define the form element
-                const form = $("form"); // or use $('#yourFormId') if your form has an ID
-
-                $('.register').click(function (event) {
-                    event.preventDefault(); // Prevent the default form submission
-
-                    if (!confirmationShown) {
-                        confirmationShown = true;
-
-                        Swal.fire({
-                            title: 'Confirm Registration?',
-                            text: "Are you sure you want to register?",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#cc0000',
-                            cancelButtonColor: '#d33',
-                            confirmButtonText: 'Yes, register!'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                form.submit(); // Now, submit the form
-                            }
-                        });
-                    }
-                });
-            });
         });
-
-        const today = new Date();
-        const sevenYearsAgo = new Date(today.setFullYear(today.getFullYear() - 7));
-
-        // Format the date as YYYY-MM-DD
-        const formattedDate = sevenYearsAgo.toISOString().split('T')[0];
-
-        // Set the minimum date in the input field
-        document.getElementById("birthday").setAttribute("min", formattedDate);
 
         $(document).ready(function () {
             // Load provinces on page load

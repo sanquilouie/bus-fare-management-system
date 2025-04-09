@@ -7,6 +7,11 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
     header("Location: ../index.php");
     exit();
 }
+
+
+// Fetch the remit logs from the database
+$query = "SELECT * FROM remit_logs ORDER BY remit_date DESC";
+$result = $conn->query($query);
 ?>
 
 <!DOCTYPE html>
@@ -48,7 +53,10 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <th>ID</th>
                                 <th>Bus No</th>
                                 <th>Conductor ID</th>
-                                <th>Total Net Amount</th>
+                                <th>Total Load</th>
+                                <th>Total Cash</th>
+                                <th>Total Deductions</th>
+                                <th>Net Amount</th>
                                 <th>Remit Date</th>
                                 <th>Created At</th>
                             </tr>
@@ -65,7 +73,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
     $(document).ready(function () {
         function loadRemitLogs(page = 1) {
             $.ajax({
-                url: '../../actions/fetch_remitlogs_admin.php', // Update this to your correct PHP file
+                url: '../../actions/fetch_remitlogs.php', // Update this to your correct PHP file
                 type: 'GET',
                 data: { page: page },
                 dataType: 'json',
@@ -83,10 +91,13 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                     remitLogs.forEach(log => {
                         tableBody.append(`
                             <tr>
-                                <td>${log.remit_id}</td>
+                                <td>${log.id}</td>
                                 <td>${log.bus_no}</td>
                                 <td>${log.conductor_id}</td>
-                                <td>${parseFloat(log.total_net_amount).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_load).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_cash).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_deductions).toFixed(2)}</td>
+                                <td>${parseFloat(log.net_amount).toFixed(2)}</td>
                                 <td>${log.remit_date}</td>
                                 <td>${log.created_at}</td>
                             </tr>
