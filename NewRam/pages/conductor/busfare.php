@@ -834,8 +834,6 @@ $conn->close();
             });
         }
 
-
-
         // Function to get user balance based on RFID (account_number)
         function processPayment(paymentType) {
             if (!validateRoutes()) {
@@ -971,6 +969,9 @@ $conn->close();
 
     Swal.fire({
         html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
+        showCancelButton: true,
+        confirmButtonText: 'Print Receipt',
+        cancelButtonText: 'Cancel',
         didClose: () => {
             if (window.AndroidPrinter) {
                 console.log("Printing receipt...");

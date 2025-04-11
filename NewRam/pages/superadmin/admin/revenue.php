@@ -80,7 +80,7 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
     <div id="main-content" class="container-fluid mt-5">
         <h2>Revenue Report</h2>
         <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-8 col-xl-8 col-xxl-8">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <form id="filterForm" method="POST">
                     <div class="row mb-3">
                         <div class="col-md-4">

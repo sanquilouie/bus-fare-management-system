@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     <div id="main-content" class="container-fluid mt-5">
         <h2>Conductor Remittance</h2>
         <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-8 col-xl-8 col-xxl-8">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <form id="remittanceForm" method="POST" action="">
                     <label for="rfid_scan" class="form-label">RFID Scan:</label>
                     <input type="text" class="form-control" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required

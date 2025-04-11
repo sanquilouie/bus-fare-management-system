@@ -46,7 +46,7 @@ $result = $conn->query($query);
     <div id="main-content" class="container-fluid mt-5">
         <h2>Remittance Logs</h2>
         <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-8 col-xl-8 col-xxl-8">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <?php if ($result->num_rows > 0): ?>
                     <table class="table table-bordered mt-4">

@@ -28,79 +28,19 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'User')) {
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+  .password-wrapper {
+    position: relative;
+  }
 
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            background-color: rgba(133, 187, 101);
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            transition: 0.2s;
-            z-index: 100000;
-        }
-
-        header.sticky {
-            padding: 10px 10px;
-            background: rgba(133, 187, 101, 0.8);
-        }
-
-        .logo {
-            margin-left: 10px;
-            width: 50px;
-            height: 45px;
-        }
-
-        .indicator {
-            display: none;
-            margin-top: 5px;
-        }
-
-        .indicator span {
-            display: inline-block;
-            width: 33%;
-            height: 5px;
-            margin-right: 2px;
-            background: lightgray;
-            border-radius: 5px;
-        }
-
-        .indicator .weak.active {
-            background: red;
-        }
-
-        .indicator .medium.active {
-            background: orange;
-        }
-
-        .indicator .strong.active {
-            background: green;
-        }
-
-        h4 {
-            color: black;
-        }
-
-        .btn-success {
-            background-color: #007BFF;
-            /* New background color */
-            color: white;
-            /* Text color */
-            border: none;
-            /* Optional: Remove border */
-        }
-
-        .btn-success:hover {
-            background-color: #0056b3;
-            /* Darker shade for hover effect */
-        }
-    </style>
+  .password-wrapper i {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+  }
+</style>
 </head>
 
 <script type="text/javascript">
@@ -196,42 +136,58 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'User')) {
     ?>
     <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-8 col-xl-8 col-xxl-8">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <h2>Update Password</h2>
                     <form id="updatePasswordForm" onsubmit="updatePassword(event)">
-                        <div class="form-group">
-                            <label for="pass2" class="form-label">Old Password</label>
-                            <input type="password" class="form-control" name="old_pass" id="pass2"
-                                placeholder="Old Password" required>
+                    <label for="pass2" class="form-label">Old Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" class="form-control" name="old_pass" id="pass2" placeholder="Old Password" required>
+                        <i class="fa-solid fa-eye" onclick="togglePassword('pass2', this)"></i>
+                    </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pass1" class="form-label">New Password</label>
+                        <div class="password-wrapper">
+                            <input onkeyup="trigger()" type="password" class="form-control" name="Password" id="pass1" placeholder="New Password" required>
+                            <i class="fa-solid fa-eye" onclick="togglePassword('pass1', this)"></i>
                         </div>
-                        <div class="form-group">
-                            <label for="pass1" class="form-label">New Password</label>
-                            <input onkeyup="trigger()" type="password" class="form-control" name="Password"
-                                id="pass1" placeholder="New Password" required>
-                            <div class="indicator">
-                                <span class="weak"></span>
-                                <span class="medium"></span>
-                                <span class="strong"></span>
-                            </div>
+                        <div class="indicator">
+                            <span class="weak"></span>
+                            <span class="medium"></span>
+                            <span class="strong"></span>
                         </div>
-                        <div class="form-group">
-                            <label for="pass3" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" name="PasswordConf" id="pass3"
-                                placeholder="Confirm Password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pass3" class="form-label">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" name="PasswordConf" id="pass3" placeholder="Confirm Password" required>
+                            <i class="fa-solid fa-eye" onclick="togglePassword('pass3', this)"></i>
                         </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" onclick="myFunction1()">
-                            <label class="form-check-label">Show Password</label>
-                        </div>
+                        
                         <div class="text-center">
                             <button type="submit" class="btn btn-success btn-block">Update Password</button>
                         </div>
                     </form>
-            </div>
+           
         </div>
     </div>
 
     <script type="text/javascript">
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+            } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+            }
+        }
+
         const indicator = document.querySelector(".indicator");
         const input = document.querySelector("#pass1");
         const weak = document.querySelector(".weak");

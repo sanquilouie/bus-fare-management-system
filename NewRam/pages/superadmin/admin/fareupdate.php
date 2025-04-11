@@ -95,7 +95,7 @@ $conn->close();
     <div id="main-content" class="container-fluid mt-5">
         <h2>Fare Settings</h2>
         <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-8 col-xl-8 col-xxl-8">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <form method="POST" class="mt-4">
                     <div class="row mb-3">
                         <div class="col-md-6">
