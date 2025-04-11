@@ -53,7 +53,7 @@ if (!isset($_SESSION['account_number'])) {
     ?>
 <div id="main-content" class="container-fluid mt-5">
     <div class="row justify-content-center">
-        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-8 col-xl-8 col-xxl-8">
             <h2>Bus Information - In Transit</h2>
             <p>Updating in <span id="timer">5</span> seconds...</p>
 
