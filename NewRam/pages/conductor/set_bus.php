@@ -23,6 +23,7 @@ while ($row = $driverResult->fetch_assoc()) {
     // Show the SweetAlert modal
     echo "
     <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script src='/NewRam/assets/js/NFCScanner.js'></script>
     <script>
     window.onload = function() {
         // Step 1: Select Bus
