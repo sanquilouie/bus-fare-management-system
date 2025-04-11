@@ -430,17 +430,17 @@ $(document).ready(function () {
         
         // Enable/disable the employee number field and show specific fields based on role
         if (role === "Driver") {
-            document.getElementById("driverFields").style.display = "block";
+            //document.getElementById("driverFields").style.display = "block";
             employeeNumberField.placeholder = "Auto generated";  
             employeeNumberField.value = "";  
             employeeNumberField.readOnly = true;  
         } else if (role === "Conductor") {
-            document.getElementById("conductorFields").style.display = "block";
+            //document.getElementById("conductorFields").style.display = "block";
             employeeNumberField.readOnly = false;
             employeeNumberField.placeholder = "Scan RFID Here";   
             employeeNumberField.value = ""; 
         } else if (role === "Cashier") {
-            document.getElementById("cashierFields").style.display = "block";
+            //document.getElementById("cashierFields").style.display = "block";
             employeeNumberField.placeholder = "Auto generated";  
             employeeNumberField.value = "";  
             employeeNumberField.readOnly = true;  
