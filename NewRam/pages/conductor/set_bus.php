@@ -60,34 +60,41 @@ while ($row = $driverResult->fetch_assoc()) {
     
                 // Step 2: Select Driver Name
                 Swal.fire({
-                    icon: 'question',
-                    title: 'Select Driver',
-                    html: '<select id=\"driver_name\" required style=\"' + 
-                          'width: 100%;' +
-                          'padding: 10px;' +
-                          'border: 2px solid #ddd;' +
-                          'border-radius: 5px;' +
-                          'font-size: 16px;' +
-                          'box-sizing: border-box;' +
-                          'background-color: #f9f9f9;' +
-                          '\" class=\"swal2-input\">' +
-                          '" . implode('', array_map(function($driver) {
-                              return "<option value=\"{$driver['firstname']} {$driver['lastname']} {$driver['account_number']}\">{$driver['firstname']} {$driver['lastname']}</option>";
-                          }, $drivers)) . "' +
-                          '</select><br><br>',
-                    showCancelButton: false,
-                    confirmButtonText: 'OK',
-                    preConfirm: function() {
-                        return new Promise((resolve) => {
-                            const selectedDriver = document.getElementById('driver_name').value;
-                            if (selectedDriver) {
-                                resolve(selectedDriver);
-                            } else {
-                                Swal.showValidationMessage('Please select a driver');
-                            }
-                        });
-                    }
-                }).then((result) => {
+            icon: 'question',
+            title: 'Enter or Scan Driver Account Number',
+            html: '<input id=\"driver_name\" required placeholder=\"Enter account number\" style=\"' +
+                'width: 85%;' +
+                'padding: 10px;' +
+                'border: 2px solid #ddd;' +
+                'border-radius: 5px;' +
+                'font-size: 16px;' +
+                'box-sizing: border-box;' +
+                'background-color: #f9f9f9;\" class=\"swal2-input\">' +
+                '<input type=\"hidden\" id=\"driver_fullname\" value=\"\">',
+            showCancelButton: false,
+            confirmButtonText: 'OK',
+            preConfirm: async function () {
+                const accountNumber = document.getElementById('driver_name').value;
+
+                if (!accountNumber) {
+                    Swal.showValidationMessage('Please enter an account number');
+                    return false;
+                }
+
+                const drivers = " . json_encode($drivers) . ";
+                const match = drivers.find(driver => driver.account_number === accountNumber);
+
+                if (!match) {
+                    Swal.showValidationMessage('No driver found with that account number');
+                    return false;
+                }
+
+                document.getElementById('driver_fullname').value = match.firstname + ' ' + match.lastname;
+
+                return match.firstname + ' ' + match.lastname;
+            }
+
+        }).then((result) => {
                     if (result.isConfirmed) {
                         const selectedDriver = result.value;
     
