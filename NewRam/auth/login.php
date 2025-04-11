@@ -69,21 +69,20 @@ if (isset($_POST['Login'])) {
 
             // Trigger SweetAlert2 for successful login using JavaScript
             echo "
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        Swal.fire({
-            title: 'Login Successfully',
-            text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
-            icon: 'success',
-            showConfirmButton: false,
-            timer: 1000
-        }).then((result) => {
-            window.location.href = '" . getRedirectURL($row['role']) . "';
-        });
-    });
-    </script>";
-
+            <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+            <script>
+            document.addEventListener('DOMContentLoaded', function () {
+               Swal.fire({
+                     title: 'Login Successfully',
+                     text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
+                     icon: 'success',
+                     showConfirmButton: false,
+                     timer: 1000
+               }).then((result) => {
+                     window.location.href = '" . getRedirectURL($row['role']) . "';
+               });
+            });
+            </script>";
             exit;
          }
       } else {
@@ -99,7 +98,6 @@ if (isset($_POST['Login'])) {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
