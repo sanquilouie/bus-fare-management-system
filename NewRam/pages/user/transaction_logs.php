@@ -31,19 +31,20 @@ $totalPages = ceil($totalTransactions / $limit); // Total number of pages
 // Fetch transactions for the logged-in user with pagination
 function fetchTransactions($conn, $accountNumber, $limit, $offset)
 {
-    $transactionQuery = "
-    SELECT t.id, u.firstname, u.lastname, u.account_number, t.amount, t.transaction_type, t.transaction_date, t.conductor_id, c.firstname AS conductor_firstname, c.lastname AS conductor_lastname
-    FROM transactions t
-    JOIN useracc u ON t.user_id = u.id
-    LEFT JOIN useracc c ON t.conductor_id = c.account_number  -- Joining useracc for conductor details
-    WHERE u.account_number = '$accountNumber'
-    ORDER BY t.transaction_date DESC
-    LIMIT $limit OFFSET $offset";
+    $query = "
+    SELECT 
+        rfid AS account_number,
+        fare AS amount,
+        transaction_number AS transaction_number,
+        timestamp AS transaction_time,
+        conductor_name AS loaded_by
+    FROM passenger_logs
+    WHERE rfid = '$accountNumber'
+    ORDER BY timestamp DESC
+    LIMIT $limit OFFSET $offset
+    ";
 
-
-
-
-    return mysqli_query($conn, $transactionQuery);
+    return mysqli_query($conn, $query);
 }
 
 $transactions = fetchTransactions($conn, $accountNumber, $limit, $offset);
@@ -86,10 +87,9 @@ $transactions = fetchTransactions($conn, $accountNumber, $limit, $offset);
                     <thead class="thead-light">
                         <tr>
                             <th>Account Number</th>
-                            <th>User Name</th>
                             <th>Amount</th>
-                            <th>Transaction Type</th>
                             <th>Transaction Time</th>
+                            <th>Transaction Number</th>
                             <th>Loaded By</th>
                         </tr>
                     </thead>
@@ -97,14 +97,11 @@ $transactions = fetchTransactions($conn, $accountNumber, $limit, $offset);
                         <?php if (mysqli_num_rows($transactions) > 0): ?>
                             <?php while ($row = mysqli_fetch_assoc($transactions)): ?>
                                 <tr>
-                                    <td><?php echo $row['account_number']; ?></td>
-                                    <td><?php echo htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['account_number']); ?></td>
                                     <td><?php echo number_format($row['amount'], 2); ?></td>
-                                    <td><?php echo htmlspecialchars(ucfirst($row['transaction_type'])); ?></td>
-                                    <td><?php echo date('Y-m-d H:i:s', strtotime($row['transaction_date'])); ?></td>
-                                    <td><?php echo htmlspecialchars($row['conductor_firstname'] . ' ' . $row['conductor_lastname']); ?>
-                                    </td>
-
+                                    <td><?php echo date('Y-m-d H:i:s', strtotime($row['transaction_time'])); ?></td>
+                                    <td><?php echo htmlspecialchars($row['transaction_number']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['loaded_by']); ?></td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>

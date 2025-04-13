@@ -29,7 +29,7 @@ if (isset($_POST['bus_number']) && isset($_POST['driver_name'])) {
 
     if (mysqli_query($conn, $update_bus_data)) {
         // Redirect to the conductor dashboard or another page after saving
-        header("Location: /NewRam/pages/conductor/busfare.php");
+        header("Location: /NewRam/pages/conductor/busfare_auto.php");
         exit();
     } else {
         // Handle database error
