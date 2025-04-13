@@ -331,13 +331,15 @@ $conn->close();
         <h2>Bus Fare Calculator</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
-            <!--<div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-                <label class="btn btn-outline-primary" for="btnradio1">Manual</label>
+                <div class="text-center">
+                    <div class="btn-group mx-auto" role="group" aria-label="Basic radio toggle button group">
+                        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btnradio1" onclick="window.location.href='busfare_manual.php'">Manual</label>
 
-                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                <label class="btn btn-outline-primary" for="btnradio2">Auto</label>
-            </div> -->
+                        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="btnradio2" onclick="window.location.href='busfare_auto.php'" checked>Auto</label>
+                    </div>
+                </div>
                 <form id="fareForm" class="mt-4">
                     <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
                         <div class="card shadow-sm text-center p-3">
@@ -348,6 +350,14 @@ $conn->close();
                             <h5 class="form-label mb-2" style="color: #007BFF;">Total Fare (₱)</h5>
                             <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="direction" class="form-label">Direction</label>
+                        <select class="form-select" id="directionDropdown">
+                            <option disabled <?= !isset($_SESSION['direction']) ? 'selected' : '' ?>>Select Direction</option>
+                            <option value="East to West" <?= ($_SESSION['direction'] ?? '') === 'East to West' ? 'selected' : '' ?>>East to West</option>
+                            <option value="West to East" <?= ($_SESSION['direction'] ?? '') === 'West to East' ? 'selected' : '' ?>>West to East</option>
+                        </select>
                     </div>
                     <!-- Route Selection -->
                     <div class="row mb-3">
@@ -386,14 +396,6 @@ $conn->close();
                                 min="1" max="10">
                         </div>
                     </div>
-                    <div class="mb-3">
-                    <label for="direction" class="form-label">Direction</label>
-                    <select class="form-select" id="directionDropdown">
-                        <option disabled <?= !isset($_SESSION['direction']) ? 'selected' : '' ?>>Select Direction</option>
-                        <option value="East to West" <?= ($_SESSION['direction'] ?? '') === 'East to West' ? 'selected' : '' ?>>East to West</option>
-                        <option value="West to East" <?= ($_SESSION['direction'] ?? '') === 'West to East' ? 'selected' : '' ?>>West to East</option>
-                    </select>
-                </div>
                 </form>
                 
 
