@@ -25,7 +25,7 @@ if (!isset($bus_number) || !isset($driverac)) {
 
 // Fetch routes
 $routes = [];
-$query = "SELECT * FROM fare_routes";
+$query = "SELECT * FROM fare_routes ORDER BY post ASC";
 $result = $conn->query($query);
 $balance = 0;
 
