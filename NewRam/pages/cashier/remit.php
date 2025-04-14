@@ -75,10 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
         <h2>Conductor Remittance</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
-                <form id="remittanceForm" method="POST" action="">
+                <form id="remittanceForm" method="POST" action="" onsubmit="return showPreview(event)">
                     <label for="rfid_scan" class="form-label">RFID Scan:</label>
-                    <input type="text" class="form-control" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required
-                        value="<?= htmlspecialchars($rfid_scan) ?>" class="form-label" oninput="fetchDetails()">>
+                    <input type="text" class="form-control" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required onkeydown="handleRFIDKey(event)"
+                        value="<?= htmlspecialchars($rfid_scan) ?>" class="form-label">
 
                     <label for="bus_no" class="form-label">Bus No:</label>
                     <input type="text" class="form-control" id="bus_no" name="bus_no" required value="<?= htmlspecialchars($bus_number) ?>" readonly>
@@ -97,10 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                         </div>
                         <div id="deductions" style="display: none; margin-top: 10px;">
                             <h3>Deductions</h3>
-                            <div class="deduction-row">
-                                <input type="text" class="form-control" name="deduction_desc[]" placeholder="Description">
-                                <input type="number" class="form-control" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)">
-                            </div>
+
                             <div class="text-center mt-1">
                                 <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
                             </div>
@@ -118,6 +115,72 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
         </div>
     </div>
     <script>
+        function showPreview(event) {
+            event.preventDefault(); // Prevent actual form submission
+
+            // Get all the form values
+            const rfid = document.getElementById('rfid_scan').value;
+            const busNo = document.getElementById('bus_no').value;
+            const conductorName = document.getElementById('conductor_name').value;
+            const totalLoad = document.getElementById('total_load').value;
+            const netAmount = document.getElementById('net_amount').value;
+
+            // Gather deductions (if any)
+            const deductions = [];
+            const descs = document.querySelectorAll('input[name="deduction_desc[]"]');
+            const amounts = document.querySelectorAll('input[name="deduction_amount[]"]');
+
+            for (let i = 0; i < descs.length; i++) {
+                const desc = descs[i].value.trim();
+                const amount = amounts[i].value.trim();
+                if (desc || amount) {
+                    deductions.push(`${desc || 'No Description'}: ₱${amount || '0.00'}`);
+                }
+            }
+
+            // Create the preview message
+            let html = `
+                <strong>RFID:</strong> ${rfid}<br>
+                <strong>Bus No:</strong> ${busNo}<br>
+                <strong>Conductor:</strong> ${conductorName}<br>
+                <strong>Total Load:</strong> ₱${totalLoad}<br>
+            `;
+
+            if (deductions.length) {
+                html += `<strong>Deductions:</strong><br><ul>`;
+                deductions.forEach(d => {
+                    html += `<li>${d}</li>`;
+                });
+                html += `</ul>`;
+            }
+
+            html += `<strong>Net Amount:</strong> ₱${netAmount}`;
+
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Confirm Remittance?',
+                html: html,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Submit',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('remittanceForm').submit();
+                }
+            });
+
+            return false;
+        }
+
+        function handleRFIDKey(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("remittanceForm").onsubmit = null; // Bypass the Swal preview temporarily
+                document.getElementById("remittanceForm").submit();     
+            }
+        }
+
         document.getElementById('toggleDeductions').addEventListener('click', function () {
             const deductions = document.getElementById('deductions');
             if (deductions.style.display === 'none') {
@@ -133,9 +196,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
             const deductionRow = document.createElement('div');
             deductionRow.classList.add('deduction-row');
             deductionRow.innerHTML = `
-                <input type="text" name="deduction_desc[]" placeholder="Description">
-                <input type="number" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)" class="deduction-amount">
+                <div class="row g-2">
+                    <div class="col-7">
+                        <input type="text" class="form-control" name="deduction_desc[]" placeholder="Description">
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control deduction-amount" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)">
+                    </div>
+                </div>
             `;
+
             document.getElementById('deductions').appendChild(deductionRow);
         });
 

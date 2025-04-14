@@ -1,3 +1,9 @@
+<?php
+include 'NewRam/includes/connection.php';
+
+// Get all active features for the slider
+$sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -343,15 +349,17 @@
 
     <section class="hero">
         <div class="slider">
-            <div class="slide active">
-                <img src="NewRam/assets/images/slider4.png" alt="Slide 1" loading="lazy">
-            </div>
-            <div class="slide">
-                <img src="NewRam/assets/images/slider2.jpg" alt="Slide 2" loading="lazy">
-            </div>
-            <div class="slide">
-                <img src="NewRam/assets/images/slider3.jpg" alt="Slide 3" loading="lazy">
-            </div>
+            <?php
+            $isFirst = true;
+            while ($row = $sliderFeatures->fetch_assoc()):
+            ?>
+                <div class="slide <?= $isFirst ? 'active' : '' ?>">
+                    <img src="NewRam/assets/images/<?= $row['image'] ?>" alt="<?= htmlspecialchars($row['title']) ?>" loading="lazy">
+                </div>
+            <?php
+            $isFirst = false;
+            endwhile;
+            ?>
 
             <div class="navigation">
                 <button id="prev">&#10094;</button>

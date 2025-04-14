@@ -37,6 +37,7 @@ $menuItems = [
             'Reg Bus Info' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/admin/businfo.php'],
             'View Bus Info' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/busviewinfo.php'],
             'Feedbacks' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/feedbackview.php'],
+            'Settings' => ['icon' => 'fa-cog', 'url' => '/NewRam/pages/admin/settings.php'],
         ]
     ],
     'Conductor' => [
@@ -100,11 +101,12 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
 }
 
 .sidebar {
-    z-index: 100;
+    z-index: 1001;
     width: 300px;
     background: #ffffff;
     border-right: 1px solid #e5e7eb;
-    height: 100vh;
+    height: calc(100vh - 60px); /* Adjust height to account for top bar */
+    overflow-y: auto;
     position: fixed;
     left: 0;
     top: 60px;
