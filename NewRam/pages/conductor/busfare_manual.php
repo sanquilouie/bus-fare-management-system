@@ -40,6 +40,7 @@ $fareSettings = $fareSettingsResult->fetch_assoc();
 
 
 $discountPercentage = $fareSettings['discount_percentage']; // Fetch discount percentage
+$specialPercentage = $fareSettings['special_percentage'];
 
 // Store passengers in a session to track those currently on the bus
 if (!isset($_SESSION['passengers'])) {
@@ -138,10 +139,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Calculate total fare with passenger quantity
         $totalFare = $fare * $passengerQuantity;
 
-        // Apply discount if applicable
        // Apply discount if applicable
 if ($fareType === 'discounted') {
     $totalFare *= (1 - ($discountPercentage / 100)); // Apply the discount based on the fetched percentage
+}else if($fareType === 'special'){
+    $totalFare *= (1 - ($specialPercentage / 100));
 }
 
         if (empty($rfid)) { // Check if payment is made in cash
@@ -392,6 +394,7 @@ $conn->close();
                             <select id="fareType" name="fareType" class="form-select">
                                 <option value="regular">Regular</option>
                                 <option value="discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
+                                <option value="special">Special (<?= htmlspecialchars($specialPercentage); ?>% Off)</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -510,6 +513,8 @@ $conn->close();
                     const fareType = document.getElementById('fareType').value;
                     if (fareType === 'discounted') {
                         totalFare *= 0.8; // Apply 20% discount
+                    } else if (fareType === 'special'){
+                        totalFare *= 0.5;
                     }
 
                     // Calculate total fare with passenger quantity
