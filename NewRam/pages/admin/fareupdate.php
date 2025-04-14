@@ -20,11 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $baseFare = $_POST['base_fare'];
     $additionalFare = $_POST['additional_fare'];
     $discountPercentage = $_POST['discount_percentage']; // Get the discount percentage
+    $specialPercentage = $_POST['special_percentage'];
 
     // Update the fare settings in the database
-    $updateQuery = "UPDATE fare_settings SET base_fare = ?, additional_fare = ?, discount_percentage = ? WHERE id = 1";
+    $updateQuery = "UPDATE fare_settings SET base_fare = ?, additional_fare = ?, discount_percentage = ?, special_percentage = ? WHERE id = 1";
     $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param("ddd", $baseFare, $additionalFare, $discountPercentage); // Bind all three parameters
+    $stmt->bind_param("dddd", $baseFare, $additionalFare, $discountPercentage, $specialPercentage); // Bind all three parameters
     $stmt->execute();
     $stmt->close();
 
@@ -130,6 +131,11 @@ $conn->close();
                             <label for="discount_percentage" class="form-label">Discount Percentage (%)</label>
                             <input type="number" id="discount_percentage" name="discount_percentage" class="form-control" placeholder="20.00"
                                 step="0.01" value="<?= htmlspecialchars($fareSettings['discount_percentage']) ?>" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="special_percentage" class="form-label">Special Percentage (%)</label>
+                            <input type="number" id="special_percentage" name="special_percentage" class="form-control" placeholder="50.00"
+                                step="0.01" value="<?= htmlspecialchars($fareSettings['special_percentage']) ?>" required>
                         </div>
                     </div>
 
