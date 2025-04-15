@@ -1,0 +1,7 @@
+{
+    "name": "newram/escpos-demo",
+    "description": "ESCPOS for Remit",
+    "require": {
+        "mike42/escpos-php": "^2.2"
+    }
+}

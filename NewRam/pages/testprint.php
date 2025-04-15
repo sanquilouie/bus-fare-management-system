@@ -1,10 +1,15 @@
 <?php
 require_once '../libraries/vendor/autoload.php';
 
-use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\Printer;
-$connector = new FilePrintConnector("php://stdout");
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+
+// Replace this with your printer share name
+$connector = new WindowsPrintConnector("POS58");
+
 $printer = new Printer($connector);
-$printer -> text("Hello World!\n");
-$printer -> cut();
-$printer -> close();
+
+$printer->text("Hello, printer!\n");
+$printer->cut();
+$printer->close();
+?>
