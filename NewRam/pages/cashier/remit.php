@@ -24,10 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
 
     // 1. Get conductor name and total load from transactions
     $stmt = $conn->prepare("SELECT u.firstname, u.lastname, SUM(t.amount) AS total_load
-                            FROM useracc u
-                            LEFT JOIN transactions t ON t.conductor_id = u.account_number
-                            WHERE u.account_number = ? AND t.status != 'edited'
-                            GROUP BY u.account_number");
+                                FROM useracc u
+                                LEFT JOIN transactions t ON t.conductor_id = u.account_number
+                                WHERE u.account_number = ? AND t.status NOT IN ('edited', 'remitted')
+                                GROUP BY u.account_number;
+                                ");
     $stmt->bind_param("s", $rfid_scan);
     $stmt->execute();
     $stmt->bind_result($firstname, $lastname, $total_load);
@@ -202,10 +203,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('remittanceForm').submit();
+                    // Send data to the backend for printing
+                    fetch('../../actions/print_remit.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            rfid: rfid,
+                            bus_no: busNo,
+                            conductor_name: conductorName,
+                            total_fare: totalFare,
+                            total_load: totalLoad,
+                            net_amount: netAmount,
+                            deductions: deductions
+                        })
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log(data);
+                        // Optionally submit form afterward
+                        document.getElementById('remittanceForm').submit();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Could not print the receipt.', 'error');
+                    });
                 }
             });
-
             return false;
         }
 

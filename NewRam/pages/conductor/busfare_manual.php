@@ -19,14 +19,12 @@ $conductorName = isset($_SESSION['conductor_name']) ? $_SESSION['conductor_name'
 $driverac = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;
 $driverID = isset($_SESSION['driver_account_number']) ? $_SESSION['driver_account_number'] : null;
 
-
 $conductorName = $firstname . ' ' . $lastname;
  
-if (!isset($bus_number) || !isset($driverac)) {
+if (!isset($bus_number) || !isset($driverID)) {
     header("Location: set_bus.php");
     exit();
 }
-
 
 // Fetch routes
 $routes = [];
