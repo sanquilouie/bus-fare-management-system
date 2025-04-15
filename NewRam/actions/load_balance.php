@@ -18,7 +18,7 @@ function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
     $id = $result->fetch_assoc()['id'] ?? null;
 
     // Fetch session variables for bus_number and conductor_id
-    $busNumber = 'Cashier';
+    $busNumber = isset($_SESSION['bus_number']) ? $_SESSION['bus_number'] : 'Unknown Bus Number';
     $conductorId = isset($_SESSION['account_number']) ? $_SESSION['account_number'] : null;
 
     // Sanitize inputs

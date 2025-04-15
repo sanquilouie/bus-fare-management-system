@@ -1,5 +1,8 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 include '../../includes/connection.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Conductor' && $_SESSION['role'] != 'Superadmin')) {
@@ -10,10 +13,12 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Conductor' && $_SESSION
 $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
 $bus_number = isset($_SESSION['bus_number']) ? $_SESSION['bus_number'] : 'Unknown Bus Number';
-$conductorac = isset($_SESSION['driver_account_number']) ? $_SESSION['driver_account_number'] : 'unknown conductor account number';
+$conductorac = isset($_SESSION['account_number']) ? $_SESSION['account_number'] : 'unknown conductor account number';
 $driverName = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : 'unknown driver name';
 $conductorName = isset($_SESSION['conductor_name']) ? $_SESSION['conductor_name'] : 'unknown conductor name';
 $driverac = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;
+$driverID = isset($_SESSION['driver_account_number']) ? $_SESSION['driver_account_number'] : null;
+
 
 $conductorName = $firstname . ' ' . $lastname;
  
@@ -49,11 +54,11 @@ if (!isset($_SESSION['passengers'])) {
 
 // Function to fetch balance based on RFID
 // Function to log passenger entry
-function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName,$driverac, $busNumber, $transactionNumber, $conn)
+function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac,$driverID, $busNumber, $transactionNumber, $conn)
 {
-    $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name,driver_name,bus_number, transaction_number) VALUES (?,?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name, conductor_id,driver_name,driver_id,bus_number, transaction_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssssss", $rfid, $fromRoute, $toRoute, $fare, $conductorName,$driverac, $busNumber, $transactionNumber);
+    $stmt->bind_param("ssssssssss", $rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac,$driverID, $busNumber, $transactionNumber);
     $stmt->execute();
     $stmt->close();
 }
@@ -167,7 +172,7 @@ if ($fareType === 'discounted') {
             ];
 
             $loggedRfid = !empty($rfid) ? $rfid : 'cash'; // Use 'cash' if payment is made in cash
-            logPassengerEntry($loggedRfid, $fromRoute['route_name'], $toRoute['route_name'], $totalFare, $conductorName,$driverac, $bus_number, $transactionNumber, $conn);
+            logPassengerEntry($loggedRfid, $fromRoute['route_name'], $toRoute['route_name'], $totalFare, $conductorName, $conductorac, $driverac,$driverID, $bus_number, $transactionNumber, $conn);
 
             echo json_encode([
                 'status' => 'success',

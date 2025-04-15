@@ -22,24 +22,54 @@ $rfid_scan = ''; // Initialize the RFID variable
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     $rfid_scan = $_POST['rfid_scan'];
 
-    // Fetch the conductor details and bus number based on RFID scan
-    $stmt = $conn->prepare("SELECT u.firstname, u.lastname, t.bus_number, SUM(t.amount) AS total_load
+    // 1. Get conductor name and total load from transactions
+    $stmt = $conn->prepare("SELECT u.firstname, u.lastname, SUM(t.amount) AS total_load
                             FROM useracc u
                             LEFT JOIN transactions t ON t.conductor_id = u.account_number
-                            WHERE u.account_number = ? AND t.status != 'edited' GROUP BY u.account_number, t.bus_number");
+                            WHERE u.account_number = ? AND t.status != 'edited'
+                            GROUP BY u.account_number");
     $stmt->bind_param("s", $rfid_scan);
     $stmt->execute();
-    $stmt->bind_result($firstname, $lastname, $bus_number, $total_load);
+    $stmt->bind_result($firstname, $lastname, $total_load);
+
     if ($stmt->fetch()) {
-        $conductor_name = $firstname . ' ' . $lastname; // Combine first and last name
+        $conductor_name = $firstname . ' ' . $lastname;
     } else {
-        // If RFID not found, reset values
         $conductor_name = "Unknown Conductor";
-        $bus_number = "No Bus Assigned";
         $total_load = 0;
     }
     $stmt->close();
+
+    $stmt_bus = $conn->prepare("SELECT bus_number 
+                                FROM passenger_logs 
+                                WHERE conductor_id = ? 
+                                AND status = 'notremitted'");
+    $stmt_bus->bind_param("s", $rfid_scan);
+    $stmt_bus->execute();
+    $stmt_bus->bind_result($bus_number);
+    $stmt_bus->fetch();
+    $stmt_bus->close();
+
+    if (!$bus_number) {
+        $bus_number = "No Bus Assigned";
+    }
+    $stmt2 = $conn->prepare("SELECT SUM(fare) AS total_fare 
+                             FROM passenger_logs 
+                             WHERE conductor_id = ? 
+                             AND bus_number = ? 
+                             AND rfid = 'cash' 
+                             AND DATE(timestamp) = CURDATE()");
+    $stmt2->bind_param("ss", $rfid_scan, $bus_number);
+    $stmt2->execute();
+    $stmt2->bind_result($total_fare);
+    $stmt2->fetch();
+    $stmt2->close();
+
+    if (!$total_fare) {
+        $total_fare = 0;
+    }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -87,6 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                     <input type="text" class="form-control" id="conductor_name" name="conductor_name" required
                         value="<?= htmlspecialchars($conductor_name) ?>" readonly>
 
+                    <label for="total_fare" class="form-label">Total Fare (₱):</label>
+                    <input type="number" class="form-control" id="total_fare" name="total_fare" step="0.01" readonly
+                        value="<?= htmlspecialchars($total_fare) ?>">
+
                     <label for="total_load" class="form-label">Total Load (₱):</label>
                     <input type="number" class="form-control" id="total_load" name="total_load" step="0.01" readonly
                         value="<?= htmlspecialchars($total_load) ?>">
@@ -106,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
 
                     <label for="net_amount" class="form-label">Net Amount (₱):</label>
                     <input type="number" class="form-control" id="net_amount" name="net_amount" step="0.01" readonly
-                        value="<?= htmlspecialchars($total_load) ?>">
+                        value="<?= htmlspecialchars($total_load + $total_fare) ?>">
                         <div class="text-center mt-1">
                             <button type="submit" name="generate_remittance" id="remitButton" class="btn btn-primary w-100">Generate Remittance</button>
                         </div>
@@ -122,7 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
             const rfid = document.getElementById('rfid_scan').value;
             const busNo = document.getElementById('bus_no').value;
             const conductorName = document.getElementById('conductor_name').value;
-            const totalLoad = document.getElementById('total_load').value;
+            const totalFare = document.getElementById('total_fare').value;
+            const totalLoad = document.getElementById('total_load').value; 
             const netAmount = document.getElementById('net_amount').value;
 
             // Gather deductions (if any)
@@ -143,6 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                 <strong>RFID:</strong> ${rfid}<br>
                 <strong>Bus No:</strong> ${busNo}<br>
                 <strong>Conductor:</strong> ${conductorName}<br>
+                <strong>Total Fare:</strong> ₱${totalFare}<br>
                 <strong>Total Load:</strong> ₱${totalLoad}<br>
             `;
 
@@ -212,6 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
         document.getElementById('remittanceForm').addEventListener('input', function (event) {
             if (event.target.classList.contains('deduction-amount')) {
                 let totalLoad = parseFloat(document.getElementById('total_load').value) || 0;
+                let totalFare = parseFloat(document.getElementById('total_fare').value) || 0;
                 let totalDeductions = 0;
 
                 document.querySelectorAll('.deduction-amount').forEach(function (deductionInput) {
@@ -221,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                     }
                 });
 
-                document.getElementById('net_amount').value = (totalLoad - totalDeductions).toFixed(2);
+                document.getElementById('net_amount').value = (totalFare + totalLoad - totalDeductions).toFixed(2);
             }
         });
     </script>

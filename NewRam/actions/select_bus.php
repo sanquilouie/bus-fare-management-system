@@ -1,10 +1,12 @@
 <?php
 session_start();
+
 include "../includes/connection.php";
 
 if (isset($_POST['bus_number']) && isset($_POST['driver_name'])) {
     // Get the selected bus number and driver name
-    $driver_account_number = $_SESSION['account_number']; // Ensure this is defined
+    $conductor_account_number = $_SESSION['account_number'];
+    $driver_account_number = $_SESSION['driver_account_number']; // Ensure this is defined
     $bus_number = mysqli_real_escape_string($conn, $_POST['bus_number']);
     $driver_name = mysqli_real_escape_string($conn, $_POST['driver_name']);
     $conductor_name = $_SESSION['firstname'] . ' ' . $_SESSION['lastname']; // Use session to get the conductor's name
@@ -12,7 +14,7 @@ if (isset($_POST['bus_number']) && isset($_POST['driver_name'])) {
 
     // Update session with the bus number, driver name, and conductor name
     $_SESSION['bus_number'] = $bus_number;
-    $_SESSION['driver_account_number'] = $driver_account_number; // Set the driver account number
+    $_SESSION['conductor_account_number'] = $conductor_account_number; // Set the driver account number
     $_SESSION['driver_name'] = $driver_name;
     $_SESSION['conductor_name'] = $conductor_name;
     $_SESSION['conductor_number'] = $conductor_account_number; // Ensure this is defined
@@ -22,7 +24,9 @@ if (isset($_POST['bus_number']) && isset($_POST['driver_name'])) {
     $update_bus_data = "
     UPDATE businfo 
     SET driverName = '$driver_name', 
-        conductorName = '$conductor_name', 
+        conductorName = '$conductor_name',
+        driverID = '$driver_account_number',
+        conductorID = '$conductor_account_number', 
         status = 'assigned' 
     WHERE bus_number = '$bus_number'
 ";

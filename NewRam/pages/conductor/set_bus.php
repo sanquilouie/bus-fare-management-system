@@ -90,10 +90,20 @@ while ($row = $driverResult->fetch_assoc()) {
                     return false;
                 }
 
+                // Send account number to PHP via POST
+                await fetch('../../actions/store_driver_session.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ account_number: accountNumber })
+                });
+
                 document.getElementById('driver_fullname').value = match.firstname + ' ' + match.lastname;
 
                 return match.firstname + ' ' + match.lastname;
             }
+
 
         }).then((result) => {
                     if (result.isConfirmed) {
