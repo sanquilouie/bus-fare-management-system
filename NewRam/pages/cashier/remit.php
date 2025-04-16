@@ -69,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     if (!$total_fare) {
         $total_fare = 0;
     }
+    
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
                 <form id="remittanceForm" method="POST" action="" onsubmit="return showPreview(event)">
-                    <label for="rfid_scan" class="form-label">RFID Scan:</label>
+                    <label for="rfid_scan" class="form-label">NFC Scan:</label>
                     <input type="text" class="form-control" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required onkeydown="handleRFIDKey(event)"
                         value="<?= htmlspecialchars($rfid_scan) ?>" class="form-label">
 
@@ -203,6 +203,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    if (busNo.trim() === "No Bus Assigned" || conductorName.trim() === "Unknown Conductor") {
+                        Swal.fire({
+                            title: 'Notice',
+                            text: 'Nothing to remit for this conductor. Please ensure a valid bus and conductor are assigned.',
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                        return;
+                    }
+
                     // Send data to the backend for printing
                     fetch('../../actions/print_remit.php', {
                         method: 'POST',
@@ -252,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                 this.textContent = '+ Deductions';
             }
         });
-
+        
         document.getElementById('addDeduction').addEventListener('click', function () {
             const deductionRow = document.createElement('div');
             deductionRow.classList.add('deduction-row');
@@ -266,10 +278,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                     </div>
                 </div>
             `;
-
             document.getElementById('deductions').appendChild(deductionRow);
         });
-
         document.getElementById('remittanceForm').addEventListener('input', function (event) {
             if (event.target.classList.contains('deduction-amount')) {
                 let totalLoad = parseFloat(document.getElementById('total_load').value) || 0;

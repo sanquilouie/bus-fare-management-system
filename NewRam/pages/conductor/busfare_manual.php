@@ -50,7 +50,6 @@ if (!isset($_SESSION['passengers'])) {
     $_SESSION['passengers'] = [];
 }
 
-// Function to fetch balance based on RFID
 // Function to log passenger entry
 function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac,$driverID, $busNumber, $transactionNumber, $conn)
 {

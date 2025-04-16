@@ -1,5 +1,6 @@
 <?php
 include 'NewRam/includes/connection.php';
+session_start();
 
 // Get all active features for the slider
 $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
@@ -318,7 +319,7 @@ $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
                 <button id="register-button" type="button" class="btn btn-primary">How to register?</button>
             </div>
         </div>
-    </header>
+    </header> 
 
 
     <!-- Modal -->

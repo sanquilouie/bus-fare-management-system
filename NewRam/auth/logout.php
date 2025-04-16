@@ -1,7 +1,6 @@
 <?php 
 session_start();
 include '../includes/connection.php';
-
 $response = ['success' => false, 'message' => ''];
 
 $driver_name = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;
@@ -15,39 +14,8 @@ $lastname = isset($nameParts[2]) ? $nameParts[2] : ''; // Last name (if present)
 if (isset($_POST['confirm_logout']) && $_POST['confirm_logout'] === 'true') {
     // Check if it's a conductor's session
     if (isset($_SESSION['bus_number'], $_SESSION['driver_account_number'], $_SESSION['email'], $_SESSION['driver_name'])) {
-        $bus_number = $_SESSION['bus_number'];
-        $conductor_id = $_SESSION['driver_account_number'];
-        $email = $_SESSION['email'];
-        $driver_name = $_SESSION['driver_name'];
-   
-        // Update the bus status to 'Available'
-        $updateBusStmt = $conn->prepare("UPDATE businfo SET driverName ='', driverID='', conductorName ='', conductorID='', status = 'available', destination = '', current_stop='' WHERE bus_number = ?");
-        if ($updateBusStmt) {
-            $updateBusStmt->bind_param("s", $bus_number);
-            if ($updateBusStmt->execute()) {
-                // Split the full name into first, middle, and last name if necessary
-               
-                // Update the driver status in the useracc table to 'notdriving'
-                $updateDriverStatusStmt = $conn->prepare("UPDATE useracc SET driverStatus = 'notdriving' WHERE  account_number = ?");
-                if ($updateDriverStatusStmt) {
-                    $updateDriverStatusStmt->bind_param("s",$lastname);
-                    if ($updateDriverStatusStmt->execute()) {
-                        session_destroy(); // End the session
-                        $response = ['success' => true, 'message' => 'Conductor logged out successfully and driver status updated.'];
-                    } else {
-                        $response = ['error' => 'Error updating driver status: ' . $conn->error];
-                    }
-                    $updateDriverStatusStmt->close();
-                } else {
-                    $response = ['error' => 'Error preparing driver status update statement: ' . $conn->error];
-                }
-            } else {
-                $response = ['error' => 'Error updating bus status: ' . $conn->error];
-            }
-            $updateBusStmt->close();
-        } else {
-            $response = ['error' => 'Error preparing bus update statement: ' . $conn->error];
-        }
+        echo json_encode(['success' => 'You have been logged out successfully!']);
+        exit();
     }
     // Check if it's a regular user session
     elseif (isset($_POST['confirm_logout'])) {
