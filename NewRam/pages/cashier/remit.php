@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../../includes/connection.php';
+//print_r($_SESSION);
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['role'] != 'Superadmin')) {
     header("Location: ../../index.php");

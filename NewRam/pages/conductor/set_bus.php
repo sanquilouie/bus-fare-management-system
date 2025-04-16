@@ -90,7 +90,22 @@ while ($row = $driverResult->fetch_assoc()) {
                     return false;
                 }
 
-                // Send account number to PHP via POST
+                // 🔍 Check if already assigned in the businfo table
+                const res = await fetch('../../actions/check_driver_assigned.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ account_number: accountNumber })
+                });
+                const check = await res.json();
+
+                if (check.assigned) {
+                    Swal.showValidationMessage('This driver is already assigned to a bus.');
+                    return false;
+                }
+
+                // ✅ Save session if not assigned
                 await fetch('../../actions/store_driver_session.php', {
                     method: 'POST',
                     headers: {
@@ -103,8 +118,6 @@ while ($row = $driverResult->fetch_assoc()) {
 
                 return match.firstname + ' ' + match.lastname;
             }
-
-
         }).then((result) => {
                     if (result.isConfirmed) {
                         const selectedDriver = result.value;
