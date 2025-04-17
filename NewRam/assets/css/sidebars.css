@@ -102,6 +102,12 @@ form .form-label {
   color: blue;
 }
 
+form .form-floating > label {
+  font-size: 1.0rem !important;
+  font-weight: 600 !important;
+  color: blue !important;
+}
+
 /* Form inputs */
 form .form-control, form .form-select {
   border: 2px solid #f1c40f;

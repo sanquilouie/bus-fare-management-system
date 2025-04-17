@@ -350,27 +350,31 @@ $conn->close();
                     </div>
                     <!-- Route Selection -->
                     <div class="row mb-1">
-                        <div class="col-md-6">
-                            <label for="fromRoute" class="form-label">From</label>
-                            <select id="fromRoute" name="fromRoute" class="form-select">
-                                <option value="" disabled selected>Select Starting Point</option>
-                                <?php foreach ($routes as $route): ?>
-                                    <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
-                                        <?= htmlspecialchars($route['route_name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                        <div class="col-md-6 mb-2">
+                            <div class="form-floating">
+                                <select id="fromRoute" name="fromRoute" class="form-select" required>
+                                    <option value="" disabled selected>Select Starting Point</option>
+                                    <?php foreach ($routes as $route): ?>
+                                        <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?= htmlspecialchars($route['route_name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <label for="fromRoute">From</label>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="toRoute" class="form-label">To</label>
-                            <select id="toRoute" name="toRoute" class="form-select">
-                                <option value="" disabled selected>Select Destination</option>
-                                <?php foreach ($routes as $route): ?>
-                                    <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
-                                        <?= htmlspecialchars($route['route_name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div class="form-floating">
+                                <select id="toRoute" name="toRoute" class="form-select" required>
+                                    <option value="" disabled selected>Select Destination</option>
+                                    <?php foreach ($routes as $route): ?>
+                                        <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?= htmlspecialchars($route['route_name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <label for="toRoute">To</label>
+                            </div>
                         </div>
                     </div>
 
