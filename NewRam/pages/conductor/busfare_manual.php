@@ -86,28 +86,6 @@ function deductFare($rfid, $fare, $conn)
 
 // Handle the POST request to get the user balance and update balance after fare deduction
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['direction'])) {
-        $_SESSION['direction'] = $_POST['direction'];
-        $bus_number = $_SESSION['bus_number']; 
-    
-        $query = "UPDATE businfo 
-                  SET destination = ? 
-                  WHERE bus_number = ?";
-    
-        if ($stmt = $conn->prepare($query)) {
-            $stmt->bind_param("ss", $_SESSION['direction'], $bus_number);
-            if ($stmt->execute()) {
-                echo "Destination updated successfully.";
-            } else {
-                echo "Error updating destination: " . $stmt->error;
-            }
-            $stmt->close();
-        } else {
-            echo "Error preparing query: " . $db->error;
-        }
-        header("Location: " . $_SERVER['REQUEST_URI']);
-        exit;
-    }
     
     $data = json_decode(file_get_contents('php://input'), true);
 
@@ -392,9 +370,9 @@ $conn->close();
                         <div class="col-md-6">
                             <label for="fareType" class="form-label">Fare Type</label>
                             <select id="fareType" name="fareType" class="form-select">
-                                <option value="regular">Regular</option>
-                                <option value="discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
-                                <option value="special">Special (<?= htmlspecialchars($specialPercentage); ?>% Off)</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
+                                <option value="Special">Special (<?= htmlspecialchars($specialPercentage); ?>% Off)</option>
                             </select>
                         </div>  
                     </div>
@@ -436,6 +414,7 @@ $conn->close();
     </div>
     <script>
     let currentDirection = "<?= $_SESSION['direction'] ?? '' ?>"; // make it mutable
+    let receiptShown = false;
 
     function openSettings() {
         Swal.fire({
@@ -507,11 +486,6 @@ $conn->close();
         input.value = newValue;
         }
 
-    document.getElementById('directionDropdown').addEventListener('change', function () {
-        const selected = this.value;
-        document.getElementById('directionInput').value = selected;
-        document.getElementById('directionForm').submit();
-    });
 
 
     function getRouteData() {
@@ -631,34 +605,39 @@ $conn->close();
         }
 
         function updateDashboard(data) {
-            const tableBody = document.querySelector("#destinationTable tbody");
-            tableBody.innerHTML = ''; // Clear existing rows
+    const tableBody = document.querySelector("#destinationTable tbody");
+    tableBody.innerHTML = ''; // Clear existing rows
 
-            // Iterate through the destinations and passenger count
-            for (const [destination, count] of Object.entries(data.destination_count)) {
-                if (count > 0) {
-                    const row = document.createElement("tr");
+    // Iterate through the destinations and passenger count
+    for (const [destination, count] of Object.entries(data.destination_count)) {
+        if (count > 0) {
+            const row = document.createElement("tr");
 
-                    row.innerHTML = `
+            row.innerHTML = `
                 <td>${destination}</td>
                 <td>${count}</td>
                 <td>
-                    <button class="btn btn-danger btn-sm" onclick="removePassenger('${destination}')">-</button>
-                    <button class="btn btn-danger btn-sm" onclick="removeAllPassengerDestination('${destination}')">--</button>
+                    <button class="btn btn-danger btn-sm" onclick="removePassenger('${destination}')">
+                        <i class="fa fa-user-minus"></i> <!-- Icon for 1 person -->
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="removeAllPassengerDestination('${destination}')">
+                        <i class="fa fa-users-slash"></i> <!-- Icon for multiple people -->
+                    </button>
                 </td>
             `;
-                    tableBody.appendChild(row);
-                }
-            }
+            tableBody.appendChild(row);
         }
+    }
+}
+
 
         async function removeAllPassengerDestination(destination) {
             const confirmation = await Swal.fire({
                 title: 'Are you sure?',
-                text: `You are about to remove all passengers going to ${destination}.`,
+                html: `You are about to remove <strong>ALL</strong> passengers going to ${destination}.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, remove all',
+                confirmButtonText: 'Yes, remove <strong>ALL</strong>',
                 cancelButtonText: 'Cancel'
             });
 
@@ -674,7 +653,7 @@ $conn->close();
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Failed to remove all passengers.',
+                        text: 'Failed to remove <strong>ALL</strong> passengers.',
                     });
                 }
             }
@@ -712,10 +691,10 @@ $conn->close();
         async function removeAllPassengers() {
             const confirmation = await Swal.fire({
                 title: 'Are you sure?',
-                text: 'You are about to remove all passengers from the list.',
+                text: 'You are about to remove <strong>ALL</strong> passengers from the list.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, remove all',
+                confirmButtonText: 'Yes, remove <strong>ALL</strong>',
                 cancelButtonText: 'Cancel'
             });
 
@@ -842,6 +821,7 @@ $conn->close();
         // Updated getUserBalance function to handle both RFID and cash payments
         async function getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, isCashPayment = false, transactionNumber, distance, paymentMethod) {
             const conductorName = "<?= $conductorName; ?>";  // PHP variable
+            const driverName = "<?= $_SESSION['driver_name'] ?>";
             try {
                 const baseFare = <?php echo $base_fare; ?>;
                 const distance = Math.abs(fromRoute.post - toRoute.post);
@@ -909,74 +889,75 @@ $conn->close();
                 Swal.fire('Error', 'An error occurred while processing your payment. Please try again.', 'error');
             }
         }
-
-        let receiptShown = false;
         
-        function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity) {
-    if (receiptShown) return; // Prevent duplicate receipt
-            
-    receiptShown = true;
-    const driverName = "<?= $_SESSION['driver_name'] ?>";  // PHP variable for driver name
-    
-    const busNumber = "<?= $bus_number; ?>"; 
-    const date = new Date().toLocaleDateString();
-    const time = new Date().toLocaleTimeString();
-
-    const receiptText = `
-      ZARAGOZA RAMSTAR
-  TRANSPORT COOPERATIVE
-  BUS NO.         : ${busNumber}
-  DATE            : ${date}
-  TIME            : ${time}
-  FROM            : ${fromRoute.route_name}
-  TO              : ${toRoute.route_name}
-  DISTANCE        : ${distance} km
-  DRIV. NAME      : ${driverName}
-  COND. NAME      : ${conductorName}
-  PASSENGER TYPE  : ${fareType}
-  PAYMENT METHOD  : ${paymentMethod}
-  PASSENGER(S)    : ${passengerQuantity}
-  TOTAL FARE      : ₱${totalFare}
-    ${transactionNumber}
-  Thank you for riding with us!
-  `;
-
-    Swal.fire({
-        html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
-        showCancelButton: true,
-        confirmButtonText: 'Print Receipt',
-        cancelButtonText: 'Cancel',
-        didClose: () => {
-            if (window.AndroidPrinter) {
-                console.log("Printing receipt...");
-                AndroidPrinter.printText(
-                    transactionNumber,
-                    busNumber,
-                    driverName,
-                    conductorName,
-                    totalFare,
-                    date,
-                    time,
-                    fromRoute.route_name,
-                    toRoute.route_name,
-                    distance,
-                    fareType,
-                    paymentMethod,
-                    passengerQuantity
-                ); 
-            } else {
-                console.error("AndroidPrinter interface not available");
-            }
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
+        function abbreviateName(fullName) {
+            const parts = fullName.trim().split(/\s+/);
+            const lastName = parts.pop();
+            const initials = parts.map(name => name[0].toUpperCase()).join(' ');
+            return initials + ' ' + lastName;
         }
-    });
-}
 
+        function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity) {
+            if (receiptShown) return; // Prevent duplicate receipt
+            
+            receiptShown = true;
+            const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>");  // PHP variable for driver name
+            const conductorNameFormatted = abbreviateName(conductorName);
+            const busNumber = "<?= $bus_number; ?>"; 
+            const date = new Date().toLocaleDateString();
+            const time = new Date().toLocaleTimeString();
 
+            const receiptText = `
+      ZARAGOZA RAMSTAR
+    TRANSPORT COOPERATIVE
+BUS NO.         : ${busNumber}
+DATE            : ${date}
+TIME            : ${time}
+FROM            : ${fromRoute.route_name}
+TO              : ${toRoute.route_name}
+DISTANCE        : ${distance} km
+DRIV. NAME      : ${driverName}
+COND. NAME      : ${conductorNameFormatted}
+PASSENGER TYPE  : ${fareType}
+PAYMENT METHOD  : ${paymentMethod}
+PASSENGER(S)    : ${passengerQuantity}
+TOTAL FARE      : ₱${totalFare}
+        ${transactionNumber}
+    Thank you for riding with us!
+        `;
 
-
+            Swal.fire({
+                html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
+                showCancelButton: true,
+                confirmButtonText: 'Print Receipt',
+                cancelButtonText: 'Cancel',
+                didClose: () => {
+                    if (window.AndroidPrinter) {
+                        console.log("Printing receipt...");
+                        AndroidPrinter.printText(
+                            transactionNumber,
+                            busNumber,
+                            driverName,
+                            conductorName,
+                            totalFare,
+                            date,
+                            time,
+                            fromRoute.route_name,
+                            toRoute.route_name,
+                            distance,
+                            fareType,
+                            paymentMethod,
+                            passengerQuantity
+                        ); 
+                    } else {
+                        console.error("AndroidPrinter interface not available");
+                    }
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            });
+    }
     </script>
 </body>
 
