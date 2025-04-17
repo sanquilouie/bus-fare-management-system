@@ -129,7 +129,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
 <div id="main-content" class="container-fluid mt-5">
     <h2>Load User</h2>
     <div class="row justify-content-center">
-        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+        <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
             <h3 class="text-center">Total Users: <span class="badge bg-secondary"><?php echo $userCount; ?></span></h3>
             <div class="mb-4">
                 <form id="searchForm" method="POST">

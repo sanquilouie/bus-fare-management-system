@@ -1,8 +1,6 @@
 <?php
 include 'NewRam/includes/connection.php';
 session_start();
-print_r($_SESSION);
-
 // Get all active features for the slider
 $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
 ?>
@@ -310,7 +308,7 @@ $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
     <?php
         include 'NewRam/includes/loader.php';
     ?>
-    <!--<header>
+    <header>
         <div class="container d-flex justify-content-between align-items-center">
             <div class="logo">
                 <h1>Ramstar Bus Transportation Cooperative</h1>
@@ -320,7 +318,7 @@ $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
                 <button id="register-button" type="button" class="btn btn-primary">How to register?</button>
             </div>
         </div> 
-    </header> -->
+    </header> 
 
 
     <!-- Modal -->

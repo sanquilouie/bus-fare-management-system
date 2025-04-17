@@ -122,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ?>
 <div id="main-content" class="container-fluid mt-5">
     <div class="row justify-content-center">
-        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-8">
+        <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
             <h2>Register Bus Information Form</h2>
             <form action="" method="POST" id="busInfoForm">
                 
