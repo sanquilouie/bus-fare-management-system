@@ -300,7 +300,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['removeAllPassengers']))
 }
 
 //include '../../actions/bus_fare_config.php';
-
 $conn->close();
 ?>
 
@@ -332,18 +331,12 @@ $conn->close();
         include '../../includes/footer.php';
     ?>   
     <div id="main-content" class="container-fluid mt-1">
+    <button class="btn btn-link settings-btn" onclick="openSettings()" title="Settings">
+        <i class="fas fa-cog fa-2xl"></i>
+    </button>
         <h2>Bus Fare</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-               <!-- <div class="text-center">
-                    <div class="btn-group mx-auto" role="group" aria-label="Basic radio toggle button group">
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-                        <label class="btn btn-outline-primary" for="btnradio1" onclick="window.location.href='busfare_manual.php'">Manual</label>
-
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio2" onclick="window.location.href='busfare_auto.php'">Auto</label>
-                    </div>
-                </div> -->
                 <form id="fareForm">
                     <div class="d-flex justify-content-center align-items-center" style="min-height: 120px;">
                         <div class="card shadow-sm text-center p-3">
@@ -355,14 +348,6 @@ $conn->close();
                             <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
                         </div>
                     </div>
-                    <!--<div class="mb-1">
-                        <label for="direction" class="form-label">Direction</label>
-                        <select class="form-select" id="directionDropdown">
-                            <option disabled <?= !isset($_SESSION['direction']) ? 'selected' : '' ?>>Select Direction</option>
-                            <option value="East to West" <?= ($_SESSION['direction'] ?? '') === 'East to West' ? 'selected' : '' ?>>East to West</option>
-                            <option value="West to East" <?= ($_SESSION['direction'] ?? '') === 'West to East' ? 'selected' : '' ?>>West to East</option>
-                        </select>
-                    </div>-->
                     <!-- Route Selection -->
                     <div class="row mb-1">
                         <div class="col-md-6">
@@ -446,6 +431,67 @@ $conn->close();
         </div>
     </div>
     <script>
+    let currentDirection = "<?= $_SESSION['direction'] ?? '' ?>"; // make it mutable
+
+    function openSettings() {
+        Swal.fire({
+            title: 'Settings',
+            html: `
+                <div class="mb-3">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary w-100" for="btnradio1" onclick="window.location.href='busfare_manual.php'">Manual</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+                            <label class="btn btn-outline-primary w-100" for="btnradio2" onclick="window.location.href='busfare_auto.php'">Auto</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-1 text-start">
+                    <label for="directionDropdown" class="form-label">Direction</label>
+                    <select class="form-select" id="directionDropdown">
+                        <option disabled value="">Select Direction</option>
+                        <option value="East to West">East to West</option>
+                        <option value="West to East">West to East</option>
+                    </select>
+                </div>
+            `,
+            didOpen: () => {
+                const dropdown = document.getElementById('directionDropdown');
+                if (dropdown && currentDirection) {
+                    dropdown.value = currentDirection;
+                }
+
+                dropdown.addEventListener('change', () => {
+                    const selected = dropdown.value;
+
+                    fetch('../../actions/update_direction.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `direction=${encodeURIComponent(selected)}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            currentDirection = selected; // update local variable
+                            console.log('Direction updated successfully.');
+                        } else {
+                            console.error('Failed to update direction.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            },
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: 500
+        });
+    }
+
     function updateValue(delta) {
         const input = document.getElementById('passengerQuantity');
         let currentValue = parseInt(input.value) || 0;

@@ -135,3 +135,16 @@ input[type=number].form-control::-webkit-outer-spin-button {
 input[type=number].form-control {
   -moz-appearance: textfield; /* for Firefox */
 }
+
+.settings-btn {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1050;
+  padding: 0;
+  color: #333;
+}
+
+.settings-btn:hover {
+  color: #007bff;
+}
