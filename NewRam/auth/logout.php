@@ -10,30 +10,42 @@ $firstname = $nameParts[0]; // First name
 $middlename = isset($nameParts[1]) ? $nameParts[1] : ''; // Middle name (if present)
 $lastname = isset($nameParts[2]) ? $nameParts[2] : ''; // Last name (if present)
 
-
 if (isset($_POST['confirm_logout']) && $_POST['confirm_logout'] === 'true') {
-    // Check if it's a conductor's session
-    if (isset($_SESSION['bus_number'], $_SESSION['driver_account_number'], $_SESSION['email'], $_SESSION['driver_name'])) {
-        echo json_encode(['success' => 'You have been logged out successfully!']);
+    if (isset($_SESSION['bus_number'], $_SESSION['driver_account_number'])) {
+        // Conductor session logic only
+        $driverID = $_SESSION['driver_account_number'];
+
+        $stmt = $conn->prepare("SELECT 1 FROM businfo WHERE driverID = ? LIMIT 1");
+        $stmt->bind_param("s", $driverID);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows === 0) {
+            unset($_SESSION['bus_number']);
+            unset($_SESSION['driver_account_number']);
+        }
+
+        $stmt->close();
+        $conn->close();
+
+        // Send response for conductor logout
+        echo json_encode([
+            'success' => true,
+            'message' => 'You have been logged out successfully (conductor).'
+        ]);
         exit();
     }
-    // Check if it's a regular user session
-    elseif (isset($_POST['confirm_logout'])) {
-        // Unset all session variables
-        session_unset();
 
-        // Destroy the session
-        session_destroy();
+    // If not a conductor, do regular logout (full session clear)
+    session_unset();
+    session_destroy();
 
-        // Return a success message as JSON
-        echo json_encode(['success' => 'You have been logged out successfully!']);
-        exit();
-    }
-
-    echo json_encode($response);
+    echo json_encode([
+        'success' => true,
+        'message' => 'You have been logged out successfully.'
+    ]);
     exit();
 }
-
 ?>
 
 
@@ -71,14 +83,14 @@ if (isset($_POST['confirm_logout']) && $_POST['confirm_logout'] === 'true') {
 					.then(data => {
 						if (data.success) {
 							Swal.fire({
-    title: 'Logged Out!',
-    text: data.message,
-    icon: 'success',
-    showConfirmButton: false,  // Disable the "OK" button
-    timer: 1500  // Optionally, you can add a timer to auto-close after 1.5 seconds
-}).then(() => {
-    window.location.href = 'login.php';  // Redirect to the login page after the alert
-});
+					title: 'Logged Out!',
+					text: data.message,
+					icon: 'success',
+					showConfirmButton: false,  // Disable the "OK" button
+					timer: 1500  // Optionally, you can add a timer to auto-close after 1.5 seconds
+				}).then(() => {
+					window.location.href = 'login.php';  // Redirect to the login page after the alert
+				});
 
 						} else {
 							Swal.fire('Error', data.error || 'An error occurred during logout.', 'error');
