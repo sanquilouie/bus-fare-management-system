@@ -32,6 +32,7 @@ $sql = "SELECT t.id,
         t.status
         FROM transactions t
         JOIN useracc u ON t.account_number = u.account_number
+        WHERE t.status = 'notremitted'
         ORDER BY t.transaction_date DESC
         LIMIT $offset, $perPage";
 

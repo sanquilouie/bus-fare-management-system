@@ -331,8 +331,8 @@ $conn->close();
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>   
-    <div id="main-content" class="container-fluid mt-5">
-        <h2>Bus Fare Calculator</h2>
+    <div id="main-content" class="container-fluid mt-1">
+        <h2>Bus Fare</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
                 <div class="text-center">
@@ -344,7 +344,7 @@ $conn->close();
                         <label class="btn btn-outline-primary" for="btnradio2" onclick="window.location.href='busfare_auto.php'">Auto</label>
                     </div>
                 </div>
-                <form id="fareForm" class="mt-4">
+                <form id="fareForm" class="mt-1">
                     <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
                         <div class="card shadow-sm text-center p-3">
                             <h5 class="form-label mb-2" style="color: #007BFF;">Distance (KM)</h5>
@@ -355,7 +355,7 @@ $conn->close();
                             <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="direction" class="form-label">Direction</label>
                         <select class="form-select" id="directionDropdown">
                             <option disabled <?= !isset($_SESSION['direction']) ? 'selected' : '' ?>>Select Direction</option>
@@ -364,7 +364,7 @@ $conn->close();
                         </select>
                     </div>
                     <!-- Route Selection -->
-                    <div class="row mb-3">
+                    <div class="row mb-1">
                         <div class="col-md-6">
                             <label for="fromRoute" class="form-label">From</label>
                             <select id="fromRoute" name="fromRoute" class="form-select">
@@ -390,7 +390,16 @@ $conn->close();
                     </div>
 
                     <!-- Fare Type and Passenger Quantity -->
-                    <div class="row mb-3">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label for="passengerQuantity" class="form-label">Number of Passengers</label>
+                            <div class="input-group">
+                                <input type="number" id="passengerQuantity" name="passengerQuantity"
+                                    class="form-control text-center" value="1" min="1" max="10">
+                                <button class="btn btn-danger" type="button" onclick="updateValue(-1)">−</button>
+                                <button class="btn btn-success" type="button" onclick="updateValue(1)">+</button>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <label for="fareType" class="form-label">Fare Type</label>
                             <select id="fareType" name="fareType" class="form-select">
@@ -398,12 +407,7 @@ $conn->close();
                                 <option value="discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
                                 <option value="special">Special (<?= htmlspecialchars($specialPercentage); ?>% Off)</option>
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="passengerQuantity" class="form-label">Number of Passengers</label>
-                            <input type="number" id="passengerQuantity" name="passengerQuantity" class="form-control" value="1"
-                                min="1" max="10">
-                        </div>
+                        </div>  
                     </div>
                 </form>
                 
@@ -450,6 +454,17 @@ $conn->close();
         </div>
     </div>
     <script>
+    function updateValue(delta) {
+        const input = document.getElementById('passengerQuantity');
+        let currentValue = parseInt(input.value) || 0;
+        const min = parseInt(input.min) || 1;
+        const max = parseInt(input.max) || 10;
+
+        let newValue = currentValue + delta;
+        newValue = Math.max(min, Math.min(max, newValue));
+        input.value = newValue;
+        }
+
     document.getElementById('directionDropdown').addEventListener('change', function () {
         const selected = this.value;
         document.getElementById('directionInput').value = selected;

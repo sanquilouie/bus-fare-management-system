@@ -125,3 +125,13 @@ form .form-control:focus {
   white-space: nowrap;
   max-width: 100%;
 }
+
+input[type=number].form-control::-webkit-inner-spin-button,
+input[type=number].form-control::-webkit-outer-spin-button {
+  -webkit-appearance: auto;
+  margin: 0;
+}
+
+input[type=number].form-control {
+  -moz-appearance: textfield; /* for Firefox */
+}
