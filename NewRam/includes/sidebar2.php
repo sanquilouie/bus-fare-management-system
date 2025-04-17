@@ -44,7 +44,7 @@ $menuItems = [
         'before' => [
             'Dashboard' => ['icon' => 'fa-tachometer-alt', 'url' => '/NewRam/pages/conductor/dashboard.php'],
             'Bus Fare' => ['icon' => 'fa-money-bill-wave', 'url' => '/NewRam/pages/conductor/busfare_auto.php'],
-            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/conductor/loadrfidconductor.php'],
+            'Load Card' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/conductor/loadrfidconductor.php'],
             'Load Transaction' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/conductor/translogscon.php'],
             'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/conductor/loadtranscon.php'],
         ],
@@ -54,7 +54,7 @@ $menuItems = [
     'Cashier' => [
         'before' => [
             'Dashboard' => ['icon' => 'fa-tachometer-alt', 'url' => '/NewRam/pages/cashier/dashboard.php'],
-            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/cashier/loadrfidadmin.php'],
+            'Load Card' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/cashier/loadrfidadmin.php'],
             'Remit' => ['icon' => 'fa-hand-holding-usd', 'url' => '/NewRam/pages/cashier/remit.php'],
             'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/cashier/translogscashier.php'],
             'Remit Logs' => ['icon' => 'fa-clipboard-list', 'url' => '/NewRam/pages/cashier/remit_logs.php'],

@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     if (!$bus_number) {
         $bus_number = "No Bus Assigned";
     }
+
     $stmt2 = $conn->prepare("SELECT SUM(fare) AS total_fare 
                              FROM passenger_logs 
                              WHERE conductor_id = ? 
@@ -71,6 +72,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
         $total_fare = 0;
     }
     
+
+    $stmt3 = $conn->prepare("SELECT SUM(fare) AS total_fare 
+                             FROM passenger_logs 
+                             WHERE conductor_id = ? 
+                             AND bus_number = ? 
+                             AND rfid != 'cash' 
+                             AND DATE(timestamp) = CURDATE()");
+    $stmt3->bind_param("ss", $rfid_scan, $bus_number);
+    $stmt3->execute();
+    $stmt3->bind_result($total_card);
+    $stmt3->fetch();
+    $stmt3->close();
+
+    if (!$total_card) {
+        $total_card = 0;
+    }
 }
 ?>
 
@@ -119,9 +136,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                     <input type="text" class="form-control" id="conductor_name" name="conductor_name" required
                         value="<?= htmlspecialchars($conductor_name) ?>" readonly>
 
-                    <label for="total_fare" class="form-label">Total Fare (₱):</label>
+                    <label for="total_fare" class="form-label">Cash Payment (₱):</label>
                     <input type="number" class="form-control" id="total_fare" name="total_fare" step="0.01" readonly
                         value="<?= htmlspecialchars($total_fare) ?>">
+
+                    <label for="total_card" class="form-label">Card Payment (₱):</label>
+                    <input type="number" class="form-control" id="total_card" name="total_card" step="0.01" readonly
+                        value="<?= htmlspecialchars($total_card) ?>">
 
                     <label for="total_load" class="form-label">Total Load (₱):</label>
                     <input type="number" class="form-control" id="total_load" name="total_load" step="0.01" readonly
@@ -159,6 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
             const busNo = document.getElementById('bus_no').value;
             const conductorName = document.getElementById('conductor_name').value;
             const totalFare = document.getElementById('total_fare').value;
+            const totalCard = document.getElementById('total_card').value;
             const totalLoad = document.getElementById('total_load').value; 
             const netAmount = document.getElementById('net_amount').value;
 
@@ -181,6 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                 <strong>Bus No:</strong> ${busNo}<br>
                 <strong>Conductor:</strong> ${conductorName}<br>
                 <strong>Total Fare:</strong> ₱${totalFare}<br>
+                <strong>Total Card:</strong> ₱${totalCard}<br>
                 <strong>Total Load:</strong> ₱${totalLoad}<br>
             `;
 
@@ -227,6 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                             bus_no: busNo,
                             conductor_name: conductorName,
                             total_fare: totalFare,
+                            total_card: totalCard,
                             total_load: totalLoad,
                             net_amount: netAmount,
                             deductions: deductions

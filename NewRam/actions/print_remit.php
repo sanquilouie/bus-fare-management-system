@@ -20,6 +20,7 @@ if ($data) {
     $busNo = $data['bus_no'] ?? '';
     $conductor = $data['conductor_name'] ?? '';
     $totalFare = $data['total_fare'] ?? '0';
+    $totalCard = $data['total_card'] ?? '0';
     $totalLoad = $data['total_load'] ?? '0';
     $netAmount = $data['net_amount'] ?? '0';
     $deductions = $data['deductions'] ?? [];
@@ -43,8 +44,8 @@ if ($data) {
         $amount = floatval(str_replace(['₱', 'P', 'p'], '', $raw_amount));
         $deduction_total += $amount;
     }
-    $stmt = $conn->prepare("INSERT INTO remit_logs (conductor_id, bus_no, total_cash, total_load, net_amount, total_deductions, remit_date) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssdddds", $rfid, $busNo, $totalFare, $totalLoad, $netAmount, $deduction_total, $date);
+    $stmt = $conn->prepare("INSERT INTO remit_logs (conductor_id, bus_no, total_cash, total_card, total_load, net_amount, total_deductions, remit_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssddddds", $rfid, $busNo, $totalFare, $totalCard, $totalLoad, $netAmount, $deduction_total, $date);
     $stmt->execute();
     $remit_id = $stmt->insert_id; // Get auto-incremented remit_id
     $stmt->close();
@@ -110,7 +111,8 @@ if ($data) {
     $printer->text(formatLine("Bus No: $busNo", date("h:i A")));
     $printer->text("Conductor: $conductor\n\n");
 
-    $printer->text(formatLine("Total Fare", "PHP$totalFare"));
+    $printer->text(formatLine("Total Cash", "PHP$totalFare"));
+    $printer->text(formatLine("Total Card", "PHP$totalCard"));
     $printer->text(formatLine("Total Load", "PHP$totalLoad"));
 
     if (!empty($deductions)) {
