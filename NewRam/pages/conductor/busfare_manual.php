@@ -335,7 +335,7 @@ $conn->close();
         <h2>Bus Fare</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <div class="text-center">
+               <!-- <div class="text-center">
                     <div class="btn-group mx-auto" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
                         <label class="btn btn-outline-primary" for="btnradio1" onclick="window.location.href='busfare_manual.php'">Manual</label>
@@ -343,9 +343,9 @@ $conn->close();
                         <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
                         <label class="btn btn-outline-primary" for="btnradio2" onclick="window.location.href='busfare_auto.php'">Auto</label>
                     </div>
-                </div>
-                <form id="fareForm" class="mt-1">
-                    <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
+                </div> -->
+                <form id="fareForm">
+                    <div class="d-flex justify-content-center align-items-center" style="min-height: 120px;">
                         <div class="card shadow-sm text-center p-3">
                             <h5 class="form-label mb-2" style="color: #007BFF;">Distance (KM)</h5>
                             <span id="kmLabel" class="h4 text-primary font-weight-bold">0 km</span>
@@ -355,14 +355,14 @@ $conn->close();
                             <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
                         </div>
                     </div>
-                    <div class="mb-1">
+                    <!--<div class="mb-1">
                         <label for="direction" class="form-label">Direction</label>
                         <select class="form-select" id="directionDropdown">
                             <option disabled <?= !isset($_SESSION['direction']) ? 'selected' : '' ?>>Select Direction</option>
                             <option value="East to West" <?= ($_SESSION['direction'] ?? '') === 'East to West' ? 'selected' : '' ?>>East to West</option>
                             <option value="West to East" <?= ($_SESSION['direction'] ?? '') === 'West to East' ? 'selected' : '' ?>>West to East</option>
                         </select>
-                    </div>
+                    </div>-->
                     <!-- Route Selection -->
                     <div class="row mb-1">
                         <div class="col-md-6">
@@ -417,19 +417,11 @@ $conn->close();
                 </form>
                 <!-- Fare Result -->
 
-                <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
-                    <!-- Card for Distance -->
-                    <div class="card shadow-sm text-center p-3 mx-2">
-                        <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
-                        <button class="btn btn-primary mt-3" onclick="processPayment('cash')">Cash</button>
-                    </div>
-
-                    <!-- RFID Payment Button -->
-                    <div class="card shadow-sm text-center p-3 mx-2">
-                        <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
-                        <button class="btn btn-success mt-3" onclick="promptRFIDInput()">RFID</button>
-                    </div>
+                <div class="d-flex justify-content-center align-items-center mb-4">
+                    <button class="btn btn-primary mx-2 form-control" onclick="processPayment('cash')">Cash</button>
+                    <button class="btn btn-success mx-2 form-control" onclick="promptRFIDInput()">RFID</button>
                 </div>
+
                 <div class="card shadow-sm mb-5">
                     <div class="card-header d-flex align-items-center">
                         <h4 class="mb-0">Passenger Destinations</h4>
