@@ -33,14 +33,15 @@ function fetchTransactions($conn, $accountNumber, $limit, $offset)
 {
     $query = "
     SELECT 
-        rfid AS account_number,
-        fare AS amount,
-        transaction_number AS transaction_number,
-        timestamp AS transaction_time,
-        conductor_name AS loaded_by
-    FROM passenger_logs
-    WHERE rfid = '$accountNumber'
-    ORDER BY timestamp DESC
+    t.account_number AS account_number,
+    t.amount AS amount,
+    t.id AS transaction_number,
+    t.transaction_date AS transaction_time,
+    CONCAT(u.firstname, ' ', u.lastname) AS loaded_by
+    FROM transactions t
+    LEFT JOIN useracc u ON BINARY TRIM(t.conductor_id) = BINARY TRIM(u.account_number)
+    WHERE t.account_number = '$accountNumber'
+    ORDER BY t.transaction_date DESC
     LIMIT $limit OFFSET $offset
     ";
 
@@ -86,10 +87,10 @@ $transactions = fetchTransactions($conn, $accountNumber, $limit, $offset);
                 <table class="table table-bordered mt-4">
                     <thead class="thead-light">
                         <tr>
+                            <th>Transaction Number</th>
                             <th>Account Number</th>
                             <th>Amount</th>
-                            <th>Transaction Time</th>
-                            <th>Transaction Number</th>
+                            <th>Transaction Time</th> 
                             <th>Loaded By</th>
                         </tr>
                     </thead>
@@ -97,10 +98,10 @@ $transactions = fetchTransactions($conn, $accountNumber, $limit, $offset);
                         <?php if (mysqli_num_rows($transactions) > 0): ?>
                             <?php while ($row = mysqli_fetch_assoc($transactions)): ?>
                                 <tr>
+                                    <td><?php echo htmlspecialchars($row['transaction_number']); ?></td>
                                     <td><?php echo htmlspecialchars($row['account_number']); ?></td>
                                     <td><?php echo number_format($row['amount'], 2); ?></td>
                                     <td><?php echo date('Y-m-d H:i:s', strtotime($row['transaction_time'])); ?></td>
-                                    <td><?php echo htmlspecialchars($row['transaction_number']); ?></td>
                                     <td><?php echo htmlspecialchars($row['loaded_by']); ?></td>
                                 </tr>
                             <?php endwhile; ?>
