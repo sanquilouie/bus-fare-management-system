@@ -335,20 +335,14 @@ $conn->close();
         include '../../includes/footer.php';
     ?>   
     <div id="main-content" class="container-fluid mt-1">
+    <button class="btn btn-link settings-btn" onclick="openSettings()" title="Settings">
+        <i class="fas fa-cog fa-2xl"></i>
+    </button>
         <h2>Bus Fare</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <div class="text-center">
-                    <div class="btn-group mx-auto" role="group" aria-label="Basic radio toggle button group">
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio1" onclick="window.location.href='busfare_manual.php'">Manual</label>
-
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked>
-                        <label class="btn btn-outline-primary" for="btnradio2" onclick="window.location.href='busfare_auto.php'" checked>Auto</label>
-                    </div>
-                </div>
-                <form id="fareForm" class="mt-1">
-                    <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
+                <form id="fareForm">
+                    <div class="d-flex justify-content-center align-items-center" style="min-height: 120px;">
                         <div class="card shadow-sm text-center p-3">
                             <h5 class="form-label mb-2" style="color: #007BFF;">Distance (KM)</h5>
                             <span id="kmLabel" class="h4 text-primary font-weight-bold">0 km</span>
@@ -358,33 +352,27 @@ $conn->close();
                             <span id="fareLabel" class="h4 text-success font-weight-bold">₱0.00</span>
                         </div>
                     </div>
-                    <div class="mb-1">
-                        <label for="direction" class="form-label">Direction</label>
-                        <select class="form-select" id="directionDropdown">
-                            <option disabled <?= !isset($_SESSION['direction']) ? 'selected' : '' ?>>Select Direction</option>
-                            <option value="East to West" <?= ($_SESSION['direction'] ?? '') === 'East to West' ? 'selected' : '' ?>>East to West</option>
-                            <option value="West to East" <?= ($_SESSION['direction'] ?? '') === 'West to East' ? 'selected' : '' ?>>West to East</option>
-                        </select>
-                    </div>
                     <!-- Route Selection -->
                     <div class="row mb-1">
                         <div class="col-md-6">
-                            <label for="fromRoute" class="form-label">From</label>
+                            <label for="fromRoute" class="form-label" style="margin-bottom: .1rem; margin-left: .6rem; font-size: 1rem;">From</label>
                                 <p id="fromRoute"></p>
                                 <h1 id="displayRouteName" class="display-6 text-center fw-bold"></h1>
                                 <h2 id="location"></h2>
                                 <h2 id="isgeo"></h2>
                         </div>
                         <div class="col-md-6">
-                            <label for="toRoute" class="form-label">To</label>
-                            <select id="toRoute" name="toRoute" class="form-select">
-                                <option value="" disabled selected>Select Destination</option>
-                                <?php foreach ($routes as $route): ?>
-                                    <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
-                                        <?= htmlspecialchars($route['route_name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div class="form-floating">
+                                <select id="toRoute" name="toRoute" class="form-select">
+                                    <option value="" disabled selected>Select Destination</option>
+                                    <?php foreach ($routes as $route): ?>
+                                        <option value="<?= htmlspecialchars(json_encode($route), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?= htmlspecialchars($route['route_name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <label for="toRoute">To</label>
+                            </div>
                         </div>
                     </div>
 
@@ -416,19 +404,11 @@ $conn->close();
                 </form>
                 <!-- Fare Result -->
 
-                <div class="d-flex justify-content-center align-items-center mb-4" style="min-height: 120px;">
-                    <!-- Card for Distance -->
-                    <div class="card shadow-sm text-center p-3 mx-2">
-                        <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
-                        <button class="btn btn-primary mt-3" onclick="processPayment('cash')">Cash</button>
-                    </div>
-
-                    <!-- RFID Payment Button -->
-                    <div class="card shadow-sm text-center p-3 mx-2">
-                        <h5 class="form-label mb-2" style="color: #007BFF;">Payment</h5>
-                        <button class="btn btn-success mt-3" onclick="promptRFIDInput()">RFID</button>
-                    </div>
+                <div class="d-flex justify-content-center align-items-center mb-4">
+                    <button class="btn btn-primary mx-1 form-control" onclick="processPayment('cash')">Cash</button>
+                    <button class="btn btn-success mx-1 form-control" onclick="promptRFIDInput()">RFID</button>
                 </div>
+
                 <div class="card shadow-sm mb-5">
                     <div class="card-header d-flex align-items-center">
                         <h4 class="mb-0">Passenger Destinations</h4>
@@ -453,6 +433,68 @@ $conn->close();
         </div>
     </div>
     <script>
+    let currentDirection = "<?= $_SESSION['direction'] ?? '' ?>"; // make it mutable
+    let receiptShown = false;
+
+    function openSettings() {
+        Swal.fire({
+            title: 'Settings',
+            html: `
+                <div class="mb-3">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
+                            <label class="btn btn-outline-primary w-100" for="btnradio1" onclick="window.location.href='busfare_manual.php'">Manual</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"  checked>
+                            <label class="btn btn-outline-primary w-100" for="btnradio2" onclick="window.location.href='busfare_auto.php'">Auto</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-1 text-start">
+                    <label for="directionDropdown" class="form-label">Direction</label>
+                    <select class="form-select" id="directionDropdown">
+                        <option disabled value="">Select Direction</option>
+                        <option value="East to West">East to West</option>
+                        <option value="West to East">West to East</option>
+                    </select>
+                </div>
+            `,
+            didOpen: () => {
+                const dropdown = document.getElementById('directionDropdown');
+                if (dropdown && currentDirection) {
+                    dropdown.value = currentDirection;
+                }
+
+                dropdown.addEventListener('change', () => {
+                    const selected = dropdown.value;
+
+                    fetch('../../actions/update_direction.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `direction=${encodeURIComponent(selected)}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            currentDirection = selected; // update local variable
+                            console.log('Direction updated successfully.');
+                        } else {
+                            console.error('Failed to update direction.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            },
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: 500
+        });
+    }
+
     function updateValue(delta) {
         const input = document.getElementById('passengerQuantity');
         let currentValue = parseInt(input.value) || 0;
@@ -463,12 +505,6 @@ $conn->close();
         newValue = Math.max(min, Math.min(max, newValue));
         input.value = newValue;
     }
-
-    document.getElementById('directionDropdown').addEventListener('change', function () {
-        const selected = this.value;
-        document.getElementById('directionInput').value = selected;
-        document.getElementById('directionForm').submit();
-    });
 
 
     function getRouteData() {
@@ -962,14 +998,20 @@ $conn->close();
                 Swal.fire('Error', 'An error occurred while processing your payment. Please try again.', 'error');
             }
         }
+ 
+        function abbreviateName(fullName) {
+            const parts = fullName.trim().split(/\s+/);
+            const lastName = parts.pop();
+            const initials = parts.map(name => name[0].toUpperCase()).join(' ');
+            return initials + ' ' + lastName;
+        }
 
-        let receiptShown = false;
-        
         function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity) {
     if (receiptShown) return; // Prevent duplicate receipt
             
     receiptShown = true;
-    const driverName = "<?= $_SESSION['driver_name'] ?>";  // PHP variable for driver name
+    const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>"); 
+    const conductorNameFormatted = abbreviateName(conductorName);
     
     const busNumber = "<?= $bus_number; ?>"; 
     const date = new Date().toLocaleDateString();
@@ -985,7 +1027,7 @@ $conn->close();
   TO              : ${toRoute.route_name}
   DISTANCE        : ${distance} km
   DRIV. NAME      : ${driverName}
-  COND. NAME      : ${conductorName}
+  COND. NAME      : ${conductorNameFormatted}
   PASSENGER TYPE  : ${fareType}
   PAYMENT METHOD  : ${paymentMethod}
   PASSENGER(S)    : ${passengerQuantity}
@@ -1006,7 +1048,7 @@ $conn->close();
                     transactionNumber,
                     busNumber,
                     driverName,
-                    conductorName,
+                    conductorNameFormatted,
                     totalFare,
                     date,
                     time,

@@ -328,7 +328,7 @@ $conn->close();
                     </div>
                     <!-- Route Selection -->
                     <div class="row mb-1">
-                        <div class="col-md-6 mb-2">
+                        <div class="col-md-6 mb-1">
                             <div class="form-floating">
                                 <select id="fromRoute" name="fromRoute" class="form-select" required>
                                     <option value="" disabled selected>Select Starting Point</option>
@@ -378,7 +378,6 @@ $conn->close();
                     </div>
                 </form>
                 
-
                  <form id="directionForm" method="POST" style="display: none;">
                     <input type="hidden" name="direction" id="directionInput">
                 </form>
@@ -901,7 +900,7 @@ $conn->close();
             if (receiptShown) return; // Prevent duplicate receipt
             
             receiptShown = true;
-            const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>");  // PHP variable for driver name
+            const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>"); 
             const conductorNameFormatted = abbreviateName(conductorName);
             const busNumber = "<?= $bus_number; ?>"; 
             const date = new Date().toLocaleDateString();
