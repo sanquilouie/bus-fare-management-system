@@ -937,7 +937,7 @@ TOTAL FARE      : ₱${totalFare}
                             transactionNumber,
                             busNumber,
                             driverName,
-                            conductorName,
+                            conductorNameFormatted,
                             totalFare,
                             date,
                             time,
