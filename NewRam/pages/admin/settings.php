@@ -12,14 +12,18 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     $title = $_POST['title'];
     $desc = $_POST['description'];
+    $type = $_POST['type'];
     $target_dir = "../../assets/images/";
     $image = basename($_FILES["image"]["name"]);
     $target_file = $target_dir . $image;
 
     if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-        $stmt = $conn->prepare("INSERT INTO features (image, title, description) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $image, $title, $desc);
+        $stmt = $conn->prepare("INSERT INTO features (image, title, description, type) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $image, $title, $desc, $type);
         $stmt->execute();
+
+        header("Location: settings.php");
+        exit();
     } else {
         echo "<div class='alert alert-danger'>Image upload failed.</div>";
     }
@@ -33,8 +37,50 @@ if (isset($_GET['toggle'])) {
     exit();
 }
 
-// Fetch all features
-$features = $conn->query("SELECT * FROM features");
+// Handle delete
+if (isset($_GET['delete'])) {
+    $id = (int) $_GET['delete'];
+
+    // Get image filename first
+    $stmt = $conn->prepare("SELECT image FROM features WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->bind_result($imageName);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Delete image file from the server
+    $imagePath = "../../assets/images/" . $imageName;
+    if (file_exists($imagePath)) {
+        unlink($imagePath);
+    }
+
+    // Delete record from database
+    $stmt = $conn->prepare("DELETE FROM features WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: settings.php");
+    exit();
+}
+
+$limit = 5; // number of features per page
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Get total count
+$totalResult = $conn->query("SELECT COUNT(*) as total FROM features");
+$totalRow = $totalResult->fetch_assoc();
+$total = $totalRow['total'];
+$totalPages = ceil($total / $limit);
+
+// Get paginated results
+$stmt = $conn->prepare("SELECT * FROM features LIMIT ?, ?");
+$stmt->bind_param("ii", $offset, $limit);
+$stmt->execute();
+$features = $stmt->get_result();
+
 ?>
 
 <!DOCTYPE html>
@@ -68,6 +114,12 @@ $features = $conn->query("SELECT * FROM features");
         <h2>Upload New Feature</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
+                <div class="text-end mb-3">
+                    <button class="btn btn-secondary" onclick="openFeatureModal()">
+                        <i class="bi bi-gear-fill me-1"></i> Manage Features
+                    </button>
+                </div>
+
                 <form action="settings.php" method="POST" enctype="multipart/form-data" class="mb-5">
                     <div class="mb-3">
                     <label class="form-label">Image</label>
@@ -79,38 +131,102 @@ $features = $conn->query("SELECT * FROM features");
                     <div class="mb-3">
                     <textarea name="description" class="form-control" placeholder="Feature Description" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-select" required>
+                            <option value="Slide">Slide</option>
+                            <option value="Card" selected>Card</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#uploadFeatureModal">
+                        <i class="bi bi-upload me-1"></i> Upload Feature
+                    </button>
                 </form>
 
-                <h2>Manage Features</h2>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>Preview</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Toggle</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php while ($row = $features->fetch_assoc()): ?>
-                            <tr>
-                            <td><img src="../../assets/images/<?= $row['image'] ?>" width="100"></td>
-                            <td><?= htmlspecialchars($row['title']) ?></td>
-                            <td><?= htmlspecialchars($row['description']) ?></td>
-                            <td><?= $row['is_active'] ? "✅ Active" : "❌ Inactive" ?></td>
-                            <td>
-                                <a href="settings.php?toggle=<?= $row['id'] ?>" class="btn btn-sm btn-warning">Toggle</a>
-                            </td>
-                            </tr>
-                        <?php endwhile; ?>
-                        </tbody>
-                    </table>
+                <div class="modal fade" id="featuresModal" tabindex="-1" aria-labelledby="featuresModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="featuresModalLabel">Manage Features</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="featuresModalBody">
+                            <!-- Content loaded via AJAX -->
+                            <p>Loading...</p>
+                        </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+function openFeatureModal(page = 1) {
+    const modalBody = document.getElementById("featuresModalBody");
+    modalBody.innerHTML = '<p>Loading...</p>';
+    fetch(`../../actions/fetch_features_table.php?page=${page}`)
+        .then(res => res.text())
+        .then(html => {
+            modalBody.innerHTML = html;
+
+            // Bind pagination
+            document.querySelectorAll('.feature-pagination').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openFeatureModal(this.getAttribute('data-page'));
+                });
+            });
+
+            // Bind delete buttons
+            document.querySelectorAll('.delete-feature').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    if (confirm('Are you sure you want to delete this feature?')) {
+                        fetch('../../actions/admin_settings_feature_actions.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `action=delete&id=${id}`
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                openFeatureModal(page); // Refresh current page
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Bind toggle buttons
+            document.querySelectorAll('.toggle-feature').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    fetch('../../actions/admin_settings_feature_actions.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `action=toggle&id=${id}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            openFeatureModal(page); // Refresh current page
+                        }
+                    });
+                });
+            });
+
+        });
+
+    const modal = new bootstrap.Modal(document.getElementById('featuresModal'));
+    modal.show();
+}
+
+document.getElementById('featuresModal').addEventListener('hidden.bs.modal', function () {
+    location.reload();
+});
+</script>
+
+
 </body>
 </html>

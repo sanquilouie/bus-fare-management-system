@@ -1,8 +1,13 @@
 <?php
 include 'NewRam/includes/connection.php';
 session_start();
-// Get all active features for the slider
-$sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
+// For Slide
+$sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND type = 'Slide'");
+
+// For Card
+$cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND type = 'Card'");
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -130,39 +135,36 @@ $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
     }
 
     .scrollable {
-        display: flex;
-        overflow-x: auto;
-        padding: 20px 10px;
-        background-color: #f5f7fa;
-        gap: 20px;
-        margin-top: 30px;
-        flex-wrap: nowrap;
-        justify-content: center;
-    }
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    padding: 1rem;
+}
 
-    .scrollable-item {
-        min-width: 280px;
-        background-color: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        flex-shrink: 0;
-        text-align: center;
-        
-        transition: transform 0.3s ease-in-out;
-    }
+.scrollable-item {
+    flex: 1 1 250px; /* grow/shrink with a base width */
+    max-width: 300px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
 
-    .scrollable-item:hover {
-        transform: translateY(-10px);
-    }
+.scrollable-item:hover {
+    transform: translateY(-5px);
+}
 
-    .scrollable-item img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 10px;
-        margin-bottom: 15px;
-    }
+.scrollable-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
 
     footer {
         background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
@@ -281,11 +283,10 @@ $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
     }
 
     @media (max-width: 768px) {
-        .scrollable {
-            flex-direction: column;
-            align-items: center;
-        }
+    .scrollable-item {
+        flex: 1 1 100%;
     }
+}
 
     @media (max-width: 480px) {
         .slider {
@@ -349,7 +350,7 @@ $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
 
     <section class="hero">
         <div class="slider">
-            <?php
+        <?php
             $isFirst = true;
             while ($row = $sliderFeatures->fetch_assoc()):
             ?>
@@ -360,37 +361,21 @@ $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1");
             $isFirst = false;
             endwhile;
             ?>
-
             <div class="navigation">
                 <button id="prev">&#10094;</button>
                 <button id="next">&#10095;</button>
             </div>
         </div>
     </section>
-
     <section class="scrollable">
-        <div class="scrollable-item">
-            <img src="NewRam/assets/images/discounts.jpg" alt="Feature 1" loading="lazy">
-            <h3>Affordable Fares</h3>
-            <p>Enjoy discounts on your trips.</p>
-        </div>
-        <div class="scrollable-item">
-            <img src="NewRam/assets/images/bus1.jpg" alt="Feature 2" loading="lazy">
-            <h3>Comfortable Buses</h3>
-            <p>Ride in style and comfort.</p>
-        </div>
-        <div class="scrollable-item">
-            <img src="NewRam/assets/images/route.jpg" alt="Feature 3" loading="lazy">
-            <h3>Convenient Routes</h3>
-            <p>Track easily.</p>
-        </div>
-        <div class="scrollable-item">
-            <img src="NewRam/assets/images/cashback.jpg" alt="Feature 1" loading="lazy">
-            <h3>Exclusive Cashback</h3>
-            <p>Enjoy Cashback every load.</p>
-        </div>
+        <?php while ($row = $cardFeatures->fetch_assoc()): ?>
+            <div class="scrollable-item">
+                <img src="NewRam/assets/images/<?= $row['image'] ?>" alt="<?= htmlspecialchars($row['title']) ?>" loading="lazy">
+                <h3><?= htmlspecialchars($row['title']) ?></h3>
+                <p><?= htmlspecialchars($row['description']) ?></p>
+            </div>
+        <?php endwhile; ?>
     </section>
-
     <footer>
         <div class="footer-content">
             <div>
