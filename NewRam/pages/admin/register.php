@@ -76,6 +76,35 @@ $lastname = $_SESSION['lastname'];
                     content: " *";
                     color: red;
          }
+         #loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255,255,255,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+    font-family: sans-serif;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
     </style>
     <script src="../../assets/js/main.js"></script>
     <script src="../../assets/js/register.js"></script>
@@ -88,27 +117,31 @@ $lastname = $_SESSION['lastname'];
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
+    <div id="loader" style="display: none;">
+        <div class="spinner"></div>
+        <p>Sending confirmation email, please wait...</p>
+    </div>
     <div id="main-content" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <h2 class="text-center">Registration Form</h2>
+                <h2>User Registration</h2>
                 <form method="POST" action="../../actions/confirm_register.php" id="registrationForm" enctype="multipart/form-data">
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="firstname" class="form-label required">First Name</label>
                             <input type="text" class="form-control" id="firstname" name="firstname" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="lastname" class="form-label required">Last Name</label>
                             <input type="text" class="form-control" id="lastname" name="lastname" required>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="middlename" class="form-label">Middle Name</label>
                             <input type="text" class="form-control" id="middlename" name="middlename">
                         </div>
-                        <div class="col-md-6">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
                             <label for="suffix" class="form-label">Suffix</label>
                             <select class="form-select" id="suffix" name="suffix">
                                 <option value="">-- Select Suffix --</option>
@@ -118,16 +151,13 @@ $lastname = $_SESSION['lastname'];
                                 <option value="IV">IV</option>
                                 <option value="V">V</option>
                             </select>
-                        
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="birthday" class="form-label required">Birthday</label>
                             <input type="date" class="form-control" id="birthday" name="birthday" required min=""
                                 max="2017-12-31" />
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="gender" class="form-label required">Gender</label>
                             <select class="form-select" id="gender" name="gender" required>
                                 <option value="">-- Select Gender --</option>
@@ -137,25 +167,25 @@ $lastname = $_SESSION['lastname'];
                         </div>
                     </div>
                     <div class="row mb-3">   
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label for="address" class="form-label">House#/Purok#/Street/Sitio</label>
                             <input type="text" class="form-control" id="address" name="address">
                         </div>
-                        <div class="col-md-6">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
                             <label for="province" class="form-label">Province</label>
                             <select class="form-select" id="province" name="province">
                                 <option value="">-- Select Province --</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="municipality" class="form-label">Municipality</label>
                             <select class="form-select" id="municipality" name="municipality">
                                 <option value="">-- Select Municipality --</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="barangay" class="form-label">Barangay</label>
                             <select class="form-select" id="barangay" name="barangay">
                                 <option value="">-- Select Barangay --</option>
@@ -163,12 +193,16 @@ $lastname = $_SESSION['lastname'];
                         </div>
                     </div>
                     <div class="row mb-3"> 
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label for="account_number" class="form-label">Account Number</label>
+                            <input type="text" class="form-control" id="account_number" name="account_number" required>
+                        </div>
+                        <div class="col-md-4">
                             <label for="email" class="form-label required">Email</label>
                             <input type="email" class="form-control" id="email" name="email" required>
                             <div id="emailFeedback" class="invalid-feedback"></div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="phone" class="form-label">Contact Number</label>
                             <div class="form-group position-relative">
                                 <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder=""
@@ -177,13 +211,8 @@ $lastname = $_SESSION['lastname'];
                             </div>
                             <div id="contactError" class="invalid-feedback" style="display: none;"></div>
                         </div>
-
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="account_number" class="form-label">Account Number</label>
-                            <input type="text" class="form-control" id="account_number" name="account_number" required>
-                        </div>
                         <input type="hidden" name="role" value="User">
                     </div>
                     <div class="text-center">
@@ -193,5 +222,13 @@ $lastname = $_SESSION['lastname'];
             </div>
         </div>
     </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function () {
+            document.getElementById("loader").style.display = "flex";
+        });
+    });
+</script>
 </body>
 </html>

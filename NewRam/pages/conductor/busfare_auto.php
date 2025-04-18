@@ -440,7 +440,8 @@ $conn->close();
         Swal.fire({
             title: 'Settings',
             html: `
-                <div class="mb-3">
+                <div class="mb-2 text-start fw-bold">
+                    <label for="tripMode" class="form-label">Trip Mode</label>
                     <div class="row g-2">
                         <div class="col-6">
                             <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
@@ -452,7 +453,7 @@ $conn->close();
                         </div>
                     </div>
                 </div>
-                <div class="mb-1 text-start">
+                <div class="mb-2 text-start fw-bold">
                     <label for="directionDropdown" class="form-label">Direction</label>
                     <select class="form-select" id="directionDropdown">
                         <option disabled value="">Select Direction</option>

@@ -1,4 +1,10 @@
 <?php
+require '../libraries/PHPMailer/src/PHPMailer.php';
+require '../libraries/PHPMailer/src/SMTP.php';
+require '../libraries/PHPMailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 // Include your database connection
 include "../includes/connection.php";
 
@@ -52,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 (account_number, firstname, lastname, middlename, suffix, birthday, age, gender, email, contactnumber, province, municipality, barangay, address, password, balance, role) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
-
+    
             $stmt->bind_param(
                 "sssssssisiiisssds",
                 $account_number,
@@ -73,20 +79,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $balance,
                 $role
             );
-
+    
             if ($stmt->execute()) {
                 $registration_successful = true;
+    
+                // Send confirmation email
+                $mail = new PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'portfolio@example.invalid';
+                    $mail->Password = 'REDACTED_SMTP_PASSWORD'; // App password
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 587;
+    
+                    $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+                    $mail->addAddress($email, $firstname . ' ' . $lastname);
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Registration Received';
+                    $mail->Body = "
+                        <p>Hi $firstname,</p>
+                        <p>Thank you for registering with Ramstar Bus Transportation.</p>
+                        <p>Your account has been successfully activated. You can now log in and start using your account.</p>
+                        <p>Best regards,<br>Ramstar Bus Transportation</p>
+                    ";
+    
+                    $mail->send();
+                } catch (Exception $e) {
+                    error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
+                }
             } else {
                 $error_message = "Database error: " . $stmt->error;
             }
-
+    
             $stmt->close();
         } catch (Exception $e) {
             $error_message = "Error: " . $e->getMessage();
         }
+    
+        $conn->close();
     }
-
-    $conn->close();
+     
 }
 ?>
 
@@ -99,7 +133,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Include SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
+
 <body>
+    
     <?php if ($registration_successful): ?>
         <script>
             Swal.fire({
@@ -121,5 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             });
         </script>
     <?php endif; ?>
+    
+
 </body>
 </html>

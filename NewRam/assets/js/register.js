@@ -231,4 +231,4 @@ document.addEventListener('DOMContentLoaded', function () {
         const formattedDate = sevenYearsAgo.toISOString().split('T')[0];
 
         // Set the minimum date in the input field
-        document.getElementById("birthday").setAttribute("min", formattedDate);
+        //document.getElementById("birthday").setAttribute("min", formattedDate);
