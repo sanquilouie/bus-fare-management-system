@@ -2,7 +2,6 @@
 session_start();
 include '../../includes/connection.php';
 include '../../includes/functions.php'; // Include your functions file
-
 // Assuming you have the user id in session
 $account_number = $_SESSION['account_number']; // Fetch account number from session
 
@@ -27,7 +26,7 @@ $totalRows = $totalResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRows / $limit); // Calculate total pages
 
 // Fetch transactions with pagination
-function fetchTransactions($conn, $limit, $offset)
+function fetchTransactions($conn,$account_number, $limit, $offset)
 {
     $transactionQuery = "SELECT 
     t.account_number AS user_account_number, 
@@ -40,12 +39,13 @@ function fetchTransactions($conn, $limit, $offset)
     FROM transactions t
     JOIN useracc u ON t.account_number = u.account_number
     LEFT JOIN useracc c ON BINARY TRIM(t.conductor_id) = BINARY TRIM(c.account_number)
+    WHERE t.conductor_id = ?
     ORDER BY t.transaction_date DESC LIMIT ? OFFSET ?";
 
     
 
     $stmt = $conn->prepare($transactionQuery);
-    $stmt->bind_param('ii', $limit, $offset); // Bind limit and offset
+    $stmt->bind_param('sii',$account_number, $limit, $offset); // Bind limit and offset
     $stmt->execute();
     $result = $stmt->get_result();
     $stmt->close();
@@ -53,7 +53,7 @@ function fetchTransactions($conn, $limit, $offset)
     return $result;
 }
 
-$transactions = fetchTransactions($conn, $limit, $offset);
+$transactions = fetchTransactions($conn,$account_number, $limit, $offset);
 
 ?>
 <!DOCTYPE html>
@@ -127,7 +127,7 @@ $transactions = fetchTransactions($conn, $limit, $offset);
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class="page-item <?php if ($page == 1) echo 'disabled'; ?>">
-                            <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Previous</a>
+                            <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Prev</a>
                         </li>
                         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                             <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
