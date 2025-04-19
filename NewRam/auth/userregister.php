@@ -324,7 +324,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" name="address" placeholder="Purok/Sitio/Street" required>
+                    <input type="text" class="form-control" id="address" name="address" placeholder="Purok/Sitio/Street">
                 </div>
                 <div class="col-md-6">
                     <label for="province" class="form-label">Province</label>
@@ -337,7 +337,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="municipality" class="form-label">Municipality</label>
-                    <select class="form-select" id="municipality" name="municipality" required> 
+                    <select class="form-select" id="municipality" name="municipality"> 
                         <option value="">-- Select Municipality --</option>
                     </select>
                 </div>
