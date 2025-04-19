@@ -144,25 +144,19 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'User')) {
                         <input type="password" class="form-control" name="old_pass" id="pass2" placeholder="Old Password" required>
                         <i class="fa-solid fa-eye" onclick="togglePassword('pass2', this)"></i>
                     </div>
+                    <label for="pass1" class="form-label">New Password</label>
+                    <div class="password-wrapper">
+                        <input onkeyup="trigger()" type="password" class="form-control" name="Password" id="pass1" placeholder="New Password" required>
+                        <i class="fa-solid fa-eye" onclick="togglePassword('pass1', this)"></i>
                     </div>
-
-                    <div class="form-group">
-                        <label for="pass1" class="form-label">New Password</label>
-                        <div class="password-wrapper">
-                            <input onkeyup="trigger()" type="password" class="form-control" name="Password" id="pass1" placeholder="New Password" required>
-                            <i class="fa-solid fa-eye" onclick="togglePassword('pass1', this)"></i>
-                        </div>
                         <div class="indicator">
                             <span class="weak"></span>
                             <span class="medium"></span>
                             <span class="strong"></span>
                         </div>
-                    </div>
-
-                    <div class="form-group">
                         <label for="pass3" class="form-label">Confirm Password</label>
                         <div class="password-wrapper">
-                            <input type="password" class="form-control" name="PasswordConf" id="pass3" placeholder="Confirm Password" required>
+                            <input type="password" class="form-control mb-2" name="PasswordConf" id="pass3" placeholder="Confirm Password" required>
                             <i class="fa-solid fa-eye" onclick="togglePassword('pass3', this)"></i>
                         </div>
                         
@@ -170,7 +164,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'User')) {
                             <button type="submit" class="btn btn-success btn-block">Update Password</button>
                         </div>
                     </form>
-           
+                    </div>
         </div>
     </div>
 
