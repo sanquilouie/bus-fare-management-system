@@ -154,8 +154,7 @@ $lastname = $_SESSION['lastname'];
                         </div>
                         <div class="col-md-4">
                             <label for="birthday" class="form-label required">Birthday</label>
-                            <input type="date" class="form-control" id="birthday" name="birthday" required min=""
-                                max="2017-12-31" />
+                            <input type="date" class="form-control" id="birthday" name="birthday" />
                         </div>
                         <div class="col-md-4">
                             <label for="gender" class="form-label required">Gender</label>
@@ -224,11 +223,19 @@ $lastname = $_SESSION['lastname'];
     </div>
     <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Loader
         const form = document.querySelector("form");
         form.addEventListener("submit", function () {
             document.getElementById("loader").style.display = "flex";
         });
+
+        // Set max date to today minus 10 years (birthday restriction)
+        const birthdayInput = document.getElementById('birthday');
+        const today = new Date();
+        const tenYearsAgo = new Date(today.getFullYear() - 10, today.getMonth(), today.getDate());
+        birthdayInput.max = tenYearsAgo.toISOString().split('T')[0];
     });
 </script>
+
 </body>
 </html>
