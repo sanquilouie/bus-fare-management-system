@@ -5,7 +5,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include '../../includes/connection.php';
-var_dump($_POST);
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Get form values and sanitize inputs
@@ -21,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $barangay = $_POST['barangay'];
     $address = $_POST['address'];
     $gender = $_POST['gender'];
-    $license = $_POST['driverLicense'] ?? null; // Use null coalescing for optional field
 
     if ($employeeType === 'Conductor') {
         $accountNumber = $_POST['employeeNumber']; // Manually provided
@@ -49,18 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Prepare the SQL query
     $query = "INSERT INTO useracc (
         account_number, firstname, middlename, lastname, email, contactnumber, birthday, age, gender,
-        province, municipality, barangay, address, password, role, is_activated, driverLicense
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        province, municipality, barangay, address, password, role, is_activated
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     // Prepare the statement
     if ($stmt = $conn->prepare($query)) {
         // Bind parameters
-        $stmt->bind_param("sssssssssssssssis", $accountNumber, $firstName, $middleName, $lastName, $email, 
-            $phone, $birthday, $age, $gender, $province, $municipality, $barangay, $address, $password, $role, $activated, $license);
+        $stmt->bind_param("sssssssssssssssi", $accountNumber, $firstName, $middleName, $lastName, $email, 
+            $phone, $birthday, $age, $gender, $province, $municipality, $barangay, $address, $password, $role, $activated);
 
         // Execute the query
         if ($stmt->execute()) {
-            $_SESSION['success'] = 'Employee registered successfully!';
+            $_SESSION['success'] = 'Employee registered successfullyasdasds!';
             header("Location: " . $_SERVER['PHP_SELF']);
             exit;
         } else {
@@ -130,135 +128,256 @@ ob_end_flush();
     ?>
 <div id="main-content" class="container-fluid mt-5">
     <div class="row justify-content-center">
-    <h2>Employee List</h2>
+        <h2>Employee List</h2>
         <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal">
-        + Register Employee
-        </button>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal">
+            + Register Employee
+            </button>
 
-        <!-- Dropdown Filter -->
-        <div class="d-flex justify-content-end mb-3"> 
-            <form method="GET">
-                <select name="role_filter" class="form-select" onchange="this.form.submit()" style="width: 150px;">
-                    <option value="">All Roles</option>
-                    <option value="Driver" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Driver' ? 'selected' : '' ?>>Driver</option>
-                    <option value="Conductor" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Conductor' ? 'selected' : '' ?>>Conductor</option>
-                    <option value="Cashier" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Cashier' ? 'selected' : '' ?>>Cashier</option>
-                </select>
-            </form>
-        </div>
+            <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title w-100 text-center" id="employeeModalLabel">Employee Registration</h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                    <label for="employeeType" class="form-label required">Employee Type</label>
+                                        <select class="form-select" id="employeeType" name="employeeType" required>
+                                            <option value="" disabled selected>Select Role</option>
+                                            <option value="Conductor">Conductor</option>
+                                            <option value="Driver">Driver</option>
+                                            <option value="Cashier">Cashier</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="employeeNumber" class="form-label required">Employee No.</label>
+                                        <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Auto generated" readonly>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="firstName" class="form-label required">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="middleName" class="form-label required">Middle Name</label>
+                                        <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="lastName" class="form-label required">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required>
+                                    </div>
+                                </div>
 
-        <!-- Employee Table -->
-        <div class="table-responsive">
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Account #</th>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Role</th>
-                <th>Date Hired</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
+                                <div class="row mb-3">
+                                    
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label required">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+                                        <div id="emailFeedback" class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="phone" class="form-label required">Phone</label>
+                                        <div class="form-group position-relative">
+                                            <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder="" required pattern="\d{10}" maxlength="10" />
+                                            <span class="position-absolute top-50 start-0 translate-middle-y ps-2 text-muted">+63</span>
+                                        </div>
+                                        <div id="contactError" class="invalid-feedback" style="display: none;"></div>
+                                    </div>
+                                </div>
 
-            $allowed_roles = ['Driver', 'Conductor', 'Cashier'];
-            $filter = isset($_GET['role_filter']) ? $_GET['role_filter'] : 'all';
+                                <div class="row mb-3">
+                                    
+                                <div class="col-md-6">
+                                        <label for="dob" class="form-label required">Date of Birth</label>
+                                        <input type="date" class="form-control" id="dob" name="dob" required>
+                                </div>
+                                <div class="col-md-6">   
+                                        <label for="gender" class="form-label required">Gender</label>
+                                        <select class="form-select" id="gender" name="gender" required>
+                                            <option value="" disabled selected>Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                </div>
+                                </div>
+                                <div class="row mb-3">   
+                                    <div class="col-md-12">
+                                        <label for="address" class="form-label">Address</label>
+                                        <input type="text" class="form-control" id="address" name="address" placeholder="Purok#/Street/Sitio"> 
+                                    </div>
+                                </div>
+                                <div class="row mb-3">         
+                                    <div class="col-md-4">
+                                        <label for="province" class="form-label">Province</label>
+                                        <select class="form-select" id="province" name="province">
+                                            <option value="">-- Select Province --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="municipality" class="form-label">Municipality</label>
+                                        <select class="form-select" id="municipality" name="municipality">
+                                            <option value="">-- Select Municipality --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="barangay" class="form-label">Barangay</label>
+                                        <select class="form-select" id="barangay" name="barangay">
+                                            <option value="">-- Select Barangay --</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-            $where = "WHERE role IN ('Driver', 'Conductor', 'Cashier')";
-            if (in_array($filter, $allowed_roles)) {
-                $where = "WHERE role = '" . mysqli_real_escape_string($conn, $filter) . "'";
-            }
+                                <!-- Conditional fields for Driver -->
+                                <div id="driverFields" class="driver-fields" style="display:none;">
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                                <label for="driverLicense" class="form-label required">Driver's License No.</label>
+                                                <input type="text" class="form-control" id="driverLicense" name="driverLicense" placeholder="Enter license number">
+                                        </div>
+                                    </div>
+                                </div>
 
-            $limit = 10;
-            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-            $start = ($page - 1) * $limit;
+                                <!-- Conditional fields for Conductor -->
+                                <div id="conductorFields" class="conductor-fields" style="display:none;">
+                                    <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label for="workExperience" class="form-label required">Work Experience</label>
+                                            <textarea class="form-control" id="workExperience" rows="2" placeholder="Enter work experience"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
 
-            $sql = "SELECT account_number, firstname, middlename, lastname, suffix, email, contactnumber, created_at, role 
-                    FROM useracc
-                    $where 
-                    ORDER BY created_at DESC 
-                    LIMIT $start, $limit";
-            $result = mysqli_query($conn, $sql);
+                                <!-- Conditional fields for Cashier -->
+                                <div id="cashierFields" class="cashier-fields" style="display:none;">
+                                    <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label for="cashHandlingExperience" class="form-label required">Cash Handling Experience</label>
+                                            <textarea class="form-control" id="cashHandlingExperience" rows="2" placeholder="Enter experience in cash handling"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
 
-            if ($result && mysqli_num_rows($result) > 0) {
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $fullname = $row['firstname'] . ' ' . $row['middlename'] . ' ' . $row['lastname'];
-                    if (!empty($row['suffix'])) {
-                        $fullname .= ', ' . $row['suffix'];
-                    }
-                    echo "<tr>
-                            <td>{$row['account_number']}</td>
-                            <td>" . htmlspecialchars($fullname) . "</td>
-                            <td>{$row['email']}</td>
-                            <td>{$row['contactnumber']}</td>
-                            <td>{$row['role']}</td>
-                            <td>" . date('F d, Y', strtotime($row['created_at'])) . "</td>
-                          </tr>";
-                }
-            } else {
-                echo "<tr><td colspan='5' class='text-center'>No records found.</td></tr>";
-            }
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary">Register</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            // PAGINATION
-            $count_sql = "SELECT COUNT(*) AS total FROM useracc $where";
-            $count_result = mysqli_query($conn, $count_sql);
-            $total = mysqli_fetch_assoc($count_result)['total'];
-            $pages = ceil($total / $limit);
+            <div class="d-flex justify-content-end mb-3"> 
+                <form method="GET">
+                    <select name="role_filter" class="form-select" onchange="this.form.submit()" style="width: 150px;">
+                        <option value="">All Roles</option>
+                        <option value="Driver" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Driver' ? 'selected' : '' ?>>Driver</option>
+                        <option value="Conductor" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Conductor' ? 'selected' : '' ?>>Conductor</option>
+                        <option value="Cashier" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Cashier' ? 'selected' : '' ?>>Cashier</option>
+                    </select>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Account #</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Contact</th>
+                            <th>Role</th>
+                            <th>Date Hired</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
 
-            ?>
-        </tbody>
-    </table>
+                        $allowed_roles = ['Driver', 'Conductor', 'Cashier'];
+                        $filter = isset($_GET['role_filter']) ? $_GET['role_filter'] : 'all';
 
-    <?php if ($pages > 1): ?>
-    <nav>
-        <ul class="pagination justify-content-center">
-            <!-- Previous Button -->
-            <li class="page-item <?= $page == 1 ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page - 1 ?>&role_filter=<?= urlencode($filter) ?>" tabindex="-1">Prev</a>
-            </li>
+                        $where = "WHERE role IN ('Driver', 'Conductor', 'Cashier')";
+                        if (in_array($filter, $allowed_roles)) {
+                            $where = "WHERE role = '" . mysqli_real_escape_string($conn, $filter) . "'";
+                        }
 
-            <!-- Page Numbers -->
-            <?php 
-            // Display a range of pages around the current one
-            $range = 2; // Number of pages before and after the current page to display
-            $start = max(1, $page - $range);
-            $end = min($pages, $page + $range);
-            
-            for ($i = $start; $i <= $end; $i++): ?>
-                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                    <a class="page-link" href="?page=<?= $i ?>&role_filter=<?= urlencode($filter) ?>"><?= $i ?></a>
-                </li>
-            <?php endfor; ?>
+                        $limit = 10;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                        $start = ($page - 1) * $limit;
 
-            <!-- Next Button -->
-            <li class="page-item <?= $page == $pages ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page + 1 ?>&role_filter=<?= urlencode($filter) ?>">Next</a>
-            </li>
-        </ul>
-    </nav>
-<?php endif; ?>
+                        $sql = "SELECT account_number, firstname, middlename, lastname, suffix, email, contactnumber, created_at, role 
+                                FROM useracc
+                                $where 
+                                ORDER BY created_at DESC 
+                                LIMIT $start, $limit";
+                        $result = mysqli_query($conn, $sql);
 
-</div>    
+                        if ($result && mysqli_num_rows($result) > 0) {
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $fullname = $row['firstname'] . ' ' . $row['middlename'] . ' ' . $row['lastname'];
+                                if (!empty($row['suffix'])) {
+                                    $fullname .= ', ' . $row['suffix'];
+                                }
+                                echo "<tr>
+                                        <td>{$row['account_number']}</td>
+                                        <td>" . htmlspecialchars($fullname) . "</td>
+                                        <td>{$row['email']}</td>
+                                        <td>{$row['contactnumber']}</td>
+                                        <td>{$row['role']}</td>
+                                        <td>" . date('F d, Y', strtotime($row['created_at'])) . "</td>
+                                    </tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='5' class='text-center'>No records found.</td></tr>";
+                        }
+
+                        // PAGINATION
+                        $count_sql = "SELECT COUNT(*) AS total FROM useracc $where";
+                        $count_result = mysqli_query($conn, $count_sql);
+                        $total = mysqli_fetch_assoc($count_result)['total'];
+                        $pages = ceil($total / $limit);
+
+                        ?>
+                    </tbody>
+                </table>
+                <?php if ($pages > 1): ?>
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous Button -->
+                        <li class="page-item <?= $page == 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page - 1 ?>&role_filter=<?= urlencode($filter) ?>" tabindex="-1">Prev</a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        <?php 
+                        // Display a range of pages around the current one
+                        $range = 2; // Number of pages before and after the current page to display
+                        $start = max(1, $page - $range);
+                        $end = min($pages, $page + $range);
+                        
+                        for ($i = $start; $i <= $end; $i++): ?>
+                            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?>&role_filter=<?= urlencode($filter) ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <!-- Next Button -->
+                        <li class="page-item <?= $page == $pages ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page + 1 ?>&role_filter=<?= urlencode($filter) ?>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            <?php endif; ?>
+
+        </div>    
     </div>
 </div>
-<div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title w-100 text-center" id="employeeModalLabel">Employee Registration</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <?php include 'features/regemployee_registration.php'; ?>
-                </div>
 
-                </div>
-            </div>
-            </div>
-        </div>
+
 <script src="../../assets/js/address_api.js"></script>
 <script>
 
