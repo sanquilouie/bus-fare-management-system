@@ -16,78 +16,76 @@ if (!isset($_SESSION['account_number'])) {
 $conductor_id = $_SESSION['account_number']; // Conductor's ID from session
 $conductor_name = ''; // Initialize the conductor's name variable
 $bus_number = '';
-$total_load = 0; // Initialize the total load variable
+$total_load = null; // Initialize the total load variable
 $rfid_scan = ''; // Initialize the RFID variable
 
 // Handle RFID scan and fetch data based on RFID
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     $rfid_scan = $_POST['rfid_scan'];
 
-    // 1. Get conductor name and total load from transactions
-    $stmt = $conn->prepare("SELECT u.firstname, u.lastname, SUM(t.amount) AS total_load
-                                FROM useracc u
-                                LEFT JOIN transactions t ON t.conductor_id = u.account_number
-                                WHERE u.account_number = ? AND t.status NOT IN ('edited', 'remitted')
-                                GROUP BY u.account_number;
-                                ");
+    $stmt = $conn->prepare("
+        SELECT 
+        u.firstname,
+        u.lastname,
+        IFNULL(SUM(DISTINCT CASE 
+            WHEN t.status NOT IN ('edited', 'remitted') THEN t.amount 
+            ELSE 0 END), 0) AS total_load,
+
+        MAX(CASE 
+            WHEN pl.status = 'notremitted' THEN pl.bus_number 
+            ELSE NULL END) AS bus_number,
+
+        IFNULL(SUM(CASE 
+            WHEN pl.status = 'notremitted' AND pl.rfid = 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
+            ELSE 0 END), 0) AS total_cash_fare,
+
+        IFNULL(SUM(CASE 
+            WHEN pl.status = 'notremitted' AND pl.rfid != 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
+            ELSE 0 END), 0) AS total_card_fare
+
+        FROM useracc u
+        LEFT JOIN transactions t ON t.conductor_id = u.account_number
+        LEFT JOIN passenger_logs pl ON pl.conductor_id = u.account_number
+        WHERE u.account_number = ?
+        GROUP BY u.account_number
+    ");
+
     $stmt->bind_param("s", $rfid_scan);
     $stmt->execute();
-    $stmt->bind_result($firstname, $lastname, $total_load);
+    $stmt->bind_result($firstname, $lastname, $total_load, $bus_number, $total_fare, $total_card);
 
     if ($stmt->fetch()) {
-        $conductor_name = $firstname . ' ' . $lastname;
+        $_SESSION['rfid_data'] = [
+            'rfid_scan' => $rfid_scan,
+            'conductor_name' => $firstname . ' ' . $lastname,
+            'total_load' => $total_load,
+            'bus_number' => $bus_number ?: "No Bus Assigned",
+            'total_fare' => $total_fare,
+            'total_card' => $total_card
+        ];
     } else {
-        $conductor_name = "Unknown Conductor";
-        $total_load = 0;
+        $_SESSION['rfid_data'] = [
+            'rfid_scan' => '',
+            'conductor_name' => "Unknown Conductor",
+            'total_load' => 0,
+            'bus_number' => "No Bus Assigned",
+            'total_fare' => 0,
+            'total_card' => 0
+        ];
     }
+
     $stmt->close();
 
-    $stmt_bus = $conn->prepare("SELECT bus_number 
-                                FROM passenger_logs 
-                                WHERE conductor_id = ? 
-                                AND status = 'notremitted'");
-    $stmt_bus->bind_param("s", $rfid_scan);
-    $stmt_bus->execute();
-    $stmt_bus->bind_result($bus_number);
-    $stmt_bus->fetch();
-    $stmt_bus->close();
+    // 👇 Redirect to avoid form resubmission on reload
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 
-    if (!$bus_number) {
-        $bus_number = "No Bus Assigned";
-    }
-
-    $stmt2 = $conn->prepare("SELECT SUM(fare) AS total_fare 
-                             FROM passenger_logs 
-                             WHERE conductor_id = ? 
-                             AND bus_number = ? 
-                             AND rfid = 'cash' 
-                             AND DATE(timestamp) = CURDATE()");
-    $stmt2->bind_param("ss", $rfid_scan, $bus_number);
-    $stmt2->execute();
-    $stmt2->bind_result($total_fare);
-    $stmt2->fetch();
-    $stmt2->close();
-
-    if (!$total_fare) {
-        $total_fare = 0;
-    }
-    
-
-    $stmt3 = $conn->prepare("SELECT SUM(fare) AS total_fare 
-                             FROM passenger_logs 
-                             WHERE conductor_id = ? 
-                             AND bus_number = ? 
-                             AND rfid != 'cash' 
-                             AND DATE(timestamp) = CURDATE()");
-    $stmt3->bind_param("ss", $rfid_scan, $bus_number);
-    $stmt3->execute();
-    $stmt3->bind_result($total_card);
-    $stmt3->fetch();
-    $stmt3->close();
-
-    if (!$total_card) {
-        $total_card = 0;
-    }
+// ✅ Retrieve and clear session data (if available)
+$rfid_data = $_SESSION['rfid_data'] ?? null;
+if ($rfid_data) {
+    extract($rfid_data); // creates $rfid_scan, $conductor_name, etc.
+    unset($_SESSION['rfid_data']);
 }
 ?>
 
@@ -124,50 +122,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
         <h2>Conductor Remittance</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <form id="remittanceForm" method="POST" action="" onsubmit="return showPreview(event)">
-                    <label for="rfid_scan" class="form-label">NFC Scan:</label>
-                    <input type="text" class="form-control" id="rfid_scan" name="rfid_scan" placeholder="Scan RFID..." required onkeydown="handleRFIDKey(event)"
-                        value="<?= htmlspecialchars($rfid_scan) ?>" class="form-label">
+            <form id="remittanceForm" method="POST" action="" onsubmit="return showPreview(event)">
+                <label for="rfid_scan" class="form-label">NFC Scan:</label>
+                <input type="text" class="form-control" id="rfid_scan" name="rfid_scan"
+                    placeholder="Scan RFID..." required onkeydown="handleRFIDKey(event)"
+                    value="<?= htmlspecialchars($rfid_scan ?? '') ?>">
 
-                    <label for="bus_no" class="form-label">Bus No:</label>
-                    <input type="text" class="form-control" id="bus_no" name="bus_no" required value="<?= htmlspecialchars($bus_number) ?>" readonly>
+                <label for="bus_no" class="form-label">Bus No:</label>
+                <input type="text" class="form-control" id="bus_no" name="bus_no"
+                    required value="<?= htmlspecialchars($bus_number ?? '') ?>" readonly>
 
-                    <label for="conductor_name" class="form-label">Conductor Name:</label>
-                    <input type="text" class="form-control" id="conductor_name" name="conductor_name" required
-                        value="<?= htmlspecialchars($conductor_name) ?>" readonly>
+                <label for="conductor_name" class="form-label">Conductor Name:</label>
+                <input type="text" class="form-control" id="conductor_name" name="conductor_name"
+                    required value="<?= htmlspecialchars($conductor_name ?? '') ?>" readonly>
 
-                    <label for="total_fare" class="form-label">Cash Payment (₱):</label>
-                    <input type="number" class="form-control" id="total_fare" name="total_fare" step="0.01" readonly
-                        value="<?= htmlspecialchars($total_fare) ?>">
+                <label for="total_fare" class="form-label">Cash Payment (₱):</label>
+                <input type="number" class="form-control" id="total_fare" name="total_fare"
+                    step="0.01" readonly value="<?= htmlspecialchars($total_fare ?? '') ?>">
 
-                    <label for="total_card" class="form-label">Card Payment (₱):</label>
-                    <input type="number" class="form-control" id="total_card" name="total_card" step="0.01" readonly
-                        value="<?= htmlspecialchars($total_card) ?>">
+                <label for="total_card" class="form-label">Card Payment (₱):</label>
+                <input type="number" class="form-control" id="total_card" name="total_card"
+                    step="0.01" readonly value="<?= htmlspecialchars($total_card ?? '') ?>">
 
-                    <label for="total_load" class="form-label">Total Load (₱):</label>
-                    <input type="number" class="form-control" id="total_load" name="total_load" step="0.01" readonly
-                        value="<?= htmlspecialchars($total_load) ?>">
+                <label for="total_load" class="form-label">Total Load (₱):</label>
+                <input type="number" class="form-control" id="total_load" name="total_load"
+                    step="0.01" readonly value="<?= htmlspecialchars($total_load ?? '') ?>">
 
-                    <div id="deductions-container">
+                <div id="deductions-container">
+                    <div class="text-center mt-1">
+                        <button type="button" id="toggleDeductions" class="btn btn-primary w-100">+ Deductions</button>
+                    </div>
+                    <div id="deductions" style="display: none; margin-top: 10px;">
+                        <h3>Deductions</h3>
+
                         <div class="text-center mt-1">
-                            <button type="button" id="toggleDeductions" class="btn btn-primary w-100">+ Deductions</button>
-                        </div>
-                        <div id="deductions" style="display: none; margin-top: 10px;">
-                            <h3>Deductions</h3>
-
-                            <div class="text-center mt-1">
-                                <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
-                            </div>
+                            <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
                         </div>
                     </div>
+                </div>
 
-                    <label for="net_amount" class="form-label">Net Amount (₱):</label>
-                    <input type="number" class="form-control" id="net_amount" name="net_amount" step="0.01" readonly
-                        value="<?= htmlspecialchars($total_load + $total_fare) ?>">
-                        <div class="text-center mt-1">
-                            <button type="submit" name="generate_remittance" id="remitButton" class="btn btn-primary w-100">Generate Remittance</button>
-                        </div>
-                </form>
+                <label for="net_amount" class="form-label">Net Amount (₱):</label>
+                <input type="number" class="form-control" id="net_amount" name="net_amount"
+                    step="0.01" readonly value="<?= htmlspecialchars(($total_load ?? 0) + ($total_fare ?? 0)) ?>">
+
+                <div class="text-center mt-1">
+                    <button type="submit" name="generate_remittance" id="remitButton"
+                        class="btn btn-primary w-100">Generate Remittance</button>
+                </div>
+            </form>
+
             </div>
         </div>
     </div>

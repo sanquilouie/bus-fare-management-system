@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div id="main-content" class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-            <h2>Register Bus Information Form</h2>
+            <h2>Bus Registration</h2>
             <form action="" method="POST" id="busInfoForm">
                 
                 <div class="mb-3">
@@ -150,12 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <div class="mb-3">
                     <label for="busModel" class="form-label">Bus Model</label>
-                    <select class="form-control" id="busModel" name="busModel" required>
-                        <option value="">Select a Bus Model</option>
-                        <option value="JMC">JMC</option>
-                        <option value="model2">Model 2</option>
-                        <option value="model3">Model 3</option>
-                    </select>
+                    <input type="text" class="form-control" id="busModel" name="busModel" required>
                 </div>
 
                 <div class="mb-3">

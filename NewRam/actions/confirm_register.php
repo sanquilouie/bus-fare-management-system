@@ -102,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <p>Hi $firstname,</p>
                         <p>Thank you for registering with Ramstar Bus Transportation.</p>
                         <p>Your account has been successfully activated. You can now log in and start using your account.</p>
+                        <p>Your default password is: ramstar</p>
                         <p>Best regards,<br>Ramstar Bus Transportation</p>
                     ";
     
