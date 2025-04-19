@@ -22,11 +22,10 @@ $driverID = isset($_SESSION['driver_account_number']) ? $_SESSION['driver_accoun
 
 $conductorName = $firstname . ' ' . $lastname;
  
-if (!isset($bus_number) || !isset($driverac)) {
+if (!isset($bus_number) || !isset($driverID)) {
     header("Location: set_bus.php");
     exit();
 }
-
 
 // Fetch routes
 $routes = [];
@@ -53,7 +52,6 @@ if (!isset($_SESSION['passengers'])) {
 }
 
 // Function to fetch balance based on RFID
-// Function to log passenger entry
 function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac,$driverID, $busNumber, $transactionNumber, $conn)
 {
     $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name, conductor_id,driver_name,driver_id,bus_number, transaction_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -681,19 +679,28 @@ $conn->close();
             }
         }
 
-        function validateRoutes() {
-            const fromRoute = document.getElementById('fromRoute').innerText;
-            const toRoute = document.getElementById('toRoute').value;
-
-            if (!fromRoute || !toRoute) {
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>?dashboard=true', {
+                    method: 'GET',
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    updateDashboard(data);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Unable to fetch destination data.',
+                    });
+                }
+            } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Missing Selection',
-                    text: 'Please select both a starting point and a destination.',
+                    title: 'Oops...',
+                    text: 'Something went wrong! Try again.',
                 });
-                return false;
             }
-            return true;
         }
 
         async function fetchDashboardData() {
@@ -770,7 +777,6 @@ $conn->close();
             }
         }
 
-
         async function removePassenger(destination) {
             const confirmation = await Swal.fire({
                 title: 'Are you sure?',
@@ -839,7 +845,7 @@ $conn->close();
             return `${timestamp}${randomNum}`;
         }
 
-        function promptRFIDInput() {
+        async function promptRFIDInput() {
             const fromRouteValue = document.getElementById('fromRoute').innerText;
             const toRouteValue = document.getElementById('toRoute').value;
             const distance = Math.abs(fromRoute.post - toRoute.post);
@@ -850,7 +856,7 @@ $conn->close();
             console.log("Distance:", distance); // Debugging line
             console.log("Payment Method:", paymentMethod);
 
-            if (!validateRoutes()) {
+            if (!validateRoutesAndBus()) {
                 // Stop execution if routes are not selected
                 return;
             }
@@ -899,8 +905,9 @@ $conn->close();
         }
 
         // Function to get user balance based on RFID (account_number)
-        function processPayment(paymentType) {
-            if (!validateRoutes()) {
+        async function processPayment(paymentType) {
+            if (!validateRoutesAndBus()) {
+                // Stop execution if routes are not selected
                 return;
             }
             if (paymentType === 'cash') {

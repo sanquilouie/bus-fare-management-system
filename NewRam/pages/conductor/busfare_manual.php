@@ -565,20 +565,38 @@ $conn->close();
             }
         }
 
-        function validateRoutes() {
+        async function validateRoutesAndBus() {
             const fromRoute = document.getElementById('fromRoute').value;
             const toRoute = document.getElementById('toRoute').value;
 
             if (!fromRoute || !toRoute) {
-                Swal.fire({
+                await Swal.fire({
                     icon: 'error',
                     title: 'Missing Selection',
                     text: 'Please select both a starting point and a destination.',
                 });
                 return false;
             }
+
+            // Check conductor assignment from the server
+            const response = await fetch('../../actions/check_conductor_businfo.php');
+            const result = await response.json();
+
+            if (!result.success) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Not Assigned',
+                    text: result.error || 'You are not assigned to any bus',
+                }).then(() => {
+                    window.location.href = '../../auth/logout.php';
+                });
+                return false;;
+            }
+
             return true;
         }
+
+
 
         async function fetchDashboardData() {
             try {
@@ -605,30 +623,30 @@ $conn->close();
         }
 
         function updateDashboard(data) {
-    const tableBody = document.querySelector("#destinationTable tbody");
-    tableBody.innerHTML = ''; // Clear existing rows
+            const tableBody = document.querySelector("#destinationTable tbody");
+            tableBody.innerHTML = ''; // Clear existing rows
 
-    // Iterate through the destinations and passenger count
-    for (const [destination, count] of Object.entries(data.destination_count)) {
-        if (count > 0) {
-            const row = document.createElement("tr");
+            // Iterate through the destinations and passenger count
+            for (const [destination, count] of Object.entries(data.destination_count)) {
+                if (count > 0) {
+                    const row = document.createElement("tr");
 
-            row.innerHTML = `
-                <td>${destination}</td>
-                <td>${count}</td>
-                <td>
-                    <button class="btn btn-danger btn-sm" onclick="removePassenger('${destination}')">
-                        <i class="fa fa-user-minus"></i> <!-- Icon for 1 person -->
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="removeAllPassengerDestination('${destination}')">
-                        <i class="fa fa-users-slash"></i> <!-- Icon for multiple people -->
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(row);
+                    row.innerHTML = `
+                        <td>${destination}</td>
+                        <td>${count}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="removePassenger('${destination}')">
+                                <i class="fa fa-user-minus"></i> <!-- Icon for 1 person -->
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="removeAllPassengerDestination('${destination}')">
+                                <i class="fa fa-users-slash"></i> <!-- Icon for multiple people -->
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            }
         }
-    }
-}
 
 
         async function removeAllPassengerDestination(destination) {
@@ -728,7 +746,7 @@ $conn->close();
             return `${timestamp}${randomNum}`;
         }
 
-        function promptRFIDInput() {
+        async function promptRFIDInput() {
             const fromRouteValue = document.getElementById('fromRoute').value;
             const toRouteValue = document.getElementById('toRoute').value;
             const distance = Math.abs(fromRoute.post - toRoute.post);
@@ -739,7 +757,7 @@ $conn->close();
             console.log("Distance:", distance); // Debugging line
             console.log("Payment Method:", paymentMethod);
 
-            if (!validateRoutes()) {
+            if (!validateRoutesAndBus()) {
                 // Stop execution if routes are not selected
                 return;
             }
@@ -788,8 +806,8 @@ $conn->close();
         }
 
         // Function to get user balance based on RFID (account_number)
-        function processPayment(paymentType) {
-            if (!validateRoutes()) {
+        async function processPayment(paymentType) {
+            if (!validateRoutesAndBus()) {
                 return;
             }
             if (paymentType === 'cash') {
