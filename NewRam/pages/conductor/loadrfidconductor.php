@@ -2,7 +2,6 @@
 session_start();
 include '../../includes/connection.php';
 include '../../includes/functions.php';
-
 // Assuming you have the user id in session
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Conductor' && $_SESSION['role'] != 'Superadmin')) {
     header("Location: ../../index.php");
@@ -25,14 +24,17 @@ $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRecords / $perPage);
 
 // Fetch paginated data
+$account_number = $_SESSION['account_number'];
+
 $sql = "SELECT t.id, 
-        t.account_number, 
-        CONCAT(u.firstname, ' ', u.lastname) AS name, 
-        t.amount,
-        t.status
+               t.account_number, 
+               CONCAT(u.firstname, ' ', u.lastname) AS name, 
+               t.amount,
+               t.status
         FROM transactions t
         JOIN useracc u ON t.account_number = u.account_number
-        WHERE t.status = 'notremitted'
+        WHERE t.status = 'notremitted' 
+          AND t.conductor_id = '$account_number'
         ORDER BY t.transaction_date DESC
         LIMIT $offset, $perPage";
 
