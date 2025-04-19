@@ -63,39 +63,31 @@ if ($data) {
     $stmt2->close();
 
     //3.5 Unset Conductor Session
-    if (isset($_SESSION['bus_number'], $_SESSION['driver_account_number'], $_SESSION['driver_name'])) {
-        $bus_number = $_SESSION['bus_number'];
-        $conductor_id = $_SESSION['driver_account_number'];
-        $email = $_SESSION['email'];
-        $driver_name = $_SESSION['driver_name'];
-   
-        // Update the bus status to 'Available'
-        $updateBusStmt = $conn->prepare("UPDATE businfo SET driverName ='', conductorName ='', status = 'available', destination = '', driverID = '', conductorID = '', current_stop = '' WHERE bus_number = ?");
-        if ($updateBusStmt) {
-            $updateBusStmt->bind_param("s", $bus_number);
-            if ($updateBusStmt->execute()) {
-                // Split the full name into first, middle, and last name if necessary
-               
-                // Update the driver status in the useracc table to 'notdriving'
-                $updateDriverStatusStmt = $conn->prepare("UPDATE useracc SET driverStatus = 'notdriving' WHERE  account_number = ?");
-                if ($updateDriverStatusStmt) {
-                    $updateDriverStatusStmt->bind_param("s",$lastname);
-                    if ($updateDriverStatusStmt->execute()) {
-                        $response = ['success' => true, 'message' => 'Conductor logged out successfully and driver status updated.'];
-                    } else {
-                        $response = ['error' => 'Error updating driver status: ' . $conn->error];
-                    }
-                    $updateDriverStatusStmt->close();
+    $updateBusStmt = $conn->prepare("UPDATE businfo SET driverName ='', conductorName ='', status = 'available', destination = '', driverID = '', conductorID = '', current_stop = '' WHERE bus_number = ?");
+    if ($updateBusStmt) {
+        $updateBusStmt->bind_param("s", $busNo);
+        if ($updateBusStmt->execute()) {
+            // Split the full name into first, middle, and last name if necessary
+            
+            // Update the driver status in the useracc table to 'notdriving'
+            $updateDriverStatusStmt = $conn->prepare("UPDATE useracc SET driverStatus = 'notdriving' WHERE  account_number = ?");
+            if ($updateDriverStatusStmt) {
+                $updateDriverStatusStmt->bind_param("s",$lastname);
+                if ($updateDriverStatusStmt->execute()) {
+                    $response = ['success' => true, 'message' => 'Conductor logged out successfully and driver status updated.'];
                 } else {
-                    $response = ['error' => 'Error preparing driver status update statement: ' . $conn->error];
+                    $response = ['error' => 'Error updating driver status: ' . $conn->error];
                 }
+                $updateDriverStatusStmt->close();
             } else {
-                $response = ['error' => 'Error updating bus status: ' . $conn->error];
+                $response = ['error' => 'Error preparing driver status update statement: ' . $conn->error];
             }
-            $updateBusStmt->close();
         } else {
-            $response = ['error' => 'Error preparing bus update statement: ' . $conn->error];
+            $response = ['error' => 'Error updating bus status: ' . $conn->error];
         }
+        $updateBusStmt->close();
+    } else {
+        $response = ['error' => 'Error preparing bus update statement: ' . $conn->error];
     }
 
     // 4. Continue with receipt printing

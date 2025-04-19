@@ -25,29 +25,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
 
     $stmt = $conn->prepare("
         SELECT 
-        u.firstname,
-        u.lastname,
-        IFNULL(SUM(DISTINCT CASE 
-            WHEN t.status NOT IN ('edited', 'remitted') THEN t.amount 
-            ELSE 0 END), 0) AS total_load,
+            u.firstname,
+            u.lastname,
 
-        MAX(CASE 
-            WHEN pl.status = 'notremitted' THEN pl.bus_number 
-            ELSE NULL END) AS bus_number,
+            IFNULL(SUM(DISTINCT CASE 
+                WHEN t.status NOT IN ('edited', 'remitted') THEN t.amount 
+                ELSE 0 END), 0) AS total_load,
 
-        IFNULL(SUM(CASE 
-            WHEN pl.status = 'notremitted' AND pl.rfid = 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
-            ELSE 0 END), 0) AS total_cash_fare,
+            COALESCE(
+                MAX(CASE 
+                    WHEN pl.status = 'notremitted' THEN pl.bus_number 
+                    ELSE NULL 
+                END),
+                MAX(CASE 
+                    WHEN t.status NOT IN ('edited', 'remitted') THEN t.bus_number 
+                    ELSE NULL 
+                END)
+            ) AS bus_number,
 
-        IFNULL(SUM(CASE 
-            WHEN pl.status = 'notremitted' AND pl.rfid != 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
-            ELSE 0 END), 0) AS total_card_fare
+            IFNULL(SUM(CASE 
+                WHEN pl.status = 'notremitted' AND pl.rfid = 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
+                ELSE 0 END), 0) AS total_cash_fare,
 
-        FROM useracc u
-        LEFT JOIN transactions t ON t.conductor_id = u.account_number
-        LEFT JOIN passenger_logs pl ON pl.conductor_id = u.account_number
-        WHERE u.account_number = ?
-        GROUP BY u.account_number
+            IFNULL(SUM(CASE 
+                WHEN pl.status = 'notremitted' AND pl.rfid != 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
+                ELSE 0 END), 0) AS total_card_fare
+
+            FROM useracc u
+            LEFT JOIN transactions t ON t.conductor_id = u.account_number
+            LEFT JOIN passenger_logs pl ON pl.conductor_id = u.account_number
+            WHERE u.account_number = ?
     ");
 
     $stmt->bind_param("s", $rfid_scan);
