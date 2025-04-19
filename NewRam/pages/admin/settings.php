@@ -182,21 +182,34 @@ function openFeatureModal(page = 1) {
             document.querySelectorAll('.delete-feature').forEach(button => {
                 button.addEventListener('click', function () {
                     const id = this.getAttribute('data-id');
-                    if (confirm('Are you sure you want to delete this feature?')) {
-                        fetch('../../actions/admin_settings_feature_actions.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `action=delete&id=${id}`
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                openFeatureModal(page); // Refresh current page
-                            }
-                        });
-                    }
+                    
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'You will not be able to recover this feature!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch('../../actions/admin_settings_feature_actions.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: `action=delete&id=${id}`
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    openFeatureModal(page); // Refresh current page
+                                }
+                            });
+                        }
+                    });
                 });
             });
+
 
             // Bind toggle buttons
             document.querySelectorAll('.toggle-feature').forEach(button => {

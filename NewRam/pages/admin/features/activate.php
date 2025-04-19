@@ -225,99 +225,90 @@ h5{
     include '../../../includes/footer.php';
     ?>
 
-    <!-- Page Content  -->
-
     <div id="main-content" class="container-fluid mt-5">
-    <h3>
-    <a href="#" id="awaitingActivation" class="clickable-count">
-        Awaiting Activation: <?php echo $userActivateCount; ?> (Disabled)
-    </a>
-</h3>
-<h3>
-    <a href="#" id="registeredUsers" class="clickable-count">
-        Registered Users: <?php echo $userCount; ?> (Activate)
-    </a>
-</h3>
-
-        <form method="POST" action="">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" id="search" name="search" placeholder="Search users...">
-              
-            </div>
-        </form>
-        <!-- Feedback Message -->
-        <?php if (isset($_SESSION['message'])): ?>
-            <div class="alert alert-info">
-                <?php
-                echo $_SESSION['message'];
-                unset($_SESSION['message']); // Clear message after displaying
-                ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Table for Displaying Users -->
-        <div class="table-container">
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                <caption>List of users</caption>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Firstname</th>
-                            <th>Middlename</th>
-                            <th>Lastname</th>
-                            <th>Birthday</th>
-                            <th>Age</th>
-                            <th>Gender</th>
-                          
-                            <th>Account Number</th>
-                            <th>Balance</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        <?php while ($row = mysqli_fetch_assoc($userResult)): ?>
-                            <tr id="user-row-<?php echo $row['id']; ?>">
-                                <td><?php echo $row['id']; ?></td>
-                                <td><?php echo htmlspecialchars($row['firstname']); ?></td>
-                                <td><?php echo htmlspecialchars($row['middlename']); ?></td>
-                                <td><?php echo htmlspecialchars($row['lastname']); ?></td>
-                                <td><?php echo date('F j, Y', strtotime($row['birthday'])); ?></td>
-                                <td><?php echo $row['age']; ?></td>
-                                <td><?php echo htmlspecialchars($row['gender']); ?></td>
-
-                                <td><?php echo htmlspecialchars($row['account_number']); ?></td>
-                                <td>₱<?php echo number_format($row['balance'], 2); ?></td>
-                                <td><?php echo isset($row['is_activated']) ? ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') : 'N/A'; ?>
-                                </td>                              
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Action Modal -->
-        <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title d-flex justify-content-center w-100" id="actionModalLabel">Actions</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h2>Registered Users</h2>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-10">
+                <form method="POST" action="">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Search users...">
                     </div>
-                    <div class="modal-body">
-                        <div id="accountNumberContainer" style="display: none;">
-                            <label for="accountNumberInput">Enter Account Number:</label>
-                            <input type="text" id="accountNumberInput" class="form-control" placeholder="Account Number">
+                </form>
+                <!-- Feedback Message -->
+                <?php if (isset($_SESSION['message'])): ?>
+                    <div class="alert alert-info">
+                        <?php
+                        echo $_SESSION['message'];
+                        unset($_SESSION['message']);
+                        ?>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Table for Displaying Users -->
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                        <caption>List of users</caption>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Firstname</th>
+                                    <th>Middlename</th>
+                                    <th>Lastname</th>
+                                    <th>Birthday</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                
+                                    <th>Account Number</th>
+                                    <th>Balance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <?php while ($row = mysqli_fetch_assoc($userResult)): ?>
+                                    <tr id="user-row-<?php echo $row['id']; ?>">
+                                        <td><?php echo $row['id']; ?></td>
+                                        <td><?php echo htmlspecialchars($row['firstname']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['middlename']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['lastname']); ?></td>
+                                        <td><?php echo date('F j, Y', strtotime($row['birthday'])); ?></td>
+                                        <td><?php echo $row['age']; ?></td>
+                                        <td><?php echo htmlspecialchars($row['gender']); ?></td>
+
+                                        <td><?php echo htmlspecialchars($row['account_number']); ?></td>
+                                        <td>₱<?php echo number_format($row['balance'], 2); ?></td>
+                                        <td><?php echo isset($row['is_activated']) ? ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') : 'N/A'; ?>
+                                        </td>                              
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Action Modal -->
+                <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title d-flex justify-content-center w-100" id="actionModalLabel">Actions</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="accountNumberContainer" style="display: none;">
+                                    <label for="accountNumberInput">Enter Account Number:</label>
+                                    <input type="text" id="accountNumberInput" class="form-control" placeholder="Account Number">
+                                </div>
+                                <button id="activateBtn" class="btn btn-success custom-btn mx-2" onclick="confirmActivate()">Activate</button>
+                                <button id="disableBtn" class="btn btn-danger custom-btn mx-2" onclick="confirmDisable()">Disable</button>
+                                <button id="transferFundsBtn" class="btn btn-warning custom-btn mx-2" onclick="confirmTransferDisable()">Transfer Funds</button>
+                            </div>
                         </div>
-                        <button id="activateBtn" class="btn btn-success custom-btn mx-2" onclick="confirmActivate()">Activate</button>
-                        <button id="disableBtn" class="btn btn-danger custom-btn mx-2" onclick="confirmDisable()">Disable</button>
-                        <button id="transferFundsBtn" class="btn btn-warning custom-btn mx-2" onclick="confirmTransferDisable()">Transfer Funds</button>
                     </div>
                 </div>
             </div>
         </div>
-</div>
+    </div>
         <script>
 
 
