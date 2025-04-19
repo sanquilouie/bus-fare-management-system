@@ -52,13 +52,22 @@ if (!isset($_SESSION['passengers'])) {
 }
 
 // Function to fetch balance based on RFID
-function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac,$driverID, $busNumber, $transactionNumber, $conn)
+function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac, $driverID, $busNumber, $transactionNumber, $conn)
 {
-    $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name, conductor_id,driver_name,driver_id,bus_number, transaction_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // First, insert the passenger log
+    $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name, conductor_id, driver_name, driver_id, bus_number, transaction_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssssssss", $rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac,$driverID, $busNumber, $transactionNumber);
+    $stmt->bind_param("ssssssssss", $rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac, $driverID, $busNumber, $transactionNumber);
     $stmt->execute();
     $stmt->close();
+
+    // Then, update the useracc points (5% of fare)
+    $points = $fare * 0.05;
+    $updateQuery = "UPDATE useracc SET points = points + ? WHERE account_number = ?";
+    $updateStmt = $conn->prepare($updateQuery);
+    $updateStmt->bind_param("ds", $points, $rfid);
+    $updateStmt->execute();
+    $updateStmt->close();
 }
 
 function getUserBalance($rfid, $conn)
