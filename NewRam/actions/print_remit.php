@@ -39,10 +39,19 @@ if ($data) {
         $deduction_total += $amount;
     }
     $stmt = $conn->prepare("INSERT INTO remit_logs (conductor_id, bus_no, total_cash, total_card, total_load, net_amount, total_deductions, remit_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error);
+    }
+
     $stmt->bind_param("ssddddds", $rfid, $busNo, $totalFare, $totalCard, $totalLoad, $netAmount, $deduction_total, $date);
-    $stmt->execute();
-    $remit_id = $stmt->insert_id; 
+
+    if (!$stmt->execute()) {
+        die("Execute failed: " . $stmt->error);
+    }
+
+    $remit_id = $stmt->insert_id;
     $stmt->close();
+
 
     // Update passenger_logs to 'remitted'
     $stmt1 = $conn->prepare("UPDATE passenger_logs SET status = 'remitted' WHERE conductor_id = ? AND bus_number = ? AND status = 'notremitted'");
