@@ -272,7 +272,7 @@ if ($rfid_data) {
 
                         // Construct the receipt HTML
                         let receiptHTML = `
-                            <div style="font-family: Arial, sans-serif; width: 227px; margin: 0; padding: 10px;">
+                            <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto; margin-left: -10px; padding: 10px;">
                                 <div style="text-align: center; font-size: 18px; font-weight: bold;">
                                     ZARAGOZA RAMSTAR
                                 </div>
