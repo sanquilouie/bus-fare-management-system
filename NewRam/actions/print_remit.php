@@ -91,7 +91,7 @@ if ($data) {
     }
 
     // 4. Continue with receipt printing
-    $connector = new WindowsPrintConnector("POS58");
+    $connector = new WindowsPrintConnector("POS60");
     $printer = new Printer($connector);
 
     $printer->setJustification(Printer::JUSTIFY_CENTER);
