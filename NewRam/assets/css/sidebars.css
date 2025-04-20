@@ -154,3 +154,21 @@ input[type=number].form-control {
 .settings-btn:hover {
   color: #007bff;
 }
+
+/* styles.css */
+@media print {
+  @page {
+      size: 80mm 150mm;  /* Custom size for receipt printers */
+      margin: 0;
+  }
+
+  body {
+      margin: 0;
+      font-family: 'Courier', monospace;
+  }
+
+  .receipt {
+      width: 80mm;
+      padding: 10mm;
+  }
+}

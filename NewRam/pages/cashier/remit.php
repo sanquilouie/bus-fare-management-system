@@ -266,9 +266,62 @@ if ($rfid_data) {
                             deductions: deductions
                         })
                     })
-                    .then(response => response.text())
+                    .then(response => response.json())
                     .then(data => {
                         console.log(data);
+
+                        // Construct the receipt HTML
+                        let receiptHTML = `
+                            <div style="font-family: Arial, sans-serif; width: 300px; margin: 0 auto; padding: 10px; border: 1px solid #000;">
+                                <div style="text-align: center; font-size: 18px; font-weight: bold;">
+                                    ZARAGOZA RAMSTAR
+                                </div>
+                                <div style="text-align: center; font-size: 16px;">
+                                    === REMITTANCE SLIP ===
+                                </div>
+                                <hr />
+                                <div>
+                                    <strong>RFID:</strong> ${data.rfid}<br>
+                                    <strong>Bus No:</strong> ${data.bus_no}<br>
+                                    <strong>Conductor:</strong> ${data.conductor_name}<br>
+                                    <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
+                                    <strong>Time:</strong> ${new Date().toLocaleTimeString()}
+                                </div>
+                                <div>
+                                    <hr />
+                                    <strong>Total Cash:</strong> PHP ${data.total_fare}<br>
+                                    <strong>Total Card:</strong> PHP ${data.total_card}<br>
+                                    <strong>Total Load:</strong> PHP ${data.total_load}<br>
+                                </div>
+                                <div>
+                                    ${data.deductions && data.deductions.length > 0 ? "<strong>Deductions:</strong><br>" : ""}
+                                    ${data.deductions.map(deduction => {
+                                        let parts = deduction.split(':');
+                                        let desc = parts[0] ?? 'No Desc';
+                                        let amount = parts[1] ?? '0.00';
+                                        return `<div>- ${desc}: PHP ${amount}</div>`;
+                                    }).join('')}
+                                </div>
+                                <hr />
+                                <div>
+                                    <strong>NET AMOUNT:</strong> PHP ${data.net_amount}
+                                </div>
+                                <div style="text-align: center; margin-top: 10px;">
+                                    ${data.remit_id ? `<strong>${data.remit_id}</strong>` : ''}
+                                </div>
+                                <hr />
+                                <div style="text-align: center;">
+                                    THANK YOU!
+                                </div>
+                            </div>
+                        `;
+
+                        // Open a new window with the receipt HTML and print
+                        let printWindow = window.open('', '', 'width=800, height=600');
+                        printWindow.document.write(receiptHTML);
+                        printWindow.document.close();
+                        printWindow.print();
+
                         // Optionally submit form afterward
                         document.getElementById('remittanceForm').submit();
                     })
