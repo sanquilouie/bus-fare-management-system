@@ -688,28 +688,35 @@ $conn->close();
             }
         }
 
-        async function fetchDashboardData() {
-            try {
-                const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>?dashboard=true', {
-                    method: 'GET',
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
-                    updateDashboard(data);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Unable to fetch destination data.',
-                    });
-                }
-            } catch (error) {
-                Swal.fire({
+        async function validateRoutesAndBus() {
+            const fromRoute = document.getElementById('fromRoute').value;
+            const toRoute = document.getElementById('toRoute').value;
+
+            if (!fromRoute || !toRoute) {
+                await Swal.fire({
                     icon: 'error',
-                    title: 'Oops...',
-                    text: 'Something went wrong! Try again.',
+                    title: 'Missing Selection',
+                    text: 'Please select both a starting point and a destination.',
                 });
+                return false;
             }
+
+            // Check conductor assignment from the server
+            const response = await fetch('../../actions/check_conductor_businfo.php');
+            const result = await response.json();
+
+            if (!result.success) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Not Assigned',
+                    text: result.error || 'You are not assigned to any bus',
+                }).then(() => {
+                    window.location.href = '../../auth/logout.php';
+                });
+                return false;;
+            }
+
+            return true;
         }
 
         async function fetchDashboardData() {
