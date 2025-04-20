@@ -118,7 +118,14 @@ if ($rfid_data) {
     <script src="/NewRam/assets/js/NFCScanner.js"></script>
     <title>Conductor Remittance</title>
 </head>
-
+<style>
+    @media print {
+        @page {
+            size: 58mm auto; /* or 80mm if your printer is wider */
+            margin: 0; /* Remove default margins */
+        }
+    }
+</style>
 <body>
     <?php
         include '../../includes/topbar.php';
