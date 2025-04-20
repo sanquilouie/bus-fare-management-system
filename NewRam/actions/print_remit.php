@@ -41,19 +41,27 @@ if ($data) {
         $amount = floatval(str_replace(['₱', 'P', 'p'], '', $raw_amount));
         $deduction_total += $amount;
     }
+    header('Content-Type: application/json');
+
     $stmt = $conn->prepare("INSERT INTO remit_logs (conductor_id, bus_no, total_cash, total_card, total_load, net_amount, total_deductions, remit_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     if (!$stmt) {
-        die("Prepare failed: " . $conn->error);
+        echo json_encode(["status" => "error", "message" => "Prepare failed: " . $conn->error]);
+        exit;
     }
 
     $stmt->bind_param("ssddddds", $rfid, $busNo, $totalFare, $totalCard, $totalLoad, $netAmount, $deduction_total, $date);
 
     if (!$stmt->execute()) {
-        die("Execute failed: " . $stmt->error);
+        echo json_encode(["status" => "error", "message" => "Execute failed: " . $stmt->error]);
+        exit;
     }
 
     $remit_id = $stmt->insert_id;
     $stmt->close();
+
+    echo json_encode(["status" => "success", "remit_id" => $remit_id]);
+    exit;
+
 
 
     // Update passenger_logs to 'remitted'
