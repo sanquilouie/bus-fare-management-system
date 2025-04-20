@@ -1,9 +1,6 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Manila');
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 include "../includes/connection.php";
 
 function formatLine($label, $value, $width = 32) {
@@ -41,28 +38,17 @@ if ($data) {
         $amount = floatval(str_replace(['₱', 'P', 'p'], '', $raw_amount));
         $deduction_total += $amount;
     }
-    header('Content-Type: application/json');
+    $stmt0 = $conn->prepare("INSERT INTO remittances (conductor_id, bus_no, remit_date, total_earning, total_deductions, net_amount) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt0->bind_param("sssddd", $rfid, $busNo, $date, $totalFare, $deduction_total, $netAmount);
+    $stmt0->execute();
+    $remit_id = $stmt0->insert_id;
+    $stmt0->close();
 
-    $stmt = $conn->prepare("INSERT INTO remit_logs (conductor_id, bus_no, total_cash, total_card, total_load, net_amount, total_deductions, remit_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    if (!$stmt) {
-        echo json_encode(["status" => "error", "message" => "Prepare failed: " . $conn->error]);
-        exit;
-    }
-
-    $stmt->bind_param("ssddddds", $rfid, $busNo, $totalFare, $totalCard, $totalLoad, $netAmount, $deduction_total, $date);
-
-    if (!$stmt->execute()) {
-        echo json_encode(["status" => "error", "message" => "Execute failed: " . $stmt->error]);
-        exit;
-    }
-
-    $remit_id = $stmt->insert_id;
-    $stmt->close();
-
-    echo json_encode(["status" => "success", "remit_id" => $remit_id]);
-    exit;
-
-
+    // Step 2: Insert into remit_logs, using the remit_id from above
+    $stmt2 = $conn->prepare("INSERT INTO remit_logs (remit_id, conductor_id, bus_no, total_cash, total_card, total_load, net_amount, total_deductions, remit_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt2->bind_param("issddddds", $remit_id, $rfid, $busNo, $totalFare, $totalCard, $totalLoad, $netAmount, $deduction_total, $date);
+    $stmt2->execute();
+    $stmt2->close();
 
     // Update passenger_logs to 'remitted'
     $stmt1 = $conn->prepare("UPDATE passenger_logs SET status = 'remitted' WHERE conductor_id = ? AND bus_number = ? AND status = 'notremitted'");
