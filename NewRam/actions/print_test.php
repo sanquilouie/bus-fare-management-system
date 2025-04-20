@@ -56,7 +56,7 @@
     body {
       font-family: monospace;
       background: #f5f5f5;
-      padding: 20px;
+      //padding: 20px;
     }
 
     .no-print {
