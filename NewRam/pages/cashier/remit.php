@@ -272,28 +272,28 @@ if ($rfid_data) {
 
                         // Construct the receipt HTML
                         let receiptHTML = `
-                            <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto; padding: 10px;">
-                                <div style="text-align: center; font-size: 18px; font-weight: bold;">
+                            <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto;">
+                                <div style="text-align: center; font-size: 14px; font-weight: bold;">
                                     ZARAGOZA RAMSTAR
                                 </div>
-                                <div style="text-align: center; font-size: 16px;">
+                                <div style="text-align: center; font-size: 10px;">
                                     === REMITTANCE SLIP ===
                                 </div>
                                 <hr />
-                                <div>
+                                <div style="font-size: 9px;">
                                     <strong>RFID:</strong> ${data.rfid}<br>
                                     <strong>Bus No:</strong> ${data.bus_no}<br>
                                     <strong>Conductor:</strong> ${data.conductor_name}<br>
                                     <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
                                     <strong>Time:</strong> ${new Date().toLocaleTimeString()}
                                 </div>
-                                <div>
+                                <div style="font-size: 9px;">
                                     <hr />
                                     <strong>Total Cash:</strong> PHP ${data.total_fare}<br>
                                     <strong>Total Card:</strong> PHP ${data.total_card}<br>
                                     <strong>Total Load:</strong> PHP ${data.total_load}<br>
                                 </div>
-                                <div>
+                                <div style="font-size: 9px;">
                                     ${data.deductions && data.deductions.length > 0 ? "<strong>Deductions:</strong><br>" : ""}
                                     ${data.deductions.map(deduction => {
                                         let parts = deduction.split(':');
@@ -303,14 +303,14 @@ if ($rfid_data) {
                                     }).join('')}
                                 </div>
                                 <hr />
-                                <div>
+                                <div style="font-size: 10px;">
                                     <strong>NET AMOUNT:</strong> PHP ${data.net_amount}
                                 </div>
-                                <div style="text-align: center; margin-top: 10px;">
+                                <div style="text-align: center; margin-top: 10px; margin-left -20px;font-size: 10px;">
                                     ${data.remit_id ? `<strong>${data.remit_id}</strong>` : ''}
                                 </div>
                                 <hr />
-                                <div style="text-align: center;">
+                                <div style="text-align: center;font-size: 10px;margin-left -20px;">
                                     THANK YOU!
                                 </div>
                             </div>
