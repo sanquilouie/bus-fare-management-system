@@ -273,10 +273,10 @@ if ($rfid_data) {
                         // Construct the receipt HTML
                         let receiptHTML = `
                             <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto;">
-                                <div style="text-align: center; font-size: 14px; font-weight: bold;">
+                                <div style="text-align: center; font-size: 14px; font-weight: bold; margin-left: -45px;">
                                     ZARAGOZA RAMSTAR
                                 </div>
-                                <div style="text-align: center; font-size: 10px;">
+                                <div style="text-align: center; font-size: 10px; margin-left: -45px">
                                     === REMITTANCE SLIP ===
                                 </div>
                                 <hr />
@@ -306,11 +306,11 @@ if ($rfid_data) {
                                 <div style="font-size: 10px;">
                                     <strong>NET AMOUNT:</strong> PHP ${data.net_amount}
                                 </div>
-                                <div style="text-align: center; margin-top: 10px; margin-left -20px;font-size: 10px;">
+                                <div style="text-align: center; margin-top: 10px; margin-left: -45px; font-size: 10px;">
                                     ${data.remit_id ? `<strong>${data.remit_id}</strong>` : ''}
                                 </div>
                                 <hr />
-                                <div style="text-align: center;font-size: 10px;margin-left -20px;">
+                                <div style="text-align: center;font-size: 10px; margin-left: -45px">
                                     THANK YOU!
                                 </div>
                             </div>
