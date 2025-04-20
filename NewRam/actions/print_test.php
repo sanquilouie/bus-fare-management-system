@@ -19,7 +19,7 @@
       }
 
       .receipt {
-        padding: 5px;
+        //padding: 5px;
         width: 100%;
       }
 
@@ -44,7 +44,7 @@
       hr {
         border: none;
         border-top: 1px dashed #000;
-        margin: 10px 0;
+        //margin: 10px 0;
       }
 
       .no-print {
