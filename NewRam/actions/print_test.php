@@ -1,24 +1,33 @@
-<?php
-date_default_timezone_set('Asia/Manila');
-require_once '../libraries/vendor/autoload.php';
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Receipt</title>
+  <style>
+    body {
+      font-family: monospace;
+      width: 300px;
+      margin: auto;
+    }
+    .center {
+      text-align: center;
+    }
+    .bold {
+      font-weight: bold;
+    }
+    @media print {
+      button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="center bold">=== TEST PRINT ===</div>
+  <div class="center">Printerrrrrr</div>
+  <div class="center"><?= date("Y-m-d H:i:s") ?></div>
+  <br>
+  <div class="center">Thank you!</div>
 
-use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
-
-try {
-    // Connect to the printer
-    $connector = new WindowsPrintConnector("POS60");
-    $printer = new Printer($connector);
-
-    // Test print content
-    $printer->text("=== TEST PRINT ===\n");
-    $printer->text("Printerrrrrr\n");
-    $printer->text(date("Y-m-d H:i:s") . "\n");
-    $printer->feed(3);
-    $printer->cut();  
-
-    // Close printer connection
-    $printer->close();
-} catch (Exception $e) {
-    echo "Couldn't print to this printer: " . $e->getMessage() . "\n";
-}
+  <button onclick="window.print()">Print Receipt</button>
+</body>
+</html>
