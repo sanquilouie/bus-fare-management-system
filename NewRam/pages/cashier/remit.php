@@ -118,14 +118,7 @@ if ($rfid_data) {
     <script src="/NewRam/assets/js/NFCScanner.js"></script>
     <title>Conductor Remittance</title>
 </head>
-<style>
-    @media print {
-        @page {
-            size: 58mm auto; /* or 80mm if your printer is wider */
-            margin: 0; /* Remove default margins */
-        }
-    }
-</style>
+
 <body>
     <?php
         include '../../includes/topbar.php';
@@ -279,7 +272,7 @@ if ($rfid_data) {
 
                         // Construct the receipt HTML
                         let receiptHTML = `
-                            <div style="font-family: Arial, sans-serif; width: 160px; margin: 0 auto; padding: 10px;">
+                            <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto; padding: 10px;">
                                 <div style="text-align: center; font-size: 18px; font-weight: bold;">
                                     ZARAGOZA RAMSTAR
                                 </div>
