@@ -161,15 +161,15 @@ ob_end_flush();
                                 <div class="row mb-3">
                                     <div class="col-md-4">
                                         <label for="firstName" class="form-label required">First Name</label>
-                                        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required pattern="[A-Za-z]+" title="Letters only">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="middleName" class="form-label required">Middle Name</label>
-                                        <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name">
+                                        <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name" required pattern="[A-Za-z]+" title="Letters only">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="lastName" class="form-label required">Last Name</label>
-                                        <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required required pattern="[A-Za-z]+" title="Letters only">
                                     </div>
                                 </div>
 

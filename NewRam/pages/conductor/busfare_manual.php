@@ -379,9 +379,9 @@ $conn->close();
                         <div class="col-md-6">
                             <label for="fareType" class="form-label">Fare Type</label>
                             <select id="fareType" name="fareType" class="form-select">
-                                <option value="Regular">Regular</option>
-                                <option value="Discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
-                                <option value="Special">Special (<?= htmlspecialchars($specialPercentage); ?>% Off)</option>
+                                <option value="regular">Regular</option>
+                                <option value="fiscounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
+                                <option value="special">Special (<?= htmlspecialchars($specialPercentage); ?>% Off)</option>
                             </select>
                         </div>  
                     </div>
