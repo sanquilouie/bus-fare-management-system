@@ -380,7 +380,7 @@ $conn->close();
                             <label for="fareType" class="form-label">Fare Type</label>
                             <select id="fareType" name="fareType" class="form-select">
                                 <option value="regular">Regular</option>
-                                <option value="fiscounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
+                                <option value="discounted">Student/Senior (<?= htmlspecialchars($discountPercentage); ?>% Off)</option>
                                 <option value="special">Special (<?= htmlspecialchars($specialPercentage); ?>% Off)</option>
                             </select>
                         </div>  
