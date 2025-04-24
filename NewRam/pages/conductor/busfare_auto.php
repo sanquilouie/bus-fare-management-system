@@ -412,8 +412,8 @@ $conn->close();
                 <!-- Fare Result -->
 
                 <div class="d-flex justify-content-center align-items-center mb-4">
-                    <button class="btn btn-primary mx-1 form-control" onclick="processPayment('cash')">Cash</button>
-                    <button class="btn btn-success mx-1 form-control" onclick="promptRFIDInput()">RFID</button>
+                    <button class="btn btn-primary mx-1 form-control" onclick="processPayment('cash')">CASH</button>
+                    <button class="btn btn-success mx-1 form-control" onclick="promptRFIDInput()">NFC</button>
                 </div>
 
                 <div class="card shadow-sm mb-5">
