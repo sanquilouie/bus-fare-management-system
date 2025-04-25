@@ -78,15 +78,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
-            $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+            $mail->setFrom('portfolio@example.invalid', 'Ramstar Zaragoza');
             $mail->addAddress($email, $firstname . ' ' . $lastname);
             $mail->isHTML(true);
             $mail->Subject = 'Registration Received';
             $mail->Body = "
                 <p>Hi $firstname,</p>
-                <p>Thank you for registering with Ramstar Bus Transportation.</p>
+                <p>Thank you for registering with Ramstar Zaragoza.</p>
                 <p>Your account is pending activation. You will receive another email once you get your card in ramstar office or teminals.</p>
-                <p>Best regards,<br>Ramstar Bus Transportation</p>
+                <p>Best regards,<br>Ramstar Zaragoza</p>
             ";
 
             $mail->send();
