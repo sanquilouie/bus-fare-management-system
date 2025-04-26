@@ -109,7 +109,7 @@ if (isset($_POST['Login'])) {
    <script src="/NewRam/assets/js/NFCScanner.js"></script>
    <style>
       body {
-         background: url('../assets/images/bus1.jpg') no-repeat center center fixed;
+         background: url('../assets/images/newbus1.jpg') no-repeat center center fixed;
          /* Add your image path here */
          background-size: cover;
          /* Ensures the image covers the full page */
