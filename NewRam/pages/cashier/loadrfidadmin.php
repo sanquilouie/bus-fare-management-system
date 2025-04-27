@@ -73,6 +73,8 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                             placeholder="Enter Amount" required>
                     </div>  
                     <div class="btn-group mb-3" role="group">
+                        <button type="button" class="btn btn-secondary load-button" data-amount="20">₱20</button>
+                        <button type="button" class="btn btn-secondary load-button" data-amount="50">₱50</button>
                         <button type="button" class="btn btn-secondary load-button" data-amount="100">₱100</button>
                         <button type="button" class="btn btn-secondary load-button" data-amount="200">₱200</button>
                         <button type="button" class="btn btn-secondary load-button" data-amount="500">₱500</button>

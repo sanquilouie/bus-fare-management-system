@@ -35,14 +35,14 @@ function sendActivationEmail($user_id, $account_number)
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+        $mail->setFrom('portfolio@example.invalid', 'Ramstar Zaragoza');
         $mail->addAddress($email, "$firstname $lastname");
         $mail->isHTML(true);
         $mail->Subject = 'Registration Successful';
         $mail->Body = "
             <p>Dear $firstname,</p>
             <p>Your account has been successfully activated!</p>
-            <p>Login to ramstarbus.com</p>
+            <p>Login to ramstarzaragosa.site</p>
             <p><strong>Account Number:</strong> $account_number<br>
             <strong>Password:</strong> $password</p>
             <p>Change your password after logging in for security.</p>
