@@ -35,7 +35,7 @@
 <div class="content">
     <h1>Privacy Policy</h1>
 
-    <p>Ramstar Zaragoza ("we," "us," or "our") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data.</p>
+    <p><b>Ramstar Zaragoza</b> ("we," "us," or "our") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data.</p>
 
     <h2>1. Information We Collect</h2>
     <ul>
@@ -59,7 +59,7 @@
 
     <h2>5. Your Rights</h2>
     <ul>
-        <li>You have the right to access, update, or delete your personal data by contacting us at portfolio@example.invalid.</li>
+        <li>You have the right to access, update, or delete your personal data by contacting us at <b><i>portfolio@example.invalid</b></i></li>
         <li>You can opt-out of promotional communications at any time.</li>
     </ul>
 
@@ -70,7 +70,7 @@
     <p>We reserve the right to update this policy at any time. Changes will be posted on this page with an updated effective date.</p>
 
     <h2>8. Contact Us</h2>
-    <p>If you have questions about this Privacy Policy, please email us at portfolio@example.invalid.</p>
+    <p>If you have questions about this Privacy Policy, please email us at <b><i>portfolio@example.invalid</b></i></p>
 </div>
 
 <button onclick="goBack()">Go Back</button>
