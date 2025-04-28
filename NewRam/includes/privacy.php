@@ -1,10 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy</title>
+    <style>
+        .content {
+            padding: 20px;
+        
+            margin: auto;
+            font-family: Arial, sans-serif;
+        }
+        button {
+            background: #f1c40f;
+         color: black;
+         font-size: 16px;
+         font-weight: 500;
+         padding: 12px 25px;
+         border: none;
+         border-radius: 25px;
+         cursor: pointer;
+         transition: all 0.3s ease-in-out;
+         margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #e67e22;
+         transform: scale(1.05);
+         transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body>
 
 <div class="content">
     <h1>Privacy Policy</h1>
-    
-    <p>Effective Date: [Insert Date]</p>
 
-    <p>[Your System Name] ("we," "us," or "our") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data.</p>
+    <p>Ramstar Zaragoza ("we," "us," or "our") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data.</p>
 
     <h2>1. Information We Collect</h2>
     <ul>
@@ -28,7 +59,7 @@
 
     <h2>5. Your Rights</h2>
     <ul>
-        <li>You have the right to access, update, or delete your personal data by contacting us at [Insert Email Address].</li>
+        <li>You have the right to access, update, or delete your personal data by contacting us at portfolio@example.invalid.</li>
         <li>You can opt-out of promotional communications at any time.</li>
     </ul>
 
@@ -39,8 +70,20 @@
     <p>We reserve the right to update this policy at any time. Changes will be posted on this page with an updated effective date.</p>
 
     <h2>8. Contact Us</h2>
-    <p>If you have questions about this Privacy Policy, please email us at [Insert Email Address].</p>
+    <p>If you have questions about this Privacy Policy, please email us at portfolio@example.invalid.</p>
 </div>
-<button onclick="window.history.length > 1 ? window.history.back() : window.location.href='admindashboard.php'">
-    Go Back
-</button>
+
+<button onclick="goBack()">Go Back</button>
+
+<script>
+function goBack() {
+    if (document.referrer !== "") {
+        window.history.back();
+    } else {
+        window.location.href = 'admindashboard.php';
+    }
+}
+</script>
+
+</body>
+</html>
