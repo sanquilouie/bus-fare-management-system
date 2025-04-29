@@ -577,12 +577,22 @@ $conn->close();
         async function validateRoutesAndBus() {
             const fromRoute = document.getElementById('fromRoute').value;
             const toRoute = document.getElementById('toRoute').value;
+            const direction = "<?= $_SESSION['direction'] ?? '' ?>";
 
             if (!fromRoute || !toRoute) {
                 await Swal.fire({
                     icon: 'error',
                     title: 'Missing Selection',
                     text: 'Please select both a starting point and a destination.',
+                });
+                return false;
+            }
+
+            if (!direction) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Selection',
+                    text: 'Please set direction first in settings.',
                 });
                 return false;
             }
@@ -766,11 +776,10 @@ $conn->close();
             console.log("Distance:", distance); // Debugging line
             console.log("Payment Method:", paymentMethod);
 
-            if (!validateRoutesAndBus()) {
-                // Stop execution if routes are not selected
+            const isValid = await validateRoutesAndBus();
+            if (!isValid) {
                 return;
             }
-
             Swal.fire({
                 title: 'Enter RFID',
                 input: 'text',
@@ -816,7 +825,8 @@ $conn->close();
 
         // Function to get user balance based on RFID (account_number)
         async function processPayment(paymentType) {
-            if (!validateRoutesAndBus()) {
+            const isValid = await validateRoutesAndBus();
+            if (!isValid) {
                 return;
             }
             if (paymentType === 'cash') {

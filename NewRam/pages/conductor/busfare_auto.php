@@ -691,12 +691,22 @@ $conn->close();
         async function validateRoutesAndBus() {
             const fromRoute = document.getElementById('fromRoute').value;
             const toRoute = document.getElementById('toRoute').value;
+            const direction = "<?= $_SESSION['direction'] ?? '' ?>";
 
             if (!fromRoute || !toRoute) {
                 await Swal.fire({
                     icon: 'error',
                     title: 'Missing Selection',
                     text: 'Please select both a starting point and a destination.',
+                });
+                return false;
+            }
+
+            if (!direction) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Selection',
+                    text: 'Please set direction first in settings.',
                 });
                 return false;
             }
@@ -872,8 +882,8 @@ $conn->close();
             console.log("Distance:", distance); // Debugging line
             console.log("Payment Method:", paymentMethod);
 
-            if (!validateRoutesAndBus()) {
-                // Stop execution if routes are not selected
+            const isValid = await validateRoutesAndBus();
+            if (!isValid) {
                 return;
             }
 
@@ -922,8 +932,8 @@ $conn->close();
 
         // Function to get user balance based on RFID (account_number)
         async function processPayment(paymentType) {
-            if (!validateRoutesAndBus()) {
-                // Stop execution if routes are not selected
+            const isValid = await validateRoutesAndBus();
+            if (!isValid) {
                 return;
             }
             if (paymentType === 'cash') {
@@ -1036,6 +1046,7 @@ $conn->close();
     receiptShown = true;
     const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>"); 
     const conductorNameFormatted = abbreviateName(conductorName);
+    const direction = "<?= $_SESSION['direction'] ?? '' ?>";
     
     const busNumber = "<?= $bus_number; ?>"; 
     const date = new Date().toLocaleDateString();
@@ -1044,6 +1055,7 @@ $conn->close();
     const receiptText = `
       ZARAGOZA RAMSTAR
   TRANSPORT COOPERATIVE
+  DIRECTION       : ${direction}
   BUS NO.         : ${busNumber}
   DATE            : ${date}
   TIME            : ${time}
@@ -1070,6 +1082,7 @@ $conn->close();
                 console.log("Printing receipt...");
                 AndroidPrinter.printText(
                     transactionNumber,
+                    direction,
                     busNumber,
                     driverName,
                     conductorNameFormatted,
