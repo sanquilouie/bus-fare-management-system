@@ -184,93 +184,35 @@ $conn->close();
 <head>
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Login</title>
+   <title>Forgot Password</title>
    <link rel="stylesheet" href="../assets/css/login.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+   <link rel="stylesheet" href="https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css">
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Include SweetAlert CSS and JS -->
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.5/dist/sweetalert2.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.5/dist/sweetalert2.min.js"></script>
 
-<!-- Custom Styling -->
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f7fc;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: url('images/bus1.jpg') no-repeat center center fixed;
-         /* Add your image path here */
-         background-size: cover;
-    }
-    .form-container {
-        background-color: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 600px;
-    }
-    .form-container h2 {
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    label {
-        font-size: 14px;
-        margin-bottom: 6px;
-        display: block;
-    }
-    input[type="email"],
-    input[type="text"],
-    input[type="password"] {
-        width: 100%;
-        padding: 10px;
-        margin: 10px 0 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-    button {
-        width: 100%;
-        padding: 12px;
-        background-color: #4CAF50;
-        border: none;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-    button:hover {
-        background-color: #45a049;
-        
-    }
-    .btn {
-        background: #f1c40f;
-         color: black;
-         font-size: 16px;
-         font-weight: 500;
-         padding: 12px 25px;
-         border: none;
-         border-radius: 25px;
-         cursor: pointer;
-         transition: all 0.3s ease-in-out;
-         margin-bottom: 10px;
-      }
+   <!-- SweetAlert2 CSS -->
+   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.5/dist/sweetalert2.min.css" rel="stylesheet">
 
-      .btn:hover {
-         background-color: #e67e22;
-         transform: scale(1.05);
-         transition: transform 0.3s ease;
-      }
-
+   <style>
+     body {
+   background: white;
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   margin: 0;
+   padding: 0;
+   min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
 
       header {
          background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
          color: white;
-         padding: 20px 0;
+         padding: 15px 0;
+         width: 100%;
+         position: fixed;
+         top: 0;
+         z-index: 1000;
          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
@@ -281,16 +223,20 @@ $conn->close();
          text-align: center;
       }
 
+      header nav ul li {
+         display: inline-block;
+         margin: 0 15px;
+      }
+
       header nav ul li a {
          color: white;
          font-size: 16px;
          font-weight: bold;
          text-decoration: none;
          padding: 10px 20px;
-         border-radius: 30px;
          background: #f1c40f;
-         cursor: pointer;
-         transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+         border-radius: 30px;
+         transition: 0.3s;
       }
 
       header nav ul li a:hover {
@@ -299,115 +245,185 @@ $conn->close();
          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       }
 
-      header nav ul li a:active {
-         background: #f1c40f;
-         transform: scale(1);
+      .page-content {
+         flex: 1;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         width: 100%;
+         padding: 20px;
       }
 
-      @media (max-width: 768px) {
+      .form-container {
+         background: rgba(255, 255, 255, 0.9);
+         backdrop-filter: blur(5px);
+         padding: 25px 20px; /* Reduced padding */
+         border-radius: 10px; /* Reduced border-radius */
+         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+         width: 100%;
+         max-width: 400px; /* Reduced max-width */
+         margin: 0 15px;
+      }
+
+      .form-container h2 {
+         text-align: center;
+         color: #333;
+         margin-bottom: 15px; /* Reduced margin */
+         font-weight: bold;
+      }
+
+      label {
+         font-size: 14px;
+         color: #555;
+         margin-bottom: 6px;
+         display: block;
+      }
+
+      input[type="email"],
+      input[type="text"],
+      input[type="password"] {
+         width: 100%;
+         padding: 10px; /* Reduced padding */
+         margin: 6px 0 15px; /* Reduced margin */
+         border: 1px solid #ccc;
+         border-radius: 5px;
+         font-size: 14px; /* Reduced font size */
+         background: #f9f9f9;
+         transition: all 0.3s ease-in-out;
+      }
+
+      input[type="email"]:focus,
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+         border-color: #3498db;
+         outline: none;
+         background: #ffffff;
+      }
+
+      button {
+         width: 100%;
+         padding: 10px; /* Reduced padding */
+         background-color: #f1c40f;
+         border: none;
+         color: black;
+         font-size: 14px; /* Reduced font size */
+         font-weight: bold;
+         border-radius: 25px;
+         margin-bottom: 10px;
+         transition: all 0.3s ease-in-out;
+         cursor: pointer;
+      }
+
+      button:hover {
+         background-color: #e67e22;
+         transform: scale(1.05);
+      }
+
+      @media (max-width: 600px) {
+         .form-container {
+            padding: 20px 15px; /* Further reduced padding */
+         }
+
          header nav ul li a {
-            font-size: 18px;
-            width: 100%;
+            font-size: 14px;
+            padding: 8px 15px;
          }
       }
+   </style>
+</head>
 
-      @media (max-width: 480px) {
-         header nav ul li a {
-            font-size: 16px;
-            padding: 10px 15px;
-         }
-      }
-
-
-</style>
-    </head>
 <body>
-<header>
+   <header>
       <nav>
          <ul>
             <li><a href="../../index.php">Home</a></li>
          </ul>
       </nav>
    </header>
-<!-- Forgot Password Form -->
-<?php if (!$otp_sent) { ?> <!-- Only show this form if OTP has not been sent -->
-<div class="form-container">
-    <h2>Forgot Password</h2>
-    <form method="POST">
-        <input type="hidden" name="action" value="forgot_password">
-        <label for="email">Email Address:</label>
-        <input type="email" name="email" required>
-        <button type="submit" class="btn">Send OTP</button>
-        <button onclick="window.location.href='login.php'" class="btn">Go Back</button>
-    </form>
-</div>
-<?php } ?>
 
-<!-- OTP Verification Form (after OTP sent) -->
-<?php if ($otp_sent) { ?>
-<div class="form-container">
-    <h2>Verify OTP</h2>
-    <form id="reset-password-form" method="POST">
-        <input type="hidden" name="action" value="verify_otp">
-        <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>"> <!-- Include email for verification -->
-        
-        <label for="otp">Enter OTP:</label>
-        <input type="text" name="otp" required>
-        
-        <label for="new_password">New Password:</label>
-        <input type="password" name="new_password" id="new_password" required>
-        
-        <label for="confirm_password">Confirm Password:</label>
-        <input type="password" name="confirm_password" id="confirm_password" required>
-        
-        <button type="submit">Reset Password</button>
-    </form>
-</div>
-<?php } ?>
+   <div class="page-content">
+      <?php if (!$otp_sent) { ?>
+         <div class="form-container">
+            <h2>Forgot Password</h2>
+            <form method="POST">
+               <input type="hidden" name="action" value="forgot_password">
+               <label for="email">Email Address:</label>
+               <input type="email" name="email" placeholder="Enter your email" required>
 
-<!-- JavaScript to Trigger SweetAlert -->
-<script type="text/javascript">
-    <?php if ($otp_sent) { ?>
-        Swal.fire({
+               <button type="submit">Send OTP</button>
+               <button type="button" onclick="window.location.href='login.php'">Go Back</button>
+            </form>
+         </div>
+      <?php } ?>
+
+      <?php if ($otp_sent) { ?>
+         <div class="form-container">
+            <h2>Verify OTP</h2>
+            <form id="reset-password-form" method="POST">
+               <input type="hidden" name="action" value="verify_otp">
+               <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+
+               <label for="otp">Enter OTP:</label>
+               <input type="text" name="otp" placeholder="Enter OTP" required>
+
+               <label for="new_password">New Password:</label>
+               <input type="password" name="new_password" id="new_password" placeholder="Enter new password" required>
+
+               <label for="confirm_password">Confirm Password:</label>
+               <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm new password" required>
+
+               <button type="submit">Reset Password</button>
+               <button type="button" onclick="window.location.href='login.php'">Go Back</button>
+            </form>
+         </div>
+      <?php } ?>
+   </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.5/dist/sweetalert2.min.js"></script>
+
+   <script type="text/javascript">
+      <?php if ($otp_sent) { ?>
+         Swal.fire({
             icon: 'success',
             title: 'OTP Sent!',
             text: 'An OTP has been sent to your email. Please check your inbox.',
             confirmButtonText: 'OK'
-        });
-    <?php } elseif ($password_updated) { ?>
-        Swal.fire({
+         });
+      <?php } elseif ($password_updated) { ?>
+         Swal.fire({
             icon: 'success',
             title: 'Password Reset Successful!',
             text: 'Your password has been updated successfully.',
             confirmButtonText: 'OK'
-        }).then((result) => {
+         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = 'login.php';
+               window.location.href = 'login.php';
             }
-        });
-    <?php } elseif ($error_message) { ?>
-        Swal.fire({
+         });
+      <?php } elseif ($error_message) { ?>
+         Swal.fire({
             icon: 'error',
             title: 'Error!',
             text: '<?php echo $error_message; ?>',
             confirmButtonText: 'OK'
-        });
-    <?php } ?>
+         });
+      <?php } ?>
 
-    document.getElementById("reset-password-form").onsubmit = function(event) {
-        var newPassword = document.getElementById("new_password").value;
-        var confirmPassword = document.getElementById("confirm_password").value;
+      document.getElementById("reset-password-form")?.addEventListener('submit', function(event) {
+         var newPassword = document.getElementById("new_password").value;
+         var confirmPassword = document.getElementById("confirm_password").value;
 
-        // Check if passwords match
-        if (newPassword !== confirmPassword) {
-            event.preventDefault(); // Prevent form submission
+         if (newPassword !== confirmPassword) {
+            event.preventDefault();
             Swal.fire({
-                icon: 'error',
-                title: 'Password Mismatch',
-                text: 'The passwords do not match. Please try again.',
-                confirmButtonText: 'OK'
+               icon: 'error',
+               title: 'Password Mismatch',
+               text: 'The passwords do not match. Please try again.',
+               confirmButtonText: 'OK'
             });
-        }
-    };
-</script>
-    </body>
+         }
+      });
+   </script>
+
+</body>
+</html>
