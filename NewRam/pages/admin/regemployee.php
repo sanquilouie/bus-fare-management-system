@@ -20,18 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $barangay = $_POST['barangay'];
     $address = $_POST['address'];
     $gender = $_POST['gender'];
+    $accountNumber = $_POST['employeeNumber'];
 
-    if ($employeeType === 'Conductor') {
-        $accountNumber = $_POST['employeeNumber']; // Manually provided
-    } else {
-        // 1. Generate unique account number using timestamp and random number
-        $prefix = '00';
-        $timestamp = time();  // Current timestamp
-        $randomNumber = rand(1000, 9999);  // Random number between 1000 and 9999
-
-        // Combine them to form a unique account number
-        $accountNumber = $prefix . $timestamp . $randomNumber;
-    }
 
     // Calculate age
     $age = date_diff(date_create($birthday), date_create('today'))->y;
@@ -155,35 +145,35 @@ ob_end_flush();
                                     </div>
                                     <div class="col-md-6">
                                         <label for="employeeNumber" class="form-label required">Employee No.</label>
-                                        <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Auto generated" readonly>
+                                        <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Scan RFID Here" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-md-4">
-                                        <label for="firstName" class="form-label required">First Name</label>
-                                        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required pattern="[A-Za-z]+" title="Letters only">
+                                        <label for="firstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required pattern="[A-Za-z\s]+" title="Letters only">
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="middleName" class="form-label required">Middle Name</label>
-                                        <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name" required pattern="[A-Za-z]+" title="Letters only">
+                                        <label for="middleName" class="form-label">Middle Name</label>
+                                        <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name" pattern="[A-Za-z\s]+" title="Letters only">
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="lastName" class="form-label required">Last Name</label>
-                                        <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required required pattern="[A-Za-z]+" title="Letters only">
+                                        <label for="lastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required pattern="[A-Za-z\s]+" title="Letters only">
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     
                                     <div class="col-md-6">
-                                        <label for="email" class="form-label required">Email</label>
+                                        <label for="email" class="form-label">Email</label>
                                         <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
                                         <div id="emailFeedback" class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="phone" class="form-label required">Phone</label>
+                                        <label for="phone" class="form-label">Phone</label>
                                         <div class="form-group position-relative">
-                                            <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder="" required pattern="\d{10}" maxlength="10" />
+                                            <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder="" required pattern="\d{10}" maxlength="10" required/>
                                             <span class="position-absolute top-50 start-0 translate-middle-y ps-2 text-muted">+63</span>
                                         </div>
                                         <div id="contactError" class="invalid-feedback" style="display: none;"></div>
@@ -193,11 +183,11 @@ ob_end_flush();
                                 <div class="row mb-3">
                                     
                                 <div class="col-md-6">
-                                        <label for="dob" class="form-label required">Date of Birth</label>
-                                        <input type="date" class="form-control" id="dob" name="dob" required>
+                                        <label for="dob" class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="dob" name="dob">
                                 </div>
                                 <div class="col-md-6">   
-                                        <label for="gender" class="form-label required">Gender</label>
+                                        <label for="gender" class="form-label">Gender</label>
                                         <select class="form-select" id="gender" name="gender" required>
                                             <option value="" disabled selected>Select Gender</option>
                                             <option value="Male">Male</option>
@@ -209,25 +199,25 @@ ob_end_flush();
                                 <div class="row mb-3">   
                                     <div class="col-md-12">
                                         <label for="address" class="form-label">Address</label>
-                                        <input type="text" class="form-control" id="address" name="address" placeholder="Purok#/Street/Sitio"> 
+                                        <input type="text" class="form-control" id="address" name="address" placeholder="Purok#/Street/Sitio" required> 
                                     </div>
                                 </div>
                                 <div class="row mb-3">         
                                     <div class="col-md-4">
                                         <label for="province" class="form-label">Province</label>
-                                        <select class="form-select" id="province" name="province">
+                                        <select class="form-select" id="province" name="province" required>
                                             <option value="">-- Select Province --</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="municipality" class="form-label">Municipality</label>
-                                        <select class="form-select" id="municipality" name="municipality">
+                                        <select class="form-select" id="municipality" name="municipality" required> 
                                             <option value="">-- Select Municipality --</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="barangay" class="form-label">Barangay</label>
-                                        <select class="form-select" id="barangay" name="barangay">
+                                        <select class="form-select" id="barangay" name="barangay" required>
                                             <option value="">-- Select Barangay --</option>
                                         </select>
                                     </div>
@@ -381,6 +371,15 @@ ob_end_flush();
 <script src="../../assets/js/address_api.js"></script>
 <script>
 
+document.querySelectorAll('#firstName, #middleName, #lastName').forEach(input => {
+    input.addEventListener('input', function () {
+        this.value = this.value.replace(/[^A-Za-z\s]/g, '');
+    });
+});
+
+
+
+
 const licenseInput = document.getElementById("driverLicense");
 
 licenseInput.addEventListener("input", function(e) {
@@ -419,6 +418,7 @@ function checkSubmitButton() {
 }
 
 $(document).ready(function () {
+    
     var today = new Date();
     today.setFullYear(today.getFullYear() - 18);  // Subtract 18 years
     document.getElementById("dob").setAttribute("max", today.toISOString().split('T')[0]);
@@ -496,15 +496,25 @@ $(document).ready(function () {
 $(document).ready(function () {
     let confirmationShown = false;
 
-    const form = $("form")[0]; // Get the native form DOM element
+    const form = $("form")[0];
 
     $('.btn-primary').click(function (event) {
         event.preventDefault();
 
+        // Extra custom validation
+        if ($('#email').hasClass('is-invalid')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email',
+                text: 'This email is already registered. Please use another.',
+            });
+            return;
+        }
+
         if (!confirmationShown) {
             if (!form.checkValidity()) {
-                form.reportValidity(); // Show native validation messages
-                return; // Don't proceed if form is invalid
+                form.reportValidity();
+                return;
             }
 
             confirmationShown = true;
@@ -527,13 +537,16 @@ $(document).ready(function () {
                         timer: 1000,
                         timerProgressBar: true,
                     }).then(() => {
-                        form.submit(); // Safe to submit now
+                        form.submit();
                     });
+                } else {
+                    confirmationShown = false; // Allow another try if canceled
                 }
             });
         }
     });
 });
+
 
     // JavaScript to show/hide additional fields based on selected role
     document.getElementById("employeeType").addEventListener("change", function() {
@@ -548,9 +561,9 @@ $(document).ready(function () {
         // Enable/disable the employee number field and show specific fields based on role
         if (role === "Driver") {
             //document.getElementById("driverFields").style.display = "block";
-            employeeNumberField.placeholder = "Auto generated";  
+            employeeNumberField.readOnly = false;
+            employeeNumberField.placeholder = "Scan RFID Here";   
             employeeNumberField.value = "";  
-            employeeNumberField.readOnly = true;  
         } else if (role === "Conductor") {
             //document.getElementById("conductorFields").style.display = "block";
             employeeNumberField.readOnly = false;
@@ -558,9 +571,9 @@ $(document).ready(function () {
             employeeNumberField.value = ""; 
         } else if (role === "Cashier") {
             //document.getElementById("cashierFields").style.display = "block";
-            employeeNumberField.placeholder = "Auto generated";  
-            employeeNumberField.value = "";  
-            employeeNumberField.readOnly = true;  
+            employeeNumberField.readOnly = false;
+            employeeNumberField.placeholder = "Scan RFID Here";   
+            employeeNumberField.value = "";   
         }
     });
 });
