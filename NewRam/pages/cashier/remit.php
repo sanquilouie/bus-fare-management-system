@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
 
     $stmt = $conn->prepare("
         SELECT 
+            u.account_number,
             u.firstname,
             u.lastname,
 
@@ -59,27 +60,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
 
     $stmt->bind_param("s", $rfid_scan);
     $stmt->execute();
-    $stmt->bind_result($firstname, $lastname, $total_load, $bus_number, $total_fare, $total_card);
+    $stmt->bind_result($account_number,$firstname, $lastname, $total_load, $bus_number, $total_fare, $total_card);
 
     if ($stmt->fetch()) {
-        $_SESSION['rfid_data'] = [
-            'rfid_scan' => $rfid_scan,
-            'conductor_name' => $firstname . ' ' . $lastname,
-            'total_load' => $total_load,
-            'bus_number' => $bus_number ?: "No Bus Assigned",
-            'total_fare' => $total_fare,
-            'total_card' => $total_card
-        ];
+        $has_data = ($bus_number !== null || $total_load > 0 || $total_fare > 0 || $total_card > 0);
+    
+        if ($has_data) {
+            // Conductor has some transaction ✅
+            $_SESSION['rfid_data'] = [
+                'rfid_scan' => $rfid_scan,
+                'conductor_name' => $firstname . ' ' . $lastname,
+                'total_load' => $total_load,
+                'bus_number' => $bus_number ?: "No Bus Assigned",
+                'total_fare' => $total_fare,
+                'total_card' => $total_card
+            ];
+        } else {
+            // Conductor exists, but no transaction ❌
+            $_SESSION['rfid_data'] = [
+                'rfid_scan' => '',
+                'conductor_name' => "Unknown Conductor",
+                'total_load' => '',
+                'bus_number' => '',
+                'total_fare' => '',
+                'total_card' => ''
+            ];
+        }
     } else {
+        // No conductor found at all
         $_SESSION['rfid_data'] = [
             'rfid_scan' => '',
             'conductor_name' => "Unknown Conductor",
-            'total_load' => 0,
-            'bus_number' => "No Bus Assigned",
-            'total_fare' => 0,
-            'total_card' => 0
+            'total_load' => '',
+            'bus_number' => '',
+            'total_fare' => '',
+            'total_card' => ''
         ];
     }
+    
 
     $stmt->close();
 
@@ -145,15 +163,15 @@ if ($rfid_data) {
 
                 <label for="total_fare" class="form-label">Cash Payment (₱):</label>
                 <input type="number" class="form-control" id="total_fare" name="total_fare"
-                    step="0.01" readonly value="<?= htmlspecialchars($total_fare ?? '') ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($total_fare ?? null) ?>">
 
                 <label for="total_card" class="form-label">Card Payment (₱):</label>
                 <input type="number" class="form-control" id="total_card" name="total_card"
-                    step="0.01" readonly value="<?= htmlspecialchars($total_card ?? '') ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($total_card ?? null) ?>">
 
                 <label for="total_load" class="form-label">Total Load (₱):</label>
                 <input type="number" class="form-control" id="total_load" name="total_load"
-                    step="0.01" readonly value="<?= htmlspecialchars($total_load ?? '') ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($total_load ?? null) ?>">
 
                 <div id="deductions-container">
                     <div class="text-center mt-1">
@@ -170,7 +188,7 @@ if ($rfid_data) {
 
                 <label for="net_amount" class="form-label">Net Amount (₱):</label>
                 <input type="number" class="form-control" id="net_amount" name="net_amount"
-                    step="0.01" readonly value="<?= htmlspecialchars(($total_load ?? 0) + ($total_fare ?? 0)) ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars(($total_load ?? null) + ($total_fare ?? null)) ?>">
 
                 <div class="text-center mt-1">
                     <button type="submit" name="generate_remittance" id="remitButton"

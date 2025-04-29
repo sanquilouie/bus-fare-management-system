@@ -53,6 +53,7 @@ $result = $conn->query($query);
                                 <th>ID</th>
                                 <th>Bus No</th>
                                 <th>Conductor ID</th>
+                                <th>Conductor Name</th>
                                 <th>Total Load</th>
                                 <th>Total Cash</th>
                                 <th>Total Deductions</th>
@@ -94,6 +95,7 @@ $result = $conn->query($query);
                                 <td>${log.id}</td>
                                 <td>${log.bus_no}</td>
                                 <td>${log.conductor_id}</td>
+                                <td>${log.full_name}</td>
                                 <td>${parseFloat(log.total_load).toFixed(2)}</td>
                                 <td>${parseFloat(log.total_cash).toFixed(2)}</td>
                                 <td>${parseFloat(log.total_deductions).toFixed(2)}</td>
