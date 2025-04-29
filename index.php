@@ -450,6 +450,11 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
                 <ul class="left-align">
                     <li>Visit the registration page.</li>
                     <li>Fill in your personal details (Full name, email, contact number, etc.).</li>
+                    <li>Use a valid, active email address </li>
+                    <li>Only register one account per person </li>
+                    <li>Provide accurate personal information </li>
+                    <li>Keep your email account secured</li>
+                    <li>Check your spam/junk folder after registering</li>
                     <li>Click on the "Register" button to complete the process.</li>
                 </ul>
                 `,
