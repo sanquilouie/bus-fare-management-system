@@ -471,6 +471,7 @@ $conn->close();
                         if (data.status === 'success') {
                             currentDirection = selected; // update local variable
                             console.log('Direction updated successfully.');
+                            location.reload();
                         } else {
                             console.error('Failed to update direction.');
                         }
