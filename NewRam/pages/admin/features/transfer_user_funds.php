@@ -9,7 +9,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 }
 
 // Fetch all users for fund transfer
-$allUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 ORDER BY created_at DESC";
+$allUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 AND role = 'User' ORDER BY created_at DESC";
 $allUsersResult = mysqli_query($conn, $allUsersQuery);
 
 // Handle fund transfer

@@ -16,7 +16,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 }
 
 // Fetch users for activation
-$inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 ORDER BY created_at DESC";
+$inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 AND role = 'User' ORDER BY created_at DESC";
 $inactiveUsersResult = mysqli_query($conn, $inactiveUsersQuery);
 
 // Handle activation

@@ -9,7 +9,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 }
 
 // Count total records
-$totalQuery = "SELECT COUNT(*) AS total FROM useracc WHERE is_activated = 1";
+$totalQuery = "SELECT COUNT(*) AS total FROM useracc WHERE is_activated = 1 AND role = 'User'";
 $totalResult = mysqli_query($conn, $totalQuery);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
