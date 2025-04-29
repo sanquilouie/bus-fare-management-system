@@ -787,38 +787,43 @@ $conn->close();
                     autocapitalize: 'off'
                 },
                 showCancelButton: true,
-                showConfirmButton: false,
+                showConfirmButton: true, // ✅ Show Confirm button
+                confirmButtonText: 'Submit',
                 cancelButtonText: 'Cancel',
                 inputPlaceholder: 'Scan your RFID here',
                 didOpen: () => {
                     const inputField = Swal.getInput();
                     if (inputField) {
-                        activeInput = inputField;  // Track the Swal input
+                        activeInput = inputField;
                         inputField.focus();
-                    inputField.addEventListener('keydown', async (event) => {
-                        // Check if the Enter key is pressed
-                        if (event.key === 'Enter') {
-                            const rfid = inputField.value.trim();
-                            if (rfid) {
-                                // If RFID is entered, automatically process the fare
-                                const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
-                                const toRoute = JSON.parse(document.getElementById('toRoute').value);
-                                const fareType = document.getElementById('fareType').value;
-                                const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
 
-                                if (!fromRoute || !toRoute) {
-                                    Swal.fire('Error', 'Please select both starting point and destination.', 'error');
-                                    return;
-                                }
-
-                                console.log("Transaction Number before calling getUser Balance:", transactionNumber); // Debugging line
-
-                                // Call the function to get user balance and process the fare
-                                getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod);
+                        // Optional: still allow Enter key for quick submission
+                        inputField.addEventListener('keydown', (event) => {
+                            if (event.key === 'Enter') {
+                                Swal.clickConfirm();  // Simulate clicking the confirm button
                             }
-                        }
-                    });
-                }
+                        });
+                    }
+                },
+                preConfirm: () => {
+                    const rfid = Swal.getInput().value.trim();
+                    if (!rfid) {
+                        Swal.showValidationMessage('Please scan or enter your RFID.');
+                        return false;
+                    }
+
+                    const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
+                    const toRoute = JSON.parse(document.getElementById('toRoute').value);
+                    const fareType = document.getElementById('fareType').value;
+                    const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
+
+                    if (!fromRoute || !toRoute) {
+                        Swal.fire('Error', 'Please select both starting point and destination.', 'error');
+                        return false;
+                    }
+
+                    // Call your processing function
+                    getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod);
                 }
             });
         }
@@ -941,12 +946,14 @@ $conn->close();
             const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>"); 
             const conductorNameFormatted = abbreviateName(conductorName);
             const busNumber = "<?= $bus_number; ?>"; 
+            const direction = "<?= $_SESSION['direction'] ?? '' ?>";
             const date = new Date().toLocaleDateString();
             const time = new Date().toLocaleTimeString();
 
             const receiptText = `
       ZARAGOZA RAMSTAR
     TRANSPORT COOPERATIVE
+DIRECTION       : ${direction}
 BUS NO.         : ${busNumber}
 DATE            : ${date}
 TIME            : ${time}
@@ -973,6 +980,7 @@ TOTAL FARE      : ₱${totalFare}
                         console.log("Printing receipt...");
                         AndroidPrinter.printText(
                             transactionNumber,
+                            direction,
                             busNumber,
                             driverName,
                             conductorNameFormatted,
