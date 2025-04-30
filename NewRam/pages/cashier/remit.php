@@ -188,7 +188,7 @@ if ($rfid_data) {
 
                 <label for="net_amount" class="form-label">Net Amount (₱):</label>
                 <input type="number" class="form-control" id="net_amount" name="net_amount"
-                    step="0.01" readonly value="<?= htmlspecialchars(($total_load ?? null) + ($total_fare ?? null)) ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars(($total_load ?? '') + ($total_fare ?? '')) ?>">
 
                 <div class="text-center mt-1">
                     <button type="submit" name="generate_remittance" id="remitButton"
