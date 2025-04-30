@@ -888,10 +888,12 @@ $conn->close();
 async function getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, isCashPayment = false, transactionNumber, distance, paymentMethod, cashReceived) {
     const conductorName = "<?= $conductorName; ?>";
     const driverName = "<?= $_SESSION['driver_name'] ?>";
+    const fareLabel = document.getElementById('fareLabel').innerText;
+
     try {
         const baseFare = <?php echo $base_fare; ?>;
         distance = Math.abs(fromRoute.post - toRoute.post); // compute distance if not passed
-        let totalFare = baseFare * passengerQuantity;
+        let totalFare = parseFloat(fareLabel.replace('₱', '').trim());
         let totalChange = 0;
 
         if (isCashPayment) {
