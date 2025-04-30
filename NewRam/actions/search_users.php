@@ -7,7 +7,7 @@ if (isset($_POST['query'])) {
 
     $searchQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address,province,municipality,barangay, account_number, balance 
                     FROM useracc 
-                    WHERE is_activated = 1 
+                    WHERE is_activated = 1 AND role = 'User'
                     AND (account_number LIKE '%$search%' OR email LIKE '%$search%')"; // Assuming you have an email column
 
     $result = mysqli_query($conn, $searchQuery);
@@ -23,17 +23,8 @@ if (isset($_POST['query'])) {
                     <td>' . $row['age'] . '</td>
                     <td>' . $row['gender'] . '</td>
                     <td>' . $row['address'] . '</td>
-                        <td>' . $row['province'] . '</td>
-                        <td>' . $row['municipality'] . '</td>
-                        <td>' . $row['barangay'] . '</td>
                     <td>' . $row['account_number'] . '</td>
                     <td>₱' . number_format($row['balance'], 2) . '</td>
-                    <td>
-                        <form method="POST" onsubmit="return confirmDisable();" action="">
-                            <input type="hidden" name="user_id" value="' . $row['id'] . '">
-                            <button type="submit" name="disable_user" class="btn btn-danger btn-sm">Disable</button>
-                        </form>
-                    </td>
                 </tr>';
         }
     } else {
