@@ -95,7 +95,7 @@ function sendActivationEmail($user_id, $account_number)
         $mail->Body = "
             <p>Dear $firstname,</p>
             <p>Your account has been successfully activated!.</p>
-            <p>Login to ramstarbus.com</p>
+            <p>Login to https://ramstarzaragosa.site/</p>
             <p><strong>Account Number:</strong> $account_number<br>
             <strong>Password:</strong>$password</p>
             <p>Change your password after logging in for security.</p>
@@ -137,7 +137,7 @@ function sendActivationEmail($user_id, $account_number)
 
 <body>
 <?php
-    include '../../../includes/topbar.php';
+    //include '../../../includes/topbar.php';
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
@@ -182,6 +182,7 @@ function sendActivationEmail($user_id, $account_number)
                                                 <!-- If there's an account number, show the Activate button -->
                                                 <form method="POST" action="activate_users.php">
                                                     <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
+                                                    <input type="hidden" name="account_number" value="<?php echo $row['account_number']; ?>">
                                                     <button type="button" class="btn btn-success activate-btn">Activate</button>
                                                 </form>
                                             <?php endif; ?>
