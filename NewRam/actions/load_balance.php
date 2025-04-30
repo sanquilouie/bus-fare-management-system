@@ -27,7 +27,7 @@ function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
     $rfid = mysqli_real_escape_string($conn, $rfid);
 
     // Check if the user account exists
-    $query = "SELECT * FROM useracc WHERE account_number = '$userAccountNumber'";
+    $query = "SELECT * FROM useracc WHERE account_number = '$userAccountNumber' AND is_activated = 1";
     $result = mysqli_query($conn, $query);
 
     if (mysqli_num_rows($result) > 0) {
@@ -42,7 +42,7 @@ function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
             return ['error' => 'Failed to update balance.'];
         }
     } else {
-        return ['error' => 'User  account not found.'];
+        return ['error' => 'User account not found.'];
     }
 }
 
