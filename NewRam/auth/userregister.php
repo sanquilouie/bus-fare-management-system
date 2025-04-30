@@ -289,7 +289,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="middlename" class="form-label">Middle Name</label>
-                    <input type="text" class="form-control" id="middlename" name="middlename" required>
+                    <input type="text" class="form-control" id="middlename" name="middlename">
                 </div>
                 <div class="col-md-6">
                     <label for="suffix" class="form-label">Suffix</label>
