@@ -176,6 +176,7 @@ ob_end_flush();
                                             <option value="Conductor">Conductor</option>
                                             <option value="Driver">Driver</option>
                                             <option value="Cashier">Cashier</option>
+                                            <option value="Inspector">Inspector</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -288,6 +289,16 @@ ob_end_flush();
                                     </div>
                                 </div>
 
+                                <!-- Conditional fields for Inspector -->
+                                <div id="inspectorFields" class="inspector-fields" style="display:none;">
+                                    <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label for="cashHandlingExperience" class="form-label required">Cash Handling Experience</label>
+                                            <textarea class="form-control" id="cashHandlingExperience" rows="2" placeholder="Enter experience in cash handling"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="text-center">
                                     <button type="submit" class="btn btn-primary">Register</button>
                                 </div>
@@ -304,6 +315,7 @@ ob_end_flush();
                         <option value="Driver" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Driver' ? 'selected' : '' ?>>Driver</option>
                         <option value="Conductor" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Conductor' ? 'selected' : '' ?>>Conductor</option>
                         <option value="Cashier" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Cashier' ? 'selected' : '' ?>>Cashier</option>
+                        <option value="Inspector" <?= isset($_GET['role_filter']) && $_GET['role_filter'] === 'Inspector' ? 'selected' : '' ?>>Inspector</option>
                     </select>
                 </form>
             </div>
@@ -322,10 +334,10 @@ ob_end_flush();
                     <tbody>
                         <?php
 
-                        $allowed_roles = ['Driver', 'Conductor', 'Cashier'];
+                        $allowed_roles = ['Driver', 'Conductor', 'Cashier', 'Inspector'];
                         $filter = isset($_GET['role_filter']) ? $_GET['role_filter'] : 'all';
 
-                        $where = "WHERE role IN ('Driver', 'Conductor', 'Cashier')";
+                        $where = "WHERE role IN ('Driver', 'Conductor', 'Cashier', 'Inspector')";
                         if (in_array($filter, $allowed_roles)) {
                             $where = "WHERE role = '" . mysqli_real_escape_string($conn, $filter) . "'";
                         }
@@ -599,10 +611,11 @@ $(document).ready(function () {
         document.getElementById("driverFields").style.display = "none";
         document.getElementById("conductorFields").style.display = "none";
         document.getElementById("cashierFields").style.display = "none";
+        document.getElementById("inspectorFields").style.display = "none";
         
         // Enable/disable the employee number field and show specific fields based on role
         if (role === "Driver") {
-            //document.getElementById("driverFields").style.display = "block";
+            document.getElementById("driverFields").style.display = "block";
             employeeNumberField.readOnly = false;
             employeeNumberField.placeholder = "Scan RFID Here";   
             employeeNumberField.value = "";  
@@ -612,6 +625,11 @@ $(document).ready(function () {
             employeeNumberField.placeholder = "Scan RFID Here";   
             employeeNumberField.value = ""; 
         } else if (role === "Cashier") {
+            //document.getElementById("cashierFields").style.display = "block";
+            employeeNumberField.readOnly = false;
+            employeeNumberField.placeholder = "Scan RFID Here";   
+            employeeNumberField.value = "";   
+        } else if (role === "Inspector") {
             //document.getElementById("cashierFields").style.display = "block";
             employeeNumberField.readOnly = false;
             employeeNumberField.placeholder = "Scan RFID Here";   
