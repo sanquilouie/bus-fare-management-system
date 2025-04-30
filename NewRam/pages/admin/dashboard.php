@@ -34,28 +34,44 @@ $busCountQuery = "SELECT COUNT(*) AS busCount FROM businfo";
 $busCountResult = mysqli_query($conn, $busCountQuery);
 $busCount = mysqli_fetch_assoc($busCountResult)['busCount'] ?? 0;
 
-// Fetch monthly revenue data for chart
-$monthlyRevenueQuery = "SELECT MONTH(transaction_date) AS month, SUM(amount) AS total 
-                        FROM revenue 
-                        WHERE transaction_type = 'debit' 
-                        GROUP BY MONTH(transaction_date) 
-                        ORDER BY MONTH(transaction_date)";
-$monthlyRevenueResult = mysqli_query($conn, $monthlyRevenueQuery);
+// Monthly Revenue Chart
+$currentYear = date('Y');
+$sql = "
+SELECT 
+    DATE_FORMAT(remit_date, '%Y-%m-01') AS remit_month,
+    SUM(total_cash) AS total_cash,
+    SUM(total_load) AS total_nfc
+FROM remit_logs
+WHERE YEAR(remit_date) = $currentYear
+GROUP BY remit_month
+ORDER BY remit_month
+";
 
-// Prepare data for the chart
-$months = [];
-$revenues = [];
-while ($row = mysqli_fetch_assoc($monthlyRevenueResult)) {
-    $months[] = date('F', mktime(0, 0, 0, $row['month'], 10)); // Convert month number to name
-    $revenues[] = $row['total'] ?? 0;
+$result = mysqli_query($conn, $sql);
+
+$data = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $data[] = $row;
 }
 
-// Fetch today's revenue from passenger logs
-$todayRevenueQuery = "SELECT SUM(fare) AS todayRevenue FROM passenger_logs WHERE DATE(timestamp) = CURDATE()";
-$todayRevenueResult = mysqli_query($conn, $todayRevenueQuery);
-$todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
+$sql = "
+SELECT 
+    DATE_FORMAT(timestamp, '%Y-%m') AS log_month,
+    COUNT(*) AS total_entries
+FROM passenger_logs
+WHERE YEAR(timestamp) = $currentYear
+GROUP BY log_month
+ORDER BY log_month
+";
 
+$result2 = mysqli_query($conn, $sql);
+
+$data2 = [];
+while ($row = mysqli_fetch_assoc($result2)) {
+    $data2[] = $row;
+}
 ?>
+
 
 <!doctype html>
 <html lang="en">
@@ -189,56 +205,120 @@ $todayRevenue = mysqli_fetch_assoc($todayRevenueResult)['todayRevenue'] ?? 0;
                     </div>
                 </div>
                 <div class="dashboard">
-                    <div class="dashboard-charts" onclick=" window.location.href='revenue.php';">
+                    <div class="dashboard-charts">
                         <h3>Monthly Revenue Chart</h3>
                         <div id="revenueChart"></div>
                     </div>
                     <div class="dashboard-charts" onclick="window.location.href='revenue.php';">
-                        <h3>Today's Revenue</h3>
-                        <div id="todayRevenueChart"></div>
+                        <h3>Monthly Passenger Chart</h3>
+                        <div id="passengerChart"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Monthly Revenue Chart
-        var options = {
+<script>
+const chartData = <?php echo json_encode($data); ?>;
+
+const cashSeries = chartData.map(item => ({
+    x: item.remit_month,
+    y: parseFloat(item.total_cash)
+}));
+
+const nfcSeries = chartData.map(item => ({
+    x: item.remit_month,
+    y: parseFloat(item.total_nfc)
+}));
+
+const options = {
+    chart: {
+        type: 'bar',  // <-- changed from 'line' to 'bar'
+        zoom: {
+            enabled: true,
+            type: 'x',
+            autoScaleYaxis: true
+        },
+        toolbar: {
+            show: true,
+            tools: {
+                zoom: true,
+                zoomin: true,
+                zoomout: true,
+                reset: true
+            }
+        }
+    },
+    series: [
+        {
+            name: 'Total Cash',
+            data: cashSeries
+        },
+        {
+            name: 'Total NFC',
+            data: nfcSeries
+        }
+    ],
+    xaxis: {
+        type: 'datetime',
+        labels: {
+            format: 'MMMM'  // Shows "January", "February", etc.
+        }
+    },
+    plotOptions: {
+        bar: {
+            horizontal: false,
+            columnWidth: '60%',
+            dataLabels: {
+                position: 'top'
+            }
+        }
+    }
+};
+
+const chartData2 = <?php echo json_encode($data2); ?>;
+
+        const seriesData = chartData2.map(item => ({
+            x: item.log_month,
+            y: parseInt(item.total_entries)
+        }));
+
+        const options2 = {
             chart: {
                 type: 'line',
-                height: 300
+                zoom: {
+                    enabled: true,
+                    type: 'x',
+                    autoScaleYaxis: true
+                },
+                toolbar: {
+                    show: true
+                }
             },
             series: [{
-                name: 'Monthly Revenue',
-                data: [12, 19, 3, 5, 2, 3, 7]
+                name: 'Passenger Entries',
+                data: seriesData
             }],
             xaxis: {
-                categories: ['January', 'February', 'March', 'April', 'May', 'June', 'July']
+                type: 'datetime',
+                labels: {
+                    format: 'MMMM'
+                }
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            markers: {
+                size: 4
             }
         };
 
-        var revenueChart = new ApexCharts(document.querySelector("#revenueChart"), options);
-        revenueChart.render();
+const chart2 = new ApexCharts(document.querySelector("#passengerChart"), options2);
+chart2.render();
 
-        // Today's Revenue Chart
-        var todayOptions = {
-            chart: {
-                type: 'bar',
-                height: 300
-            },
-            series: [{
-                name: "Today's Revenue",
-                data: [12, 19, 3]
-            }],
-            xaxis: {
-                categories: ['Morning', 'Afternoon', 'Evening']
-            }
-        };
-
-        var todayRevenueChart = new ApexCharts(document.querySelector("#todayRevenueChart"), todayOptions);
-        todayRevenueChart.render();
-    </script>
+const chart = new ApexCharts(document.querySelector("#revenueChart"), options);
+chart.render();
+</script>
 
 </body>
 

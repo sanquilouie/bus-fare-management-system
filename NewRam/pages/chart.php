@@ -2,106 +2,77 @@
 include '../includes/connection.php';
 
 $currentYear = date('Y');
-$currentMonth = date('n');
 
-$months = [];
-$cash_data = [];
-$nfc_data = [];
-
-// Build array for months Jan to current month of this year
-for ($m = 1; $m <= $currentMonth; $m++) {
-    $monthStr = sprintf('%04d-%02d', $currentYear, $m); // Format: 2025-01, 2025-02, etc.
-    $months[$monthStr] = ['cash' => 0, 'nfc' => 0];
-}
-
-// Fetch monthly totals only for current year
 $sql = "
 SELECT 
-    DATE_FORMAT(remit_date, '%Y-%m') AS remit_month,
-    SUM(total_cash) AS total_cash,
-    SUM(total_load) AS total_nfc
-FROM remit_logs
-WHERE YEAR(remit_date) = $currentYear
-GROUP BY remit_month
-ORDER BY remit_month
+    DATE_FORMAT(timestamp, '%Y-%m') AS log_month,
+    COUNT(*) AS total_entries
+FROM passenger_logs
+WHERE YEAR(timestamp) = $currentYear
+GROUP BY log_month
+ORDER BY log_month
 ";
 
-$result = $conn->query($sql);
-while ($row = $result->fetch_assoc()) {
-    $month = $row['remit_month'];
-    if (isset($months[$month])) {
-        $months[$month]['cash'] = (float) $row['total_cash'];
-        $months[$month]['nfc'] = (float) $row['total_nfc'];
-    }
-}
-$conn->close();
+$result = mysqli_query($conn, $sql);
 
-// Build data arrays
-foreach ($months as $month => $totals) {
-    $date = $month . '-01'; // Use first day of month for x-axis
-    $cash_data[] = ["x" => $date, "y" => $totals['cash']];
-    $nfc_data[] = ["x" => $date, "y" => $totals['nfc']];
+$data = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $data[] = $row;
 }
 ?>
-
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Remit Logs Monthly Chart</title>
+    <meta charset="UTF-8">
+    <title>Monthly Passenger Logs</title>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
-    <h2>Monthly Remittance Revenue: Cash vs NFC</h2>
-    <div id="chart"></div>
+    <div id="passengerChart" style="max-width: 700px; margin: auto;"></div>
 
     <script>
-        const chartData = {
-            cash: <?php echo json_encode($cash_data); ?>,
-            nfc: <?php echo json_encode($nfc_data); ?>
-        };
+        const chartData = <?php echo json_encode($data); ?>;
+
+        const seriesData = chartData.map(item => ({
+            x: item.log_month,
+            y: parseInt(item.total_entries)
+        }));
 
         const options = {
             chart: {
-                type: 'bar',
-                height: 500,
+                type: 'line',
                 zoom: {
                     enabled: true,
                     type: 'x',
                     autoScaleYaxis: true
+                },
+                toolbar: {
+                    show: true
                 }
             },
-            plotOptions: {
-                bar: {
-                    columnWidth: '60%'
-                }
-            },
-            series: [
-                { name: 'Cash', data: chartData.cash },
-                { name: 'NFC', data: chartData.nfc }
-            ],
+            series: [{
+                name: 'Passenger Entries',
+                data: seriesData
+            }],
             xaxis: {
                 type: 'datetime',
                 labels: {
-                    format: 'MMM yyyy'
-                },
-                title: {
-                    text: 'Month'
+                    format: 'MMMM'
                 }
             },
-            yaxis: {
-                title: {
-                    text: 'Amount (₱)'
-                }
+            stroke: {
+                curve: 'smooth'
             },
-            tooltip: {
-                x: {
-                    format: 'MMM yyyy'
-                }
+            title: {
+                text: 'Monthly Passenger Log Entries',
+                align: 'center'
+            },
+            markers: {
+                size: 4
             }
         };
 
-        const chart = new ApexCharts(document.querySelector("#chart"), options);
+        const chart = new ApexCharts(document.querySelector("#passengerChart"), options);
         chart.render();
     </script>
 </body>
