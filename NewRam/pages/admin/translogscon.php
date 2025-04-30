@@ -42,6 +42,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
                 <div class="table-responsive">
+                <input type="text" id="busSearch" class="form-control mb-3" placeholder="Search Bus No">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -50,7 +51,6 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <th>Conductor ID</th>
                                 <th>Total Net Amount</th>
                                 <th>Remit Date</th>
-                                <th>Created At</th>
                             </tr>
                         </thead>
                         <tbody id="remitLogsTableBody"></tbody>
@@ -62,6 +62,15 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
         </div>
     </div>
     <script>
+        document.getElementById('busSearch').addEventListener('keyup', function() {
+            const query = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#remitLogsTableBody tr');
+
+            rows.forEach(row => {
+                const busNo = row.cells[1]?.textContent.toLowerCase(); // Column 2: Bus No
+                row.style.display = busNo.includes(query) ? '' : 'none';
+            });
+        });
     $(document).ready(function () {
         function loadRemitLogs(page = 1) {
             $.ajax({
@@ -88,7 +97,6 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <td>${log.conductor_id}</td>
                                 <td>${parseFloat(log.total_net_amount).toFixed(2)}</td>
                                 <td>${log.remit_date}</td>
-                                <td>${log.created_at}</td>
                             </tr>
 
                         `);

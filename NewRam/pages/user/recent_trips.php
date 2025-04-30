@@ -137,7 +137,7 @@ $recentTripsStmt->close();
                                             <p><strong>Feedback:</strong> <?php echo htmlspecialchars($trip['feedback']); ?></p>
                                         <?php else: ?>
                                             <!-- If there's no rating or feedback, show the form -->
-                                            <form action="user_feedback.php" method="POST">
+                                            <form action="../../actions/user_feedback.php" method="POST">
                                                 <input type="hidden" name="trip_id" value="<?php echo $trip['id']; ?>">
 
                                                 <!-- Rating Section -->
