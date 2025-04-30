@@ -65,6 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     if ($stmt->fetch()) {
         $has_data = ($bus_number !== null || $total_load > 0 || $total_fare > 0 || $total_card > 0);
     
+        $net_amount = $total_load + $total_fare;
+
         if ($has_data) {
             // Conductor has some transaction ✅
             $_SESSION['rfid_data'] = [
@@ -73,28 +75,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
                 'total_load' => $total_load,
                 'bus_number' => $bus_number ?: "No Bus Assigned",
                 'total_fare' => $total_fare,
-                'total_card' => $total_card
+                'total_card' => $total_card,
+                'net_amount' => $total_load + $total_fare
             ];
         } else {
             // Conductor exists, but no transaction ❌
             $_SESSION['rfid_data'] = [
                 'rfid_scan' => '',
-                'conductor_name' => "Unknown Conductor",
+                'conductor_name' => "",
                 'total_load' => '',
                 'bus_number' => '',
                 'total_fare' => '',
-                'total_card' => ''
+                'total_card' => '',
+                'net_amount' => ''
             ];
         }
     } else {
         // No conductor found at all
         $_SESSION['rfid_data'] = [
             'rfid_scan' => '',
-            'conductor_name' => "Unknown Conductor",
+            'conductor_name' => "",
             'total_load' => '',
             'bus_number' => '',
             'total_fare' => '',
-            'total_card' => ''
+            'total_card' => '',
+            'net_amount' => ''
         ];
     }
     
@@ -188,7 +193,7 @@ if ($rfid_data) {
 
                 <label for="net_amount" class="form-label">Net Amount (₱):</label>
                 <input type="number" class="form-control" id="net_amount" name="net_amount"
-                    step="0.01" readonly value="<?= htmlspecialchars(($total_load ?? '') + ($total_fare ?? '')) ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($net_amount ?? null) ?>">
 
                 <div class="text-center mt-1">
                     <button type="submit" name="generate_remittance" id="remitButton"
