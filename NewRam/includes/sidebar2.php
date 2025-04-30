@@ -66,6 +66,7 @@ $menuItems = [
     'User' => [
         'before' => [
             'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/user/dashboard.php'],
+            'Personal Info' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/user/personal_info.php'],
             'Recent Trips' => ['icon' => 'fa-route', 'url' => '/NewRam/pages/user/recent_trips.php'],
             'Bus In Transit' => ['icon' => 'fa-map-marker-alt', 'url' => '/NewRam/pages/user/bus_current_location.php'],
             'Convert Points' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/user/convert_points.php'],
