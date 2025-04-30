@@ -4,6 +4,13 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+require '../../libraries/PHPMailer/src/PHPMailer.php';
+require '../../libraries/PHPMailer/src/SMTP.php';
+require '../../libraries/PHPMailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 include '../../includes/connection.php';
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -48,7 +55,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Execute the query
         if ($stmt->execute()) {
-            $_SESSION['success'] = 'Employee registered successfullyasdasds!';
+
+            $mail = new PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'portfolio@example.invalid';
+                    $mail->Password = 'REDACTED_SMTP_PASSWORD'; // App password
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 587;
+    
+                    $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+                    $mail->addAddress($email, $firstName . ' ' . $lastName);
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Registration Received';
+                    $mail->Body = "
+                        <p>Hi $firstName,</p>
+                        <p>Thank you for registering with Ramstar Bus Transportation.</p>
+                        <p>Your account has been successfully activated. You can now log in and start using your account.</p>
+                        <p>Your default password is: ramstarbus123</p>
+                        <p>Best regards,<br>Ramstar Bus Transportation</p>
+                    ";
+    
+                    $mail->send();
+                } catch (Exception $e) {
+                    error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
+                }
+
+            $_SESSION['success'] = 'Employee registered successfully!';
             header("Location: " . $_SERVER['PHP_SELF']);
             exit;
         } else {
@@ -371,13 +406,21 @@ ob_end_flush();
 <script src="../../assets/js/address_api.js"></script>
 <script>
 
+<?php if (isset($_SESSION['success'])): ?>
+    Swal.fire({
+        title: 'Registration Successful!',
+        text: '<?php echo $_SESSION['success']; ?>',
+        icon: 'success',
+        confirmButtonColor: '#3085d6'
+    });
+<?php unset($_SESSION['success']); endif; ?>
+
+
 document.querySelectorAll('#firstName, #middleName, #lastName').forEach(input => {
     input.addEventListener('input', function () {
         this.value = this.value.replace(/[^A-Za-z\s]/g, '');
     });
 });
-
-
 
 
 const licenseInput = document.getElementById("driverLicense");
@@ -530,14 +573,13 @@ $(document).ready(function () {
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({
-                        title: 'Registration Successful!',
-                        text: 'You have been successfully registered.',
-                        icon: 'success',
-                        confirmButtonColor: '#3085d6',
-                        timer: 1000,
-                        timerProgressBar: true,
-                    }).then(() => {
-                        form.submit();
+                        title: 'Registering...',
+                        html: 'Please wait while we process your registration.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            form.submit();  // Actual submission here, backend does the emailing
+                        }
                     });
                 } else {
                     confirmationShown = false; // Allow another try if canceled
