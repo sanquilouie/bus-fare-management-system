@@ -182,11 +182,12 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
     </style>
 </head>
 <body>
-    <button class="btn btn-light toggle-btn shadow-sm collapsed" onclick="toggleSidebar()">
+    <button class="btn btn-light toggle-btn shadow-sm <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? 'collapsed' : ''; ?>" onclick="toggleSidebar()">
         <i class="bi bi-list fs-5"></i>
     </button>
 
-    <div class="sidebar collapsed" id="sidebar">
+
+    <div class="sidebar <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? 'collapsed' : ''; ?>" id="sidebar">
     <div class="sidebar-header p-3">
         <div class="d-flex align-items-center justify-content-between">
             <h5 class="mb-0"><?php echo $_SESSION['role'] ?> Panel</h5>
