@@ -884,101 +884,61 @@ $conn->close();
             }
         }
 
-        // Updated getUserBalance function to handle both RFID and cash payments
-        async function getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, isCashPayment = false, transactionNumber, distance, paymentMethod, cashReceived) {
-            const conductorName = "<?= $conductorName; ?>";  // PHP variable
-            const driverName = "<?= $_SESSION['driver_name'] ?>";
-            try {
-                const baseFare = <?php echo $base_fare; ?>;
-                const distance = Math.abs(fromRoute.post - toRoute.post);
-                let totalFare = 0;
-                let totalChange = 0;
+        // Updated getUserBalance function to show receipt first and only POST on confirmation
+async function getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, isCashPayment = false, transactionNumber, distance, paymentMethod, cashReceived) {
+    const conductorName = "<?= $conductorName; ?>";
+    const driverName = "<?= $_SESSION['driver_name'] ?>";
+    try {
+        const baseFare = <?php echo $base_fare; ?>;
+        distance = Math.abs(fromRoute.post - toRoute.post); // compute distance if not passed
+        let totalFare = baseFare * passengerQuantity;
+        let totalChange = 0;
 
-                if (isCashPayment) {
-                    // Cash payment logic
-                    const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            rfid: rfid,
-                            fromRoute: fromRoute,
-                            toRoute: toRoute,
-                            fareType: fareType,
-                            passengerQuantity: passengerQuantity,
-                            transactionNumber: transactionNumber,
-                            distance: distance,
-                            driverName: driverName
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    const data = await response.json();
-                    if (data.status === 'error') {
-                        Swal.fire('Error', data.message, 'error');
-                        return;
-                    }
-
-                    totalFare = data.fare; // Use the fare returned from the server
-                    totalChange = cashReceived - totalFare;
-                } else {
-                    // RFID payment logic
-                    const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            rfid: rfid,
-                            fromRoute: fromRoute,
-                            toRoute: toRoute,
-                            fareType: fareType,
-                            passengerQuantity: passengerQuantity,
-                            transactionNumber: transactionNumber,
-                            distance: distance,
-                            driverName: driverName
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    const data = await response.json(); // Await the JSON response here
-
-                    if (data.status === 'error') {
-                        Swal.fire('Error', data.message, 'error');
-                        return;
-                    }
-
-                    totalFare = data.fare; // Use the fare returned from the server
-                }
-
-                totalFare = totalFare.toFixed(2); // Ensure it's formatted correctly
-                showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange);
-            } catch (error) {
-                console.error('Error fetching balance and processing fare:', error);
-                Swal.fire('Error', 'An error occurred while processing your payment. Please try again.', 'error');
-            }
-        }
-        
-        function abbreviateName(fullName) {
-            const parts = fullName.trim().split(/\s+/);
-            const lastName = parts.pop();
-            const initials = parts.map(name => name[0].toUpperCase()).join(' ');
-            return initials + ' ' + lastName;
+        if (isCashPayment) {
+            totalChange = cashReceived - totalFare;
         }
 
-        function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange) {
-            if (receiptShown) return;
-            
-            receiptShown = true;
-            const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>"); 
-            const conductorNameFormatted = abbreviateName(conductorName);
-            const busNumber = "<?= $bus_number; ?>"; 
-            const direction = "<?= $_SESSION['direction'] ?? '' ?>";
-            const date = new Date().toLocaleDateString();
-            const time = new Date().toLocaleTimeString();
+        totalFare = totalFare.toFixed(2);
 
-            let receiptText = `
-      ZARAGOZA RAMSTAR
-    TRANSPORT COOPERATIVE
+        const postData = {
+            rfid: rfid,
+            fromRoute: fromRoute,
+            toRoute: toRoute,
+            fareType: fareType,
+            passengerQuantity: passengerQuantity,
+            transactionNumber: transactionNumber,
+            distance: distance,
+            driverName: driverName
+        };
+
+        showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange, postData);
+    } catch (error) {
+        console.error('Error preparing fare:', error);
+        Swal.fire('Error', 'An error occurred while processing your payment. Please try again.', 'error');
+    }
+}
+
+function abbreviateName(fullName) {
+    const parts = fullName.trim().split(/\s+/);
+    const lastName = parts.pop();
+    const initials = parts.map(name => name[0].toUpperCase()).join(' ');
+    return initials + ' ' + lastName;
+}
+
+function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange, postData) {
+    if (receiptShown) return;
+
+    receiptShown = true;
+    const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>");
+    const conductorNameFormatted = abbreviateName(conductorName);
+    const busNumber = "<?= $bus_number; ?>";
+    const direction = "<?= $_SESSION['direction'] ?? '' ?>";
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
+
+    let receiptText = `
+     ZARAGOZA RAMSTAR
+   TRANSPORT COOPERATIVE
 DIRECTION       : ${direction}
 BUS NO.         : ${busNumber}
 DATE            : ${date}
@@ -994,50 +954,73 @@ PASSENGER(S)    : ${passengerQuantity}
 TOTAL FARE      : ₱${totalFare}
 `;
 
-if (paymentMethod === "Cash") {
-    receiptText += `CHANGE          : ₱${totalChange}\n`;
-}
+    if (paymentMethod === "Cash") {
+        receiptText += `CHANGE          : ₱${totalChange}\n`;
+    }
 
-receiptText += `
+    receiptText += `
         ${transactionNumber}
-    Thank you for riding with us!
+ Thank you for riding with us!
 `;
 
-
-            Swal.fire({
-                html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
-                showCancelButton: true,
-                confirmButtonText: 'Print Receipt',
-                cancelButtonText: 'Cancel',
-                didClose: () => {
-                    if (window.AndroidPrinter) {
-                        console.log("Printing receipt...");
-                        AndroidPrinter.printText(
-                            transactionNumber,
-                            direction,
-                            busNumber,
-                            driverName,
-                            conductorNameFormatted,
-                            totalFare,
-                            date,
-                            time,
-                            fromRoute.route_name,
-                            toRoute.route_name,
-                            distance,
-                            fareType,
-                            paymentMethod,
-                            totalChange,
-                            passengerQuantity
-                        ); 
-                    } else {
-                        console.error("AndroidPrinter interface not available");
+    Swal.fire({
+        html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
+        showCancelButton: true,
+        confirmButtonText: 'Print Receipt',
+        cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>', {
+                    method: 'POST',
+                    body: JSON.stringify(postData),
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'error') {
+                    Swal.fire('Error', data.message, 'error');
+                    return;
                 }
-            });
-    }
+
+                if (window.AndroidPrinter) {
+                    AndroidPrinter.printText(
+                        transactionNumber,
+                        direction,
+                        busNumber,
+                        driverName,
+                        conductorNameFormatted,
+                        totalFare,
+                        date,
+                        time,
+                        fromRoute.route_name,
+                        toRoute.route_name,
+                        distance,
+                        fareType,
+                        paymentMethod,
+                        totalChange,
+                        passengerQuantity
+                    );
+                } else {
+                    console.error("AndroidPrinter interface not available");
+                }
+
+                setTimeout(() => location.reload(), 2000);
+
+            } catch (error) {
+                console.error("Failed to post transaction:", error);
+                Swal.fire('Error', 'An error occurred while saving the transaction.', 'error');
+            }
+        } else {
+            console.log("User canceled the receipt. Transaction not posted.");
+            receiptShown = false;
+        }
+    });
+}
+
     </script>
 </body>
 
