@@ -974,6 +974,7 @@ $conn->close();
                 const baseFare = <?php echo $base_fare; ?>;
                 const distance = Math.abs(fromRoute.post - toRoute.post);
                 let totalFare = 0;
+                let totalChange = 0;
 
                 if (isCashPayment) {
                     // Cash payment logic
@@ -1001,6 +1002,7 @@ $conn->close();
                     }
 
                     totalFare = data.fare; // Use the fare returned from the server
+                    totalChange = cashReceived - totalFare;
                 } else {
                     // RFID payment logic
                     const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>', {
@@ -1031,7 +1033,7 @@ $conn->close();
                 }
 
                 totalFare = totalFare.toFixed(2); // Ensure it's formatted correctly
-                showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity);
+                showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange);
             } catch (error) {
                 console.error('Error fetching balance and processing fare:', error);
                 Swal.fire('Error', 'An error occurred while processing your payment. Please try again.', 'error');
@@ -1045,7 +1047,7 @@ $conn->close();
             return initials + ' ' + lastName;
         }
 
-        function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity) {
+        function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange) {
     if (receiptShown) return; // Prevent duplicate receipt
             
     receiptShown = true;
@@ -1057,25 +1059,32 @@ $conn->close();
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
-    const receiptText = `
+    let receiptText = `
       ZARAGOZA RAMSTAR
-  TRANSPORT COOPERATIVE
-  DIRECTION       : ${direction}
-  BUS NO.         : ${busNumber}
-  DATE            : ${date}
-  TIME            : ${time}
-  FROM            : ${fromRoute.route_name}
-  TO              : ${toRoute.route_name}
-  DISTANCE        : ${distance} km
-  DRIV. NAME      : ${driverName}
-  COND. NAME      : ${conductorNameFormatted}
-  PASSENGER TYPE  : ${fareType}
-  PAYMENT METHOD  : ${paymentMethod}
-  PASSENGER(S)    : ${passengerQuantity}
-  TOTAL FARE      : ₱${totalFare}
-    ${transactionNumber}
-  Thank you for riding with us!
-  `;
+    TRANSPORT COOPERATIVE
+DIRECTION       : ${direction}
+BUS NO.         : ${busNumber}
+DATE            : ${date}
+TIME            : ${time}
+FROM            : ${fromRoute.route_name}
+TO              : ${toRoute.route_name}
+DISTANCE        : ${distance} km
+DRIV. NAME      : ${driverName}
+COND. NAME      : ${conductorNameFormatted}
+PASSENGER TYPE  : ${fareType}
+PAYMENT METHOD  : ${paymentMethod}
+PASSENGER(S)    : ${passengerQuantity}
+TOTAL FARE      : ₱${totalFare}
+`;
+
+if (paymentMethod === "Cash") {
+    receiptText += `CHANGE          : ₱${totalChange}\n`;
+}
+
+receiptText += `
+        ${transactionNumber}
+    Thank you for riding with us!
+`;
 
     Swal.fire({
         html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
@@ -1099,6 +1108,7 @@ $conn->close();
                     distance,
                     fareType,
                     paymentMethod,
+                    totalChange,
                     passengerQuantity
                 ); 
             } else {

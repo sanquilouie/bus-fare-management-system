@@ -832,43 +832,67 @@ $conn->close();
         // Function to get user balance based on RFID (account_number)
         async function processPayment(paymentType) {
             const isValid = await validateRoutesAndBus();
-            if (!isValid) {
-                return;
-            }
-            if (paymentType === 'cash') {
-                Swal.fire({
-                    title: 'Confirm Cash Payment',
-                    text: 'Are you sure you want to pay in cash?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, Proceed',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const rfid = '';
-                        const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
-                        const toRoute = JSON.parse(document.getElementById('toRoute').value);
-                        const fareType = document.getElementById('fareType').value;
-                        const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
-                        const paymentMethod = 'Cash';
+            if (!isValid) return;
 
-                        // Generate transaction number
-                        const transactionNumber = generateTransactionNumber();
-                        const distance = Math.abs(fromRoute.post - toRoute.post);
-                        getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod);
+            if (paymentType === 'cash') {
+                // First prompt: Enter Cash Received
+                Swal.fire({
+                    title: 'Enter Cash Received',
+                    input: 'number',
+                    inputPlaceholder: 'e.g. 100',
+                    inputAttributes: {
+                        min: 0,
+                        step: 1
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Next',
+                    cancelButtonText: 'Cancel',
+                    preConfirm: (value) => {
+                        if (!value || isNaN(value) || parseFloat(value) <= 0) {
+                            Swal.showValidationMessage('Please enter a valid amount');
+                        }
+                        return value;
+                    }
+                }).then((inputResult) => {
+                    if (inputResult.isConfirmed) {
+                        const cashReceived = parseFloat(inputResult.value);
+
+                        // Second prompt: Confirm Payment
+                        Swal.fire({
+                            title: 'Confirm Cash Payment',
+                            html: `You entered <strong>₱${cashReceived.toFixed(2)}</strong><br>Proceed with cash payment?`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, Proceed',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const rfid = '';
+                                const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
+                                const toRoute = JSON.parse(document.getElementById('toRoute').value);
+                                const fareType = document.getElementById('fareType').value;
+                                const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
+                                const paymentMethod = 'Cash';
+                                const transactionNumber = generateTransactionNumber();
+                                const distance = Math.abs(fromRoute.post - toRoute.post);
+
+                                getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod, cashReceived);
+                            }
+                        });
                     }
                 });
             }
         }
 
         // Updated getUserBalance function to handle both RFID and cash payments
-        async function getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, isCashPayment = false, transactionNumber, distance, paymentMethod) {
+        async function getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, isCashPayment = false, transactionNumber, distance, paymentMethod, cashReceived) {
             const conductorName = "<?= $conductorName; ?>";  // PHP variable
             const driverName = "<?= $_SESSION['driver_name'] ?>";
             try {
                 const baseFare = <?php echo $base_fare; ?>;
                 const distance = Math.abs(fromRoute.post - toRoute.post);
                 let totalFare = 0;
+                let totalChange = 0;
 
                 if (isCashPayment) {
                     // Cash payment logic
@@ -896,6 +920,7 @@ $conn->close();
                     }
 
                     totalFare = data.fare; // Use the fare returned from the server
+                    totalChange = cashReceived - totalFare;
                 } else {
                     // RFID payment logic
                     const response = await fetch('<?= $_SERVER['PHP_SELF']; ?>', {
@@ -926,7 +951,7 @@ $conn->close();
                 }
 
                 totalFare = totalFare.toFixed(2); // Ensure it's formatted correctly
-                showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity);
+                showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange);
             } catch (error) {
                 console.error('Error fetching balance and processing fare:', error);
                 Swal.fire('Error', 'An error occurred while processing your payment. Please try again.', 'error');
@@ -940,8 +965,8 @@ $conn->close();
             return initials + ' ' + lastName;
         }
 
-        function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity) {
-            if (receiptShown) return; // Prevent duplicate receipt
+        function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange) {
+            if (receiptShown) return;
             
             receiptShown = true;
             const driverName = abbreviateName("<?= $_SESSION['driver_name'] ?>"); 
@@ -951,7 +976,7 @@ $conn->close();
             const date = new Date().toLocaleDateString();
             const time = new Date().toLocaleTimeString();
 
-            const receiptText = `
+            let receiptText = `
       ZARAGOZA RAMSTAR
     TRANSPORT COOPERATIVE
 DIRECTION       : ${direction}
@@ -967,9 +992,17 @@ PASSENGER TYPE  : ${fareType}
 PAYMENT METHOD  : ${paymentMethod}
 PASSENGER(S)    : ${passengerQuantity}
 TOTAL FARE      : ₱${totalFare}
+`;
+
+if (paymentMethod === "Cash") {
+    receiptText += `CHANGE          : ₱${totalChange}\n`;
+}
+
+receiptText += `
         ${transactionNumber}
     Thank you for riding with us!
-        `;
+`;
+
 
             Swal.fire({
                 html: `<pre style="font-family: monospace; text-align: left;">${receiptText}</pre>`,
@@ -993,6 +1026,7 @@ TOTAL FARE      : ₱${totalFare}
                             distance,
                             fareType,
                             paymentMethod,
+                            totalChange,
                             passengerQuantity
                         ); 
                     } else {
