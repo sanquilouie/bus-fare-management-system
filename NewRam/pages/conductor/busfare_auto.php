@@ -341,7 +341,7 @@ $conn->close();
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>   
-    <div id="main-content" class="container-fluid mt-1">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-1">
     <button class="btn btn-link settings-btn" onclick="openSettings()" title="Settings">
         <i class="fas fa-cog fa-2xl"></i>
     </button>

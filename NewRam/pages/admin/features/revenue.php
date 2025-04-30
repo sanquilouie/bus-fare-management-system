@@ -82,7 +82,7 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
-<div id="main-content" class="container-fluid mt-5">
+<div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Revenue Report</h2>
 
         <!-- Filter Form -->
