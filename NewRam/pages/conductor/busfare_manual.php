@@ -528,6 +528,23 @@ $conn->close();
         document.getElementById('fareType').addEventListener('change', updateDistance);
         document.getElementById('passengerQuantity').addEventListener('change', updateDistance);
 
+        function updateValue(amount) {
+            var input = document.getElementById('passengerQuantity');
+            var currentValue = parseInt(input.value, 10);
+            var newValue = currentValue + amount;
+
+            newValue = Math.min(Math.max(newValue, input.min), input.max);
+            input.value = newValue;
+            input.dispatchEvent(new Event('change'));
+        }
+
+        document.getElementById('passengerQuantity').addEventListener('change', updateDistance);
+        function updateDistance() {
+            var quantity = document.getElementById('passengerQuantity').value;
+            console.log("Updated quantity:", quantity);
+        }
+
+
         function updateDistance() {
             const fromRouteValue = document.getElementById('fromRoute').value;
             const toRouteValue = document.getElementById('toRoute').value;
