@@ -23,6 +23,7 @@ $totalRevenueQuery = "SELECT SUM(amount) as totalRevenue
                       FROM transactions 
                       WHERE transaction_type = 'Load' 
                       AND bus_number = '$bus_number'
+                      AND status != 'edited'
                       AND DATE(transaction_date) = CURDATE()";
 
 $totalRevenueResult = mysqli_query($conn, $totalRevenueQuery);

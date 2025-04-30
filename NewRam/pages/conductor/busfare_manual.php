@@ -859,9 +859,17 @@ $conn->close();
                 Swal.fire({
                     title: 'Enter Cash Received',
                     html: `
-                        <input id="amount" type="number" placeholder="e.g. 100" class="swal2-input" min="0" step="1">
-                        <label for="exactAmount">Exact amount</label>
-                        <input type="checkbox" id="exactAmount">
+                        <div class="container">
+                        <div class="row g-3">
+                            <div class="col-12">
+                            <input id="amount" type="number" placeholder="e.g. 100" class="form-control" min="0" step="1">
+                            </div>
+                            <div class="col-12 d-flex align-items-center">
+                            <input type="checkbox" id="exactAmount" class="form-check-input me-2">
+                            <label for="exactAmount" class="form-check-label">Exact amount</label>
+                            </div>
+                        </div>
+                        </div>
                     `,
                     showCancelButton: true,
                     confirmButtonText: 'Next',
@@ -962,7 +970,7 @@ async function getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuant
             driverName: driverName
         };
 
-        showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange, postData);
+        showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange, cashReceived, postData);
     } catch (error) {
         console.error('Error preparing fare:', error);
         Swal.fire('Error', 'An error occurred while processing your payment. Please try again.', 'error');
@@ -976,7 +984,7 @@ function abbreviateName(fullName) {
     return initials + ' ' + lastName;
 }
 
-function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange, postData) {
+function showReceipt(fromRoute, toRoute, fareType, totalFare, conductorName, transactionNumber, distance, paymentMethod, passengerQuantity, totalChange, cashReceived, postData) {
     if (receiptShown) return;
 
     receiptShown = true;
@@ -1006,6 +1014,7 @@ TOTAL FARE      : ₱${totalFare}
 `;
 
     if (paymentMethod === "Cash") {
+        receiptText += `CASH            : ₱${cashReceived}\n`;
         receiptText += `CHANGE          : ₱${totalChange}\n`;
     }
 
@@ -1053,6 +1062,7 @@ TOTAL FARE      : ₱${totalFare}
                         fareType,
                         paymentMethod,
                         totalChange,
+                        cashReceived,
                         passengerQuantity
                     );
                 } else {
