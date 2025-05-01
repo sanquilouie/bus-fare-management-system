@@ -196,7 +196,9 @@ ob_end_flush();
                                     <div class="col-md-6">
                                         <label for="employeeNumber" class="form-label required">Employee No.</label>
                                         <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Scan NFC Here" required>
+                                        <div id="employeeNumberFeedback" class="invalid-feedback"></div>
                                     </div>
+
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-md-4">
@@ -507,10 +509,11 @@ licenseInput.addEventListener("input", function(e) {
 function checkSubmitButton() {
     var emailValid = !$('#email').hasClass('is-invalid');
     var contactValid = !$('#phone').hasClass('is-invalid');
+    var empNumValid = !$('#employeeNumber').hasClass('is-invalid');
 
     // Enable the register button only if both are valid
     var registerButton = $('.primary');
-    if (emailValid && contactValid) {
+    if (emailValid && contactValid && empNumValid) {
         registerButton.prop('disabled', false);
     } else {
         registerButton.prop('disabled', true);
@@ -561,37 +564,71 @@ $(document).ready(function () {
 });
 
     $('#email').on('input', function () {
-    var email = $(this).val();
-    var registerButton = $('.primary');
-    registerButton.prop('disabled', true); // Disable register button initially
+        var email = $(this).val();
+        var registerButton = $('.primary');
+        registerButton.prop('disabled', true); // Disable register button initially
 
-    if (email) {
-        $.ajax({
-            url: '../../actions/check_email.php', // File to check email availability
-            type: 'POST',
-            data: { email: email },
-            dataType: 'json',
-            success: function (response) {
-                if (response.exists) {
-                    $('#email').addClass('is-invalid');
-                    $('#emailFeedback').remove();
-                    $('#email').after('<div id="emailFeedback" class="invalid-feedback">This email is already registered.</div>');
-                } else {
-                    $('#email').removeClass('is-invalid');
-                    $('#emailFeedback').remove();
+        if (email) {
+            $.ajax({
+                url: '../../actions/check_email.php', // File to check email availability
+                type: 'POST',
+                data: { email: email },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.exists) {
+                        $('#email').addClass('is-invalid');
+                        $('#emailFeedback').remove();
+                        $('#email').after('<div id="emailFeedback" class="invalid-feedback">This email is already registered.</div>');
+                    } else {
+                        $('#email').removeClass('is-invalid');
+                        $('#emailFeedback').remove();
+                    }
+                    checkSubmitButton(); // Check if both email and contact are valid
+                },
+                error: function () {
+                    console.error('Error checking email.');
                 }
-                checkSubmitButton(); // Check if both email and contact are valid
-            },
-            error: function () {
-                console.error('Error checking email.');
-            }
-        });
-    } else {
-        $('#email').removeClass('is-invalid');
-        $('#emailFeedback').remove();
-        checkSubmitButton(); // Re-check submit status
-    }
-});
+            });
+        } else {
+            $('#email').removeClass('is-invalid');
+            $('#emailFeedback').remove();
+            checkSubmitButton(); // Re-check submit status
+        }
+    });
+
+
+    $('#employeeNumber').on('input', function () {
+        var empNo = $(this).val();
+        var registerButton = $('.primary');
+        registerButton.prop('disabled', true); // Disable button while checking
+
+        if (empNo) {
+            $.ajax({
+                url: '../../actions/check_employee_no.php',
+                type: 'POST',
+                data: { employeeNumber: empNo },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.exists) {
+                        $('#employeeNumber').addClass('is-invalid');
+                        $('#employeeNumberFeedback').remove();
+                        $('#employeeNumber').after('<div id="employeeNumberFeedback" class="invalid-feedback">This Employee Number is already registered.</div>');
+                    } else {
+                        $('#employeeNumber').removeClass('is-invalid');
+                        $('#employeeNumberFeedback').remove();
+                    }
+                    checkSubmitButton(); // Optionally validate form again
+                },
+                error: function () {
+                    console.error('Error checking Employee Number.');
+                }
+            });
+        } else {
+            $('#employeeNumber').removeClass('is-invalid');
+            $('#employeeNumberFeedback').remove();
+            checkSubmitButton();
+        }
+    });
 
 $(document).ready(function () {
     let confirmationShown = false;
@@ -606,7 +643,16 @@ $(document).ready(function () {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Email',
-                text: 'This email is already registered. Please use another.',
+                text: 'This Email is already registered. Please use another.',
+            });
+            return;
+        }
+
+        if ($('#employeeNumber').hasClass('is-invalid')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Employee Number',
+                text: 'This Employee Number is already registered. Please use another.',
             });
             return;
         }
