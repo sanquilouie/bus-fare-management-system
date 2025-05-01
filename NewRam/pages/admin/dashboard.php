@@ -25,9 +25,22 @@ $userCountResult = mysqli_query($conn, $userCountQuery);
 $userCount = mysqli_fetch_assoc($userCountResult)['userCount'] ?? 0;
 
 // Fetch total revenue
-$totalRevenueQuery = "SELECT SUM(amount) AS totalRevenue FROM revenue WHERE transaction_type = 'debit'";
+$totalRevenueQuery = "
+    SELECT 
+        SUM(total_load) AS totalLoad, 
+        SUM(total_cash) AS totalCash 
+    FROM remit_logs 
+    WHERE MONTH(remit_date) = MONTH(CURRENT_DATE()) 
+      AND YEAR(remit_date) = YEAR(CURRENT_DATE())
+";
+
 $totalRevenueResult = mysqli_query($conn, $totalRevenueQuery);
-$totalRevenue = mysqli_fetch_assoc($totalRevenueResult)['totalRevenue'] ?? 0;
+$row = mysqli_fetch_assoc($totalRevenueResult);
+
+$totalLoad = $row['totalLoad'] ?? 0;
+$totalCash = $row['totalCash'] ?? 0;
+$totalRevenue = $totalLoad + $totalCash;
+
 
 // Fetch total bus count
 $busCountQuery = "SELECT COUNT(*) AS busCount FROM businfo";
