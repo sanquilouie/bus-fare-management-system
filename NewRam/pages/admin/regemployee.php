@@ -12,6 +12,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 include '../../includes/connection.php';
+
+
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Get form values and sanitize inputs
@@ -29,6 +31,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $gender = $_POST['gender'];
     $accountNumber = $_POST['employeeNumber'];
 
+
+    if (isset($_POST['update_id']) && isset($_POST['new_status'])) {
+        $update_id = mysqli_real_escape_string($conn, $_POST['update_id']);
+        $new_status = (int) $_POST['new_status'];
+
+        $update_sql = "UPDATE useracc SET is_activated = $new_status WHERE account_number = '$update_id'";
+        mysqli_query($conn, $update_sql);
+
+        // Optional: redirect to avoid form resubmission
+        header("Location: " . $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']);
+        exit;
+    }
 
     // Calculate age
     $age = date_diff(date_create($birthday), date_create('today'))->y;
@@ -181,7 +195,7 @@ ob_end_flush();
                                     </div>
                                     <div class="col-md-6">
                                         <label for="employeeNumber" class="form-label required">Employee No.</label>
-                                        <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Scan RFID Here" required>
+                                        <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Scan NFC Here" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -329,6 +343,7 @@ ob_end_flush();
                             <th>Contact</th>
                             <th>Role</th>
                             <th>Date Hired</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -346,11 +361,12 @@ ob_end_flush();
                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                         $start = ($page - 1) * $limit;
 
-                        $sql = "SELECT account_number, firstname, middlename, lastname, suffix, email, contactnumber, created_at, role 
-                                FROM useracc
-                                $where 
-                                ORDER BY created_at DESC 
-                                LIMIT $start, $limit";
+                        $sql = "SELECT account_number, firstname, middlename, lastname, suffix, email, contactnumber, created_at, role, is_activated 
+                        FROM useracc
+                        $where 
+                        ORDER BY created_at DESC 
+                        LIMIT $start, $limit";
+
                         $result = mysqli_query($conn, $sql);
 
                         if ($result && mysqli_num_rows($result) > 0) {
@@ -359,6 +375,8 @@ ob_end_flush();
                                 if (!empty($row['suffix'])) {
                                     $fullname .= ', ' . $row['suffix'];
                                 }
+                                $action_label = $row['is_activated'] == 1 ? 'Disable' : 'Enable';
+                                $action_status = $row['is_activated'] == 1 ? 2 : 1;
                                 echo "<tr>
                                         <td>{$row['account_number']}</td>
                                         <td>" . htmlspecialchars($fullname) . "</td>
@@ -366,6 +384,13 @@ ob_end_flush();
                                         <td>{$row['contactnumber']}</td>
                                         <td>{$row['role']}</td>
                                         <td>" . date('F d, Y', strtotime($row['created_at'])) . "</td>
+                                        <td>
+                                            <form method='post' class='status-form' data-label='$action_label' style='display:inline-block;'>
+                                                <input type='hidden' name='update_id' value='{$row['account_number']}'>
+                                                <input type='hidden' name='new_status' value='{$action_status}'>
+                                                <button type='button' class='btn btn-sm btn-" . ($action_status == 1 ? "success" : "danger") . " confirm-status'>$action_label</button>
+                                            </form>
+                                        </td>
                                     </tr>";
                             }
                         } else {
@@ -417,6 +442,26 @@ ob_end_flush();
 
 <script src="../../assets/js/address_api.js"></script>
 <script>
+
+document.querySelectorAll('.confirm-status').forEach(button => {
+    button.addEventListener('click', function () {
+        const form = this.closest('form');
+        const label = form.getAttribute('data-label');
+
+        Swal.fire({
+            title: `Are you sure you want to ${label.toLowerCase()} this user?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: `Yes, ${label}`,
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: label === 'Disable' ? '#d33' : '#3085d6',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
 
 <?php if (isset($_SESSION['success'])): ?>
     Swal.fire({
@@ -617,22 +662,22 @@ $(document).ready(function () {
         if (role === "Driver") {
             document.getElementById("driverFields").style.display = "block";
             employeeNumberField.readOnly = false;
-            employeeNumberField.placeholder = "Scan RFID Here";   
+            employeeNumberField.placeholder = "Scan NFC Here";   
             employeeNumberField.value = "";  
         } else if (role === "Conductor") {
             //document.getElementById("conductorFields").style.display = "block";
             employeeNumberField.readOnly = false;
-            employeeNumberField.placeholder = "Scan RFID Here";   
+            employeeNumberField.placeholder = "Scan NFC Here";   
             employeeNumberField.value = ""; 
         } else if (role === "Cashier") {
             //document.getElementById("cashierFields").style.display = "block";
             employeeNumberField.readOnly = false;
-            employeeNumberField.placeholder = "Scan RFID Here";   
+            employeeNumberField.placeholder = "Scan NFC Here";   
             employeeNumberField.value = "";   
         } else if (role === "Inspector") {
             //document.getElementById("cashierFields").style.display = "block";
             employeeNumberField.readOnly = false;
-            employeeNumberField.placeholder = "Scan RFID Here";   
+            employeeNumberField.placeholder = "Scan NFC Here";   
             employeeNumberField.value = "";   
         }
     });
