@@ -3,7 +3,9 @@ session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+date_default_timezone_set('Asia/Manila');
 include '../../includes/connection.php';
+require '../../includes/sms_helper.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Conductor' && $_SESSION['role'] != 'Superadmin')) {
     header("Location: ../../index.php");
@@ -152,11 +154,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $totalFare = $fare * $passengerQuantity;
 
        // Apply discount if applicable
-if ($fareType === 'discounted') {
-    $totalFare *= (1 - ($discountPercentage / 100)); // Apply the discount based on the fetched percentage
-}else if($fareType === 'special'){
-    $totalFare *= (1 - ($specialPercentage / 100));
-}
+        if ($fareType === 'discounted') {
+            $totalFare *= (1 - ($discountPercentage / 100)); // Apply the discount based on the fetched percentage
+        }else if($fareType === 'special'){
+            $totalFare *= (1 - ($specialPercentage / 100));
+        }
 
         if (empty($rfid)) { // Check if payment is made in cash
             $totalFare = round($totalFare); // Round to the nearest whole number
@@ -166,8 +168,24 @@ if ($fareType === 'discounted') {
         if (empty($rfid) || $balance >= $totalFare) {
             if (!empty($rfid)) {
                 deductFare($rfid, $totalFare, $conn);
+            
+                // Optional: Fetch the phone number associated with the RFID
+                $phoneQuery = $conn->prepare("SELECT contactnumber FROM useracc WHERE account_number = ?");
+                $phoneQuery->bind_param("s", $rfid);
+                $phoneQuery->execute();
+                $phoneResult = $phoneQuery->get_result();
+            
+                if ($phoneResult && $phoneResult->num_rows > 0) {
+                    $row = $phoneResult->fetch_assoc();
+                    $phoneNumber = $row['contactnumber'];
+            
+                    // Compose SMS message
+                    $smsMessage = "Fare of ₱" . number_format($totalFare, 2) . " deducted on " . date('Y-m-d h:i A') . ". Remaining balance: ₱" . number_format($balance - $totalFare, 2) . ".";
+            
+                    // Send the SMS
+                    sendSMS($phoneNumber, $smsMessage);
+                }
             }
-
             // Track the passenger
             $_SESSION['passengers'][] = [
                 'rfid' => $rfid,

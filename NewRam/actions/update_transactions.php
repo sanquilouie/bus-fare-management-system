@@ -76,6 +76,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $updateNewBalance->close();
         $updateOld->close();
 
+        // Step 6: Fetch user's contact number and new balance
+        $contactStmt = $conn->prepare("SELECT contactnumber, balance FROM useracc WHERE account_number = ?");
+        $contactStmt->bind_param("s", $userId);
+        $contactStmt->execute();
+        $contactResult = $contactStmt->get_result();
+
+        if ($contactResult && $contactResult->num_rows > 0) {
+            $user = $contactResult->fetch_assoc();
+            $phoneNumber = $user['contactnumber'];
+            $newBalance = $user['balance'];
+
+            // Compose SMS with timestamp
+            date_default_timezone_set('Asia/Manila');
+            $smsMessage = "Your load transaction was updated on " . date('Y-m-d h:i A') .
+                ". New load: ₱" . number_format($newAmount, 2) .
+                ". New balance: ₱" . number_format($newBalance, 2) . ".";
+
+            // Send SMS
+            require_once '../includes/sms_helper.php'; // Make sure this path is correct
+            sendSMS($phoneNumber, $smsMessage);
+        }
+
+$contactStmt->close();
+
+
     } catch (Exception $e) {
         $conn->rollback(); // Revert changes on error
         echo json_encode(["success" => false, "message" => $e->getMessage()]);
