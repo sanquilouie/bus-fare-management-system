@@ -100,10 +100,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $mail->Subject = 'Registration Received';
                     $mail->Body = "
                         <p>Hi $firstname,</p>
-                        <p>Thank you for registering with Ramstar Bus Transportation.</p>
-                        <p>Your account has been successfully activated. You can now log in and start using your account.</p>
-                        <p>Your default password is: ramstar</p>
-                        <p>Best regards,<br>Ramstar Bus Transportation</p>
+                        <p>Thank you for registering with Ramstar Zaragoza.</p>
+                        <p>Your account is pending activation. You will receive another email once you get your card in ramstar office or teminals.</p>
+                        <p>Best regards,<br>Ramstar Zaragoza</p>
                     ";
     
                     $mail->send();
