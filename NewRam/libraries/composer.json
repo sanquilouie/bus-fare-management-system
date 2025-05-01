@@ -2,6 +2,7 @@
     "name": "newram/escpos-demo",
     "description": "ESCPOS for Remit",
     "require": {
-        "mike42/escpos-php": "^2.2"
+        "mike42/escpos-php": "^2.2",
+        "phpoffice/phpspreadsheet": "1.17"
     }
 }

@@ -42,7 +42,11 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
                 <div class="table-responsive">
-                <input type="text" id="busSearch" class="form-control mb-3" placeholder="Search Bus No">
+                <div class="input-group mb-3">
+                    <input type="text" id="busSearch" class="form-control" placeholder="Search Bus No">
+                    <button class="btn btn-primary" id="busDropdownBtn">Select Bus</button>
+                </div>
+
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -62,6 +66,38 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
         </div>
     </div>
     <script>
+        $('#busDropdownBtn').click(function () {
+    $.ajax({
+        url: '../../actions/get_bus_numbers.php', // your PHP endpoint
+        method: 'GET',
+        dataType: 'json',
+        success: function (buses) {
+            if (!Array.isArray(buses) || buses.length === 0) {
+                Swal.fire('No buses found', '', 'info');
+                return;
+            }
+
+            const options = buses.map(bus => 
+                `<option value="${bus}">${bus}</option>`).join('');
+
+            Swal.fire({
+                title: 'Select Bus Number',
+                html: `<select id="swal-bus-dropdown" class="form-control form-select">${options}</select>`,
+                confirmButtonText: 'Generate Excel',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const selected = document.getElementById('swal-bus-dropdown').value;
+                    // Redirect to the PHP script that generates the Excel file
+                    window.location.href = `../../actions/generate_excel.php?bus_number=${selected}`;
+                }
+            });
+        },
+        error: function () {
+            Swal.fire('Error', 'Could not fetch bus numbers', 'error');
+        }
+    });
+});
+
         document.getElementById('busSearch').addEventListener('keyup', function() {
             const query = this.value.toLowerCase();
             const rows = document.querySelectorAll('#remitLogsTableBody tr');

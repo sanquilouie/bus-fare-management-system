@@ -147,7 +147,7 @@ $result = $conn->query($sql);
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item <?php if ($page == 1) echo 'disabled'; ?>">
-                    <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Previous</a>
+                    <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Prev</a>
                 </li>
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                     <li class="page-item <?php if ($i == $page) echo 'active'; ?>">

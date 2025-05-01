@@ -4,7 +4,7 @@ require('../libraries/fpdf/fpdf.php'); // Adjust the path if necessary
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the selected date values from the POST request
     $selectedDate = $_POST['date'] ?? date('Y-m-d'); // Default to current date if not provided
-w
+
     // Extract year, month, and day from the selected date
     $year = date('Y', strtotime($selectedDate));
     $month = date('m', strtotime($selectedDate));
