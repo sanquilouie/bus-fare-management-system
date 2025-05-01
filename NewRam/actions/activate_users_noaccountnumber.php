@@ -65,6 +65,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($user_id && $account_number) {
         try {
+            // Step 1: Check if account_number exists for another user
+            $checkQuery = "SELECT id FROM useracc WHERE account_number = ? AND id != ?";
+            $checkStmt = $conn->prepare($checkQuery);
+            $checkStmt->bind_param("si", $account_number, $user_id);
+            $checkStmt->execute();
+            $checkStmt->store_result();
+
+            if ($checkStmt->num_rows > 0) {
+                echo json_encode(['success' => false, 'message' => 'Account number already exists.']);
+                $checkStmt->close();
+                exit;
+            }
+            $checkStmt->close();
+
+            // Step 2: Proceed with activation
             $activateQuery = "UPDATE useracc SET is_activated = 1, account_number = ? WHERE id = ?";
             $stmt = $conn->prepare($activateQuery);
 
@@ -77,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($stmt->execute()) {
                 $stmt->close();
 
-                // Send the activation email after successful update
+                // Send activation email
                 sendActivationEmail($user_id, $account_number);
 
                 echo json_encode(['success' => true, 'message' => 'User activated and email sent successfully.']);
@@ -88,7 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
+
     } else {
         echo json_encode(['success' => false, 'message' => 'User ID or Account Number is missing.']);
     }
 }
+

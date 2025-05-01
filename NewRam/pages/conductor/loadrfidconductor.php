@@ -105,42 +105,42 @@ $result = $conn->query($sql);
                 </form>
         <!-- Transactions Table -->
          <div class="table-responsive">
-        <table id="transactionTable" class="table table-bordered mt-4">
-    <thead class="thead-light">
-        <tr>
-            <th>Transaction #</th>
-            <th>Account #</th>
-            <th>Passenger Name</th>
-            <th>Load Amount</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (mysqli_num_rows($result) > 0): ?>
-            <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                <tr>
-                    <td><?php echo $row['id']; ?></td>
-                    <td><?php echo $row['account_number']; ?></td>
-                    <td><?php echo htmlspecialchars($row['name']); ?></td>
-                    <td><?php echo number_format($row['amount'], 2); ?></td>
-                    <td>
-                        <!-- Disable the Edit button if the status is 'edited' -->
-                        <button class="btn btn-warning btn-sm edit-btn" 
-                            data-account="<?php echo $row['id']; ?>" 
-                            data-amount="<?php echo $row['amount']; ?>"
-                            <?php echo ($row['status'] === 'edited') ? 'disabled' : ''; ?>>
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="5" class="text-center">No transaction records found.</td>
-            </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+            <table id="transactionTable" class="table table-bordered mt-4">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Transaction #</th>
+                        <th>Account #</th>
+                        <th>Passenger Name</th>
+                        <th>Load Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (mysqli_num_rows($result) > 0): ?>
+                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                            <tr>
+                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $row['account_number']; ?></td>
+                                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                                <td><?php echo number_format($row['amount'], 2); ?></td>
+                                <td>
+                                    <!-- Disable the Edit button if the status is 'edited' -->
+                                    <button class="btn btn-warning btn-sm edit-btn" 
+                                        data-account="<?php echo $row['id']; ?>" 
+                                        data-amount="<?php echo $row['amount']; ?>"
+                                        <?php echo ($row['status'] === 'edited') ? 'disabled' : ''; ?>>
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="text-center">No transaction records found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <!-- Pagination -->

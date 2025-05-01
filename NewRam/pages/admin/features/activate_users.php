@@ -137,7 +137,7 @@ function sendActivationEmail($user_id, $account_number)
 
 <body>
 <?php
-    //include '../../../includes/topbar.php';
+    include '../../../includes/topbar.php';
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
@@ -268,7 +268,7 @@ function sendActivationEmail($user_id, $account_number)
                                 location.reload();
                             });
                         } else {
-                            Swal.fire('Error', 'There was an error activating the user.', 'error');
+                            Swal.fire('Error', data.message || 'There was an error activating the user.', 'error');
                         }
                     })
                     .catch(error => {
