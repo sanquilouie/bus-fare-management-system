@@ -16,7 +16,7 @@ include "../includes/connection.php";
 
 // Get bus number from request (you might get it via GET or POST)
 $busNumber = $_GET['bus_number']; // Assume it's passed via GET
-$today = date('Y-m-d'); // Today's date
+$today = $_GET['remit_date'];
 
 // Query passenger logs for the selected bus number and today's date
 $sql = "SELECT rfid, from_route, to_route, fare, conductor_id, conductor_name, driver_id, driver_name, timestamp, transaction_number, rating, feedback

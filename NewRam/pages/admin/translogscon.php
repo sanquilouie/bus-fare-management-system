@@ -44,9 +44,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                 <div class="table-responsive">
                 <div class="input-group mb-3">
                     <input type="text" id="busSearch" class="form-control" placeholder="Search Bus No">
-                    <button class="btn btn-primary" id="busDropdownBtn">Select Bus</button>
                 </div>
-
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -55,14 +53,16 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <th>Conductor ID</th>
                                 <th>Total Net Amount</th>
                                 <th>Remit Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="remitLogsTableBody"></tbody>
                     </table>
                 </div>
-                    <nav>
-                        <ul class="pagination" id="pagination"></ul>
-                    </nav>
+                <nav>
+                    <ul class="pagination" id="pagination"></ul>
+                </nav>
+            </div>
         </div>
     </div>
     <script>
@@ -108,6 +108,11 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
             });
         });
     $(document).ready(function () {
+        window.generateExcel = function(busNumber, remitDate) {
+            window.location.href = `../../actions/generate_excel.php?bus_number=${busNumber}&remit_date=${remitDate}`;
+        };
+
+
         function loadRemitLogs(page = 1) {
             $.ajax({
                 url: '../../actions/fetch_remitlogs_admin.php', // Update this to your correct PHP file
@@ -126,6 +131,9 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
 
                     // Populate the remit logs table
                     remitLogs.forEach(log => {
+                        const remitDate = encodeURIComponent(log.remit_date);
+                        const busNo = encodeURIComponent(log.bus_no);
+
                         tableBody.append(`
                             <tr>
                                 <td>${log.remit_id}</td>
@@ -133,10 +141,16 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <td>${log.conductor_id}</td>
                                 <td>${parseFloat(log.total_net_amount).toFixed(2)}</td>
                                 <td>${log.remit_date}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="generateExcel('${busNo}', '${remitDate}')">
+                                        Generate Excel
+                                    </button>
+                                </td>
                             </tr>
 
                         `);
                     });
+
 
                     // Responsive pagination logic
                     function addPageButton(pageNumber, isActive = false) {
