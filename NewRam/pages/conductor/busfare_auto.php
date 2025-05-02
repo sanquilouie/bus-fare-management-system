@@ -707,8 +707,8 @@ $conn->close();
         }
 
         async function validateRoutesAndBus() {
-            const fromRoute = document.getElementById('fromRoute').value;
-            const toRoute = document.getElementById('toRoute').value;
+            const fromRoute = document.getElementById('fromRoute').innerText;
+            const toRoute = document.getElementById('toRoute').innerText;
             const direction = "<?= $_SESSION['direction'] ?? '' ?>";
 
             if (!fromRoute || !toRoute) {
