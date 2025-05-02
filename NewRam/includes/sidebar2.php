@@ -123,7 +123,7 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
 }
 
 #main-content.sidebar-expanded {
-    margin-left: 300px; /* When sidebar is expanded */
+    margin-left: 150px; /* When sidebar is expanded */
 }
 
 .toggle-btn {
