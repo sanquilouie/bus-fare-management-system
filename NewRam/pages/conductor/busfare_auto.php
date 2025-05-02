@@ -955,6 +955,9 @@ $conn->close();
 
         async function processPayment(paymentType) {
             const isValid = await validateRoutesAndBus();
+            const fareLabel = document.getElementById('fareLabel').innerText;
+            let totalFare = parseFloat(fareLabel.replace('₱', '').trim());
+            
             if (!isValid) return;
 
             if (paymentType === 'cash') {
@@ -977,10 +980,40 @@ $conn->close();
                     showCancelButton: true,
                     confirmButtonText: 'Next',
                     cancelButtonText: 'Cancel',
-                    preConfirm: (value) => {
-                        if (!value || isNaN(value) || parseFloat(value) <= 0) {
+                    didOpen: () => {
+                        const checkbox = document.getElementById('exactAmount');
+                        const amountInput = document.getElementById('amount');
+                        
+                        // If checkbox is ticked, set the input value to totalFare
+                        checkbox.addEventListener('change', () => {
+                            if (checkbox.checked) {
+                                let totalFare = parseFloat(fareLabel.replace('₱', '').trim());
+                                amountInput.value = totalFare;  // Set the input value to totalFare
+                            } else {
+                                amountInput.value = '';  // Reset input value when unchecked
+                            }
+                        });
+                    },
+                    preConfirm: () => {
+                        const amount = document.getElementById('amount').value;
+                        const exactAmountChecked = document.getElementById('exactAmount').checked;
+
+                        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
                             Swal.showValidationMessage('Please enter a valid amount');
+                            return false;
                         }
+
+                        if (amount < totalFare){
+                            Swal.showValidationMessage('Cash received cannot be less than the total fare');
+                            return false;
+                        }
+
+                        let value = parseFloat(amount);
+                        if (exactAmountChecked) {
+                            let totalFare = parseFloat(fareLabel.replace('₱', '').trim());
+                            value = totalFare; // Use the totalFare value if checkbox is ticked
+                        }
+
                         return value;
                     }
                 }).then((inputResult) => {
