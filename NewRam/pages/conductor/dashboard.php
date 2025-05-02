@@ -214,10 +214,6 @@ while ($row = mysqli_fetch_assoc($revenueByDateResult)) {
             </div>
         </div>
     </div>
-
-
-    <!-- Revenue Chart -->
-
     </div>
     </div>
     </div>

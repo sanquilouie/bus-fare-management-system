@@ -452,11 +452,11 @@ $conn->close();
                     <label for="tripMode" class="form-label">Trip Mode</label>
                     <div class="row g-2">
                         <div class="col-6">
-                            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
                             <label class="btn btn-outline-primary w-100" for="btnradio1" onclick="window.location.href='busfare_manual.php'">Manual</label>
                         </div>
                         <div class="col-6">
-                            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"  checked>
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
                             <label class="btn btn-outline-primary w-100" for="btnradio2" onclick="window.location.href='busfare_auto.php'">Auto</label>
                         </div>
                     </div>
