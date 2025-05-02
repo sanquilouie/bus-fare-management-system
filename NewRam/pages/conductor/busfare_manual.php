@@ -600,7 +600,7 @@ $conn->close();
                     // Calculate total fare with passenger quantity
                     totalFare *= passengerQuantity; // Multiply by the number of passengers
 
-                    fareLabel.textContent = `₱${totalFare.toFixed(2)}`;
+                    fareLabel.textContent = `₱${Math.round(totalFare).toFixed(2)}`;
                 } catch (error) {
                     console.error('Error parsing route data:', error);
                     kmLabel.textContent = "Invalid route data";
