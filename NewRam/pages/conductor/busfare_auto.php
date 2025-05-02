@@ -708,7 +708,7 @@ $conn->close();
 
         async function validateRoutesAndBus() {
             const fromRoute = document.getElementById('fromRoute').innerText;
-            const toRoute = document.getElementById('toRoute').innerText;
+            const toRoute = document.getElementById('toRoute').value;
             const direction = "<?= $_SESSION['direction'] ?? '' ?>";
 
             if (!fromRoute || !toRoute) {
@@ -906,7 +906,7 @@ $conn->close();
             }
 
             Swal.fire({
-                title: 'Enter RFID',
+                title: 'Enter NFC',
                 input: 'text',
                 inputAttributes: {
                     autocapitalize: 'off'
@@ -915,7 +915,7 @@ $conn->close();
                 showConfirmButton: true, // ✅ Show Confirm button
                 confirmButtonText: 'Submit',
                 cancelButtonText: 'Cancel',
-                inputPlaceholder: 'Scan your RFID here',
+                inputPlaceholder: 'Scan your NFC here',
                 didOpen: () => {
                     const inputField = Swal.getInput();
                     if (inputField) {
