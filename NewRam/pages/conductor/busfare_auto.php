@@ -937,7 +937,7 @@ $conn->close();
                         return false;
                     }
 
-                    const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
+                    const fromRoute = JSON.parse(document.getElementById('fromRoute').innerText);
                     const toRoute = JSON.parse(document.getElementById('toRoute').value);
                     const fareType = document.getElementById('fareType').value;
                     const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
