@@ -226,14 +226,6 @@ $result = $conn->query($sql);
     });
     const busNumber = <?= isset($_SESSION['bus_number']) ? json_encode($_SESSION['bus_number']) : 'null' ?>;
         document.getElementById('scanRFIDBtn').addEventListener('click', async () => { 
-            if (!busNumber) {
-                await Swal.fire({
-                    icon: 'warning',
-                    title: 'Bus Number Not Set',
-                    text: 'Please set the bus number in Bus Fare first before proceeding.',
-                });
-                return; // ⛔ Stop execution
-    }
             try {
                 // First, prompt for the user account number
                 const { value: userAccountNumber } = await Swal.fire({

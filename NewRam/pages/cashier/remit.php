@@ -19,7 +19,8 @@ $bus_number = '';
 $total_load = null; // Initialize the total load variable
 $rfid_scan = ''; // Initialize the RFID variable
 
-// Handle RFID scan and fetch data based on RFID
+$enableButton = isset($_SESSION['rfid_data']) && !empty($_SESSION['rfid_data']['rfid_scan']);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     $rfid_scan = $_POST['rfid_scan'];
 
@@ -102,11 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
             'net_amount' => ''
         ];
     }
-    
-
     $stmt->close();
-
-    // 👇 Redirect to avoid form resubmission on reload
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -197,7 +194,9 @@ if ($rfid_data) {
 
                 <div class="text-center mt-1">
                     <button type="submit" name="generate_remittance" id="remitButton"
-                        class="btn btn-primary w-100">Generate Remittance</button>
+                        class="btn btn-primary w-100" <?= $enableButton ? '' : 'disabled' ?>>
+                        Generate Remittance
+                    </button>
                 </div>
             </form>
 
