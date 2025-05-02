@@ -23,6 +23,7 @@ if (isset($_POST['confirm_logout']) && $_POST['confirm_logout'] === 'true') {
         if ($stmt->num_rows === 0) {
             unset($_SESSION['bus_number']);
             unset($_SESSION['driver_account_number']);
+			unset($_SESSION['direction']);
         }
 
         $stmt->close();

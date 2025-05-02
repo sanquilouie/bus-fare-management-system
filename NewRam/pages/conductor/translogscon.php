@@ -123,7 +123,7 @@ $transactions = fetchTransactions($conn,$account_number, $limit, $offset);
                                         <td>
                                         <?php if ($row['status'] === 'edited'): ?>
                                             <span class="badge bg-warning text-dark" title="This transaction was edited after submission.">Edited</span>
-                                        <?php elseif ($row['status'] === 'unremitted'): ?>
+                                        <?php elseif ($row['status'] === 'notremitted'): ?>
                                             <span class="badge bg-secondary">Unremitted</span>
                                         <?php elseif ($row['status'] === 'remitted'): ?>
                                             <span class="badge bg-success">Remitted</span>
