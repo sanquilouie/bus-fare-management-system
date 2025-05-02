@@ -13,7 +13,7 @@ $query = "SELECT
         CONCAT(u.firstname, ' ', u.lastname) AS full_name
     FROM remit_logs r
     JOIN useracc u ON r.conductor_id = u.account_number
-    ORDER BY r.remit_date DESC 
+    ORDER BY r.created_at DESC 
     LIMIT ? OFFSET ?
 ";
 
