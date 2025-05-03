@@ -24,6 +24,7 @@ try {
 	$pdo = new PDO("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpass);
 	// Set the PDO error mode to exception
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$pdo->exec("SET time_zone = 'Asia/Manila'");
 } catch (PDOException $e) {
 	die("Failed to connect using PDO: " . $e->getMessage());
 }
