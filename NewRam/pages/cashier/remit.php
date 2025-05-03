@@ -30,33 +30,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
             u.firstname,
             u.lastname,
 
-            IFNULL(SUM(DISTINCT CASE 
-                WHEN t.status NOT IN ('edited', 'remitted') THEN t.amount 
-                ELSE 0 END), 0) AS total_load,
+            IFNULL((
+                SELECT SUM(DISTINCT t.amount)
+                FROM transactions t
+                WHERE t.conductor_id = u.account_number AND t.status NOT IN ('edited', 'remitted')
+            ), 0) AS total_load,
 
-            COALESCE(
-                MAX(CASE 
-                    WHEN pl.status = 'notremitted' THEN pl.bus_number 
-                    ELSE NULL 
-                END),
-                MAX(CASE 
-                    WHEN t.status NOT IN ('edited', 'remitted') THEN t.bus_number 
-                    ELSE NULL 
-                END)
+            (
+                SELECT pl.bus_number
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number AND pl.status = 'notremitted'
+                ORDER BY pl.timestamp DESC
+                LIMIT 1
             ) AS bus_number,
 
-            IFNULL(SUM(CASE 
-                WHEN pl.status = 'notremitted' AND pl.rfid = 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
-                ELSE 0 END), 0) AS total_cash_fare,
+            IFNULL((
+                SELECT SUM(pl.fare)
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number 
+                AND pl.status = 'notremitted' 
+                AND pl.rfid = 'cash' 
+                AND DATE(pl.timestamp) = CURDATE()
+            ), 0) AS total_cash_fare,
 
-            IFNULL(SUM(CASE 
-                WHEN pl.status = 'notremitted' AND pl.rfid != 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
-                ELSE 0 END), 0) AS total_card_fare
+            IFNULL((
+                SELECT SUM(pl.fare)
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number 
+                AND pl.status = 'notremitted' 
+                AND pl.rfid != 'cash' 
+                AND DATE(pl.timestamp) = CURDATE()
+            ), 0) AS total_card_fare
 
-            FROM useracc u
-            LEFT JOIN transactions t ON t.conductor_id = u.account_number
-            LEFT JOIN passenger_logs pl ON pl.conductor_id = u.account_number
-            WHERE u.account_number = ?
+        FROM useracc u
+        WHERE u.account_number = ?;
+
     ");
 
     $stmt->bind_param("s", $rfid_scan);
