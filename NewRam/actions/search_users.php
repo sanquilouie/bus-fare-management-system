@@ -11,7 +11,7 @@ if (isset($_POST['query'])) {
     $searchQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address,province,municipality,barangay, account_number, balance, is_activated 
                     FROM useracc 
                     WHERE is_activated = 1 AND role = 'User'
-                    AND (account_number LIKE '%$search%' OR email LIKE '%$search%')"; // Assuming you have an email column
+                    AND (account_number LIKE '%$search%' OR email LIKE '%$search%')";
 
     $result = mysqli_query($conn, $searchQuery);
 

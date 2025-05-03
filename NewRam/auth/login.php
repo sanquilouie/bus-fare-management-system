@@ -312,7 +312,7 @@ if (isset($_POST['Login'])) {
               <div class="row gy-2 overflow-hidden">
                 <div class="col-12">
                   <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="username" id="username" placeholder="Account Number/Email" required>
+                  <input type="text" class="form-control" name="username" id="username" placeholder="Account Number/Email" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                     <label for="username" class="form-label">Account Number/Email</label>
                   </div>
                 </div>
