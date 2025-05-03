@@ -18,7 +18,7 @@ if (!$conn) {
 	die("Failed to connect using MySQLi: " . mysqli_connect_error());
 }
 
-mysqli_query($conn, "SET time_zone = 'Asia/Manila'");
+mysqli_query($conn, "SET time_zone = '+08:00'");
 
 try {
     // Connect using PDO
