@@ -27,7 +27,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Set the time zone for the PDO connection
-    $pdo->exec("SET time_zone = 'Asia/Manila'");
+    $pdo->exec("SET time_zone = '+08:00'");
 } catch (PDOException $e) {
     die("Failed to connect using PDO: " . $e->getMessage());
 }
