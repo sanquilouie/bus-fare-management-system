@@ -8,7 +8,7 @@ include "../includes/connection.php";
 if (isset($_POST['query'])) {
     $search = mysqli_real_escape_string($conn, $_POST['query']);
 
-    $searchQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address,province,municipality,barangay, account_number, balance, status 
+    $searchQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address,province,municipality,barangay, account_number, balance, is_activated 
                     FROM useracc 
                     WHERE is_activated = 1 AND role = 'User'
                     AND (account_number LIKE '%$search%' OR email LIKE '%$search%')"; // Assuming you have an email column
