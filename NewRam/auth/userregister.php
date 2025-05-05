@@ -307,9 +307,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row mb-3">
             <div class="col-md-6">
                 <label for="birthday" class="form-label">
-                    Birthday <span class="text-danger">*</span>
+                    Birthday 
                 </label>
-                <input type="date" class="form-control" id="birthday" name="birthday" required />
+                <input type="date" class="form-control" id="birthday" name="birthday" />
             </div>
                 <div class="col-md-6">
                     <label for="gender" class="form-label">Gender</label>
@@ -359,7 +359,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <div class="col-md-6">
                     <label for="phone" class="form-label">
-                        Contact Number
+                        Contact Number <span class="text-danger">*</span>
                     </label>
                     <div class="form-group d-flex">
                         <span class="border-end country-code px-2">+63</span>
