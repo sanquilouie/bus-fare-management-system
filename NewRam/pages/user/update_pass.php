@@ -247,46 +247,6 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'User')) {
 </script>
 
 
-<body>
-<?php
-        include '../../includes/topbar.php';
-        include '../../includes/sidebar2.php';
-        include '../../includes/footer.php';
-    ?>
-    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <h2>Update Password</h2>
-                    <form id="updatePasswordForm" onsubmit="updatePassword(event)">
-                    <label for="pass2" class="form-label">Old Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" class="form-control" name="old_pass" id="pass2" placeholder="Old Password" required>
-                        <i class="fa-solid fa-eye" onclick="togglePassword('pass2', this)"></i>
-                    </div>
-                    <label for="pass1" class="form-label">New Password</label>
-                    <div class="password-wrapper">
-                        <input onkeyup="trigger()" type="password" class="form-control" name="Password" id="pass1" placeholder="New Password" required>
-                        <i class="fa-solid fa-eye" onclick="togglePassword('pass1', this)"></i>
-                    </div>
-                        <div class="indicator">
-                            <span class="weak"></span>
-                            <span class="medium"></span>
-                            <span class="strong"></span>
-                        </div>
-                        <label for="pass3" class="form-label">Confirm Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" class="form-control mb-2" name="PasswordConf" id="pass3" placeholder="Confirm Password" required>
-                            <i class="fa-solid fa-eye" onclick="togglePassword('pass3', this)"></i>
-                        </div>
-                        
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-success btn-block">Update Password</button>
-                        </div>
-                    </form>
-                    </div>
-        </div>
-    </div>
-
     <script type="text/javascript">
         function togglePassword(inputId, icon) {
             const input = document.getElementById(inputId);
