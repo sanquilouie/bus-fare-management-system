@@ -42,7 +42,7 @@ $result = $conn->query($query);
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Remittance Logs</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
@@ -53,6 +53,7 @@ $result = $conn->query($query);
                                 <th>ID</th>
                                 <th>Bus No</th>
                                 <th>Conductor ID</th>
+                                <th>Conductor Name</th>
                                 <th>Total Load</th>
                                 <th>Total Cash</th>
                                 <th>Total Deductions</th>
@@ -94,6 +95,7 @@ $result = $conn->query($query);
                                 <td>${log.id}</td>
                                 <td>${log.bus_no}</td>
                                 <td>${log.conductor_id}</td>
+                                <td>${log.full_name}</td>
                                 <td>${parseFloat(log.total_load).toFixed(2)}</td>
                                 <td>${parseFloat(log.total_cash).toFixed(2)}</td>
                                 <td>${parseFloat(log.total_deductions).toFixed(2)}</td>

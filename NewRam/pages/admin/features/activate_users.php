@@ -16,7 +16,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 }
 
 // Fetch users for activation
-$inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 ORDER BY created_at DESC";
+$inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 AND role = 'User' ORDER BY created_at DESC";
 $inactiveUsersResult = mysqli_query($conn, $inactiveUsersQuery);
 
 // Handle activation
@@ -95,7 +95,7 @@ function sendActivationEmail($user_id, $account_number)
         $mail->Body = "
             <p>Dear $firstname,</p>
             <p>Your account has been successfully activated!.</p>
-            <p>Login to ramstarbus.com</p>
+            <p>Login to https://ramstarzaragosa.site/</p>
             <p><strong>Account Number:</strong> $account_number<br>
             <strong>Password:</strong>$password</p>
             <p>Change your password after logging in for security.</p>
@@ -141,7 +141,7 @@ function sendActivationEmail($user_id, $account_number)
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Activate Users</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
@@ -182,6 +182,7 @@ function sendActivationEmail($user_id, $account_number)
                                                 <!-- If there's an account number, show the Activate button -->
                                                 <form method="POST" action="activate_users.php">
                                                     <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
+                                                    <input type="hidden" name="account_number" value="<?php echo $row['account_number']; ?>">
                                                     <button type="button" class="btn btn-success activate-btn">Activate</button>
                                                 </form>
                                             <?php endif; ?>
@@ -267,7 +268,7 @@ function sendActivationEmail($user_id, $account_number)
                                 location.reload();
                             });
                         } else {
-                            Swal.fire('Error', 'There was an error activating the user.', 'error');
+                            Swal.fire('Error', data.message || 'There was an error activating the user.', 'error');
                         }
                     })
                     .catch(error => {

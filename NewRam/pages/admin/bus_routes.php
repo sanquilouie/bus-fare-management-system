@@ -39,7 +39,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-6 col-xxl-10">
                 <h2>Bus Routes</h2>

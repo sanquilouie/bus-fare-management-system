@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-
 session_start();
 require '../../../../libraries/PHPMailer/src/PHPMailer.php';
 require '../../../../libraries/PHPMailer/src/SMTP.php';
@@ -13,24 +10,14 @@ use PHPMailer\PHPMailer\Exception;
 ob_start(); // Start output buffering
 include '../../../../includes/connection.php';
 
-$limit = 5;
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$page = max($page, 1); // Ensure the page is at least 1
-$offset = ($page - 1) * $limit;
-
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
     header("Location: ../../../../index.php");
     exit();
 }
 
 // Fetch users for activation
-$inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 ORDER BY created_at DESC";
+$inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 AND role = 'User' ORDER BY created_at DESC";
 $inactiveUsersResult = mysqli_query($conn, $inactiveUsersQuery);
-$totalUsersRow = mysqli_fetch_assoc($inactiveUsersResult);
-$totalUsers = $totalUsersRow['total'];
-
-// Calculate total pages
-$totalPages = ceil($totalUsers / $limit);
 
 // Handle activation
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -48,12 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($stmt->execute()) {
                 // Sending Email using PHPMailer
                 sendActivationEmail($user_id, $account_number); // Send email after assigning account number
-            
-                echo json_encode(["success" => true]); // ✅ Ensure JSON output
             } else {
-                echo json_encode(["success" => false, "message" => "Error activating user."]);
+                $_SESSION['message'] = ['type' => 'error', 'text' => 'Error activating user.'];
             }
-            
             $stmt->close();
         } else {
             // If no account number provided, just activate the user directly
@@ -62,15 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bind_param("i", $user_id);
 
             if ($stmt->execute()) {
-                echo json_encode(["success" => true]);
+                $_SESSION['message'] = ['type' => 'success', 'text' => 'User activated without email.'];
             } else {
-                echo json_encode(["success" => false, "message" => "Error disabling user."]);
+                $_SESSION['message'] = ['type' => 'error', 'text' => 'Error activating user.'];
             }
             $stmt->close();
         }
     } else {
-        echo json_encode(["success" => false, "message" => "User ID is missing."]);
+        $_SESSION['message'] = ['type' => 'error', 'text' => 'User ID is missing.'];
     }
+
+    header("Location: activate_users.php"); // Redirect back to the activation page
     exit;
 }
 
@@ -109,7 +95,7 @@ function sendActivationEmail($user_id, $account_number)
         $mail->Body = "
             <p>Dear $firstname,</p>
             <p>Your account has been successfully activated!.</p>
-            <p>Login to ramstarbus.com</p>
+            <p>Login to https://ramstarzaragosa.site/</p>
             <p><strong>Account Number:</strong> $account_number<br>
             <strong>Password:</strong>$password</p>
             <p>Change your password after logging in for security.</p>
@@ -146,15 +132,16 @@ function sendActivationEmail($user_id, $account_number)
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
 </head>
 
 <body>
-    <?php
-        include '../../../../includes/topbar.php';
-        include '../../../../includes/superadmin_sidebar.php';
-        include '../../../../includes/footer.php';
+<?php
+    include '../../../../includes/topbar.php';
+    include '../../../../includes/superadmin_sidebar.php';
+    include '../../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Activate Users</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
@@ -165,129 +152,137 @@ function sendActivationEmail($user_id, $account_number)
                                 <th>ID</th>
                                 <th>Firstname</th>
                                 <th>Lastname</th>
+                                <th>Account Number</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="userTableBody"></tbody>
+                        <tbody>
+                            <?php 
+                            if (mysqli_num_rows($inactiveUsersResult) > 0) {
+                                while ($row = mysqli_fetch_assoc($inactiveUsersResult)): ?>
+                                    <tr>
+                                        <td><?php echo $row['id']; ?></td>
+                                        <td><?php echo htmlspecialchars($row['firstname']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['lastname']); ?></td>
+                                        <td>
+                                            <?php if (!$row['account_number']): ?>
+                                                <!-- If no account number, show "No Account Number" text -->
+                                                No Account Number
+                                            <?php else: ?>
+                                                <?php echo $row['account_number']; ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if (!$row['account_number']): ?>
+                                                <!-- If no account number, show a form to enter one -->
+                                                <form method="POST" action="activate_users.php">
+                                                    <button type="button" class="btn btn-success" onclick="askForAccountNumber(<?php echo $row['id']; ?>)">Activate</button>
+                                                </form>
+                                            <?php else: ?>
+                                                <!-- If there's an account number, show the Activate button -->
+                                                <form method="POST" action="activate_users.php">
+                                                    <input type="hidden" name="user_id" value="<?php echo $row['id']; ?>">
+                                                    <input type="hidden" name="account_number" value="<?php echo $row['account_number']; ?>">
+                                                    <button type="button" class="btn btn-success activate-btn">Activate</button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endwhile;
+                            } else {
+                                // If no rows are found, display "No Data to display"
+                                echo '<tr><td colspan="5" class="text-center">No Data to display</td></tr>';
+                            }
+                            ?>
+                        </tbody>
                     </table>
                 </div>
-                <nav>
-                    <ul class="pagination" id="pagination"></ul>
-                </nav>
             </div>
         </div>
     </div>
-</body>
-<script>
-    $(document).ready(function () {
-    function loadUsers(page = 1) {
-        $.ajax({
-            url: '../../../../actions/fetch_enable_users.php',
-            type: 'GET',
-            data: { page: page },
-            dataType: 'json',
-            success: function (response) {
-                let users = response.users;
-                let totalPages = response.totalPages;
-                let currentPage = response.currentPage;
-                let tableBody = $("#userTableBody");
-                let pagination = $("#pagination");
 
-                // Clear existing data
-                tableBody.empty();
-                pagination.empty();
 
-                // Populate the user table
-                users.forEach(user => {
-                    tableBody.append(`
-                        <tr>
-                            <td>${user.id}</td>
-                            <td>${user.firstname}</td>
-                            <td>${user.lastname}</td>
-                            <td>${user.account_number}</td>
-                            <td>
-                                <button type="button" class="btn btn-success enable-user" data-user-id="${user.id}">
-                                    Activate
-                                </button>
-                            </td>
-                        </tr>
-                    `);
-                });
-                // Previous button
-                if (currentPage > 1) {
-                    pagination.append(`
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
-                        </li>
-                    `);
-                }
+    <script>
+    function askForConfirmationAndActivate(event, form) {
+        event.preventDefault(); 
 
-                // Numbered page links
-                for (let i = 1; i <= totalPages; i++) {
-                    pagination.append(`
-                        <li class="page-item ${i === currentPage ? 'active' : ''}">
-                            <a class="page-link" href="#" data-page="${i}">${i}</a>
-                        </li>
-                    `);
-                }
-
-                // Next button
-                if (currentPage < totalPages) {
-                    pagination.append(`
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
-                        </li>
-                    `);
-                }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You are about to activate this user.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, activate!',
+            cancelButtonText: 'No, cancel',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
             }
         });
     }
 
-    // Handle pagination click
-    $(document).on('click', '.page-link', function (e) {
-        e.preventDefault();
-        let page = $(this).data('page');
-        loadUsers(page);
-    });
+    document.addEventListener('DOMContentLoaded', () => {
+        const activateButtons = document.querySelectorAll('.activate-btn');
 
-    // Load the first page initially
-    loadUsers();
-});
-    
-$(document).on("click", ".enable-user", function () {
-    let userId = $(this).data("user-id");
-
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This will enable the user!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, enable!",
-        cancelButtonText: "Cancel"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post("activate_users.php", { user_id: userId }, function (response) {
-            try {
-                let result = JSON.parse(response);
-                if (result.success) {
-                    Swal.fire("Enabled!", "The user has been enabled.", "success").then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire("Error!", result.message, "error");
-                }
-            } catch (error) {
-                console.error("Invalid JSON response:", response);
-                Swal.fire("Error!", "Unexpected response from server.", "error");
-            }
+        activateButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                const form = this.closest('form');
+                askForConfirmationAndActivate(event, form);
+            });
         });
-
-        }
     });
-});
-</script>
+
+
+        function askForAccountNumber(userId) {
+            Swal.fire({
+                title: 'Enter Account Number',
+                input: 'text',
+                inputLabel: 'Account Number',
+                inputPlaceholder: 'Enter account number here',
+                showCancelButton: true,
+                confirmButtonText: 'Activate',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to enter an account number!';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const accountNumber = result.value;
+
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    formData.append('account_number', accountNumber);
+
+                    fetch('../../../../actions/activate_users_noaccountnumber.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('User Activated', 'The user has been activated with the account number.', 'success')
+                            .then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'There was an error activating the user.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Something went wrong with the activation process.', 'error');
+                    });
+                }
+            });
+    }
+    </script>
+
+</body>
+
 </html>
 
 <?php
-ob_end_flush(); // End output buffering
+ob_end_flush();
 ?>

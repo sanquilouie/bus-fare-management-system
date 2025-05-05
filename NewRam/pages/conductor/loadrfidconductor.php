@@ -17,26 +17,30 @@ $perPage = 5; // Records per page
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $perPage;
 
+$account_number = $_SESSION['account_number'];
 // Count total records
-$totalRecordsQuery = "SELECT COUNT(*) AS total FROM transactions t JOIN useracc u ON t.account_number = u.account_number";
+$totalRecordsQuery = "SELECT COUNT(*) AS total FROM transactions t JOIN useracc u ON t.account_number = u.account_number WHERE t.status = 'notremitted' 
+      AND t.conductor_id = '$account_number' AND DATE(t.transaction_date) = CURDATE()";
 $totalRecordsResult = $conn->query($totalRecordsQuery);
 $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRecords / $perPage);
 
 // Fetch paginated data
-$account_number = $_SESSION['account_number'];
+
 
 $sql = "SELECT t.id, 
-               t.account_number, 
-               CONCAT(u.firstname, ' ', u.lastname) AS name, 
-               t.amount,
-               t.status
+            t.account_number, 
+            CONCAT(u.firstname, ' ', u.lastname) AS name, 
+            t.amount,
+            t.status
         FROM transactions t
         JOIN useracc u ON t.account_number = u.account_number
         WHERE t.status = 'notremitted' 
-          AND t.conductor_id = '$account_number'
+        AND t.conductor_id = '$account_number'
+        AND DATE(t.transaction_date) = CURDATE()
         ORDER BY t.transaction_date DESC
-        LIMIT $offset, $perPage";
+        LIMIT $offset, $perPage
+";
 
 $result = $conn->query($sql);
 ?>
@@ -81,7 +85,7 @@ $result = $conn->query($sql);
         include '../../includes/footer.php';
     ?>
 
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Load User</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
@@ -105,49 +109,49 @@ $result = $conn->query($sql);
                 </form>
         <!-- Transactions Table -->
          <div class="table-responsive">
-        <table id="transactionTable" class="table table-bordered mt-4">
-    <thead class="thead-light">
-        <tr>
-            <th>Transaction #</th>
-            <th>Account #</th>
-            <th>Passenger Name</th>
-            <th>Load Amount</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (mysqli_num_rows($result) > 0): ?>
-            <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                <tr>
-                    <td><?php echo $row['id']; ?></td>
-                    <td><?php echo $row['account_number']; ?></td>
-                    <td><?php echo htmlspecialchars($row['name']); ?></td>
-                    <td><?php echo number_format($row['amount'], 2); ?></td>
-                    <td>
-                        <!-- Disable the Edit button if the status is 'edited' -->
-                        <button class="btn btn-warning btn-sm edit-btn" 
-                            data-account="<?php echo $row['id']; ?>" 
-                            data-amount="<?php echo $row['amount']; ?>"
-                            <?php echo ($row['status'] === 'edited') ? 'disabled' : ''; ?>>
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="5" class="text-center">No transaction records found.</td>
-            </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+            <table id="transactionTable" class="table table-bordered mt-4">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Transaction #</th>
+                        <th>Account #</th>
+                        <th>Passenger Name</th>
+                        <th>Load Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (mysqli_num_rows($result) > 0): ?>
+                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                            <tr>
+                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $row['account_number']; ?></td>
+                                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                                <td><?php echo number_format($row['amount'], 2); ?></td>
+                                <td>
+                                    <!-- Disable the Edit button if the status is 'edited' -->
+                                    <button class="btn btn-warning btn-sm edit-btn" 
+                                        data-account="<?php echo $row['id']; ?>" 
+                                        data-amount="<?php echo $row['amount']; ?>"
+                                        <?php echo ($row['status'] === 'edited') ? 'disabled' : ''; ?>>
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="text-center">No transaction records found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <!-- Pagination -->
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item <?php if ($page == 1) echo 'disabled'; ?>">
-                    <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Previous</a>
+                    <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Prev</a>
                 </li>
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                     <li class="page-item <?php if ($i == $page) echo 'active'; ?>">

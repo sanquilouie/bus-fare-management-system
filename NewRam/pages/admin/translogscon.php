@@ -37,11 +37,14 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Remittance Logs</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
                 <div class="table-responsive">
+                <div class="input-group mb-3">
+                    <input type="text" id="busSearch" class="form-control" placeholder="Search Bus No">
+                </div>
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -50,19 +53,66 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <th>Conductor ID</th>
                                 <th>Total Net Amount</th>
                                 <th>Remit Date</th>
-                                <th>Created At</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="remitLogsTableBody"></tbody>
                     </table>
                 </div>
-                    <nav>
-                        <ul class="pagination" id="pagination"></ul>
-                    </nav>
+                <nav>
+                    <ul class="pagination" id="pagination"></ul>
+                </nav>
+            </div>
         </div>
     </div>
     <script>
+        $('#busDropdownBtn').click(function () {
+    $.ajax({
+        url: '../../actions/get_bus_numbers.php', // your PHP endpoint
+        method: 'GET',
+        dataType: 'json',
+        success: function (buses) {
+            if (!Array.isArray(buses) || buses.length === 0) {
+                Swal.fire('No buses found', '', 'info');
+                return;
+            }
+
+            const options = buses.map(bus => 
+                `<option value="${bus}">${bus}</option>`).join('');
+
+            Swal.fire({
+                title: 'Select Bus Number',
+                html: `<select id="swal-bus-dropdown" class="form-control form-select">${options}</select>`,
+                confirmButtonText: 'Generate Excel',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const selected = document.getElementById('swal-bus-dropdown').value;
+                    // Redirect to the PHP script that generates the Excel file
+                    window.location.href = `../../actions/generate_excel.php?bus_number=${selected}`;
+                }
+            });
+        },
+        error: function () {
+            Swal.fire('Error', 'Could not fetch bus numbers', 'error');
+        }
+    });
+});
+
+        document.getElementById('busSearch').addEventListener('keyup', function() {
+            const query = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#remitLogsTableBody tr');
+
+            rows.forEach(row => {
+                const busNo = row.cells[1]?.textContent.toLowerCase(); // Column 2: Bus No
+                row.style.display = busNo.includes(query) ? '' : 'none';
+            });
+        });
     $(document).ready(function () {
+        window.generateExcel = function(busNumber, remitDate) {
+            window.location.href = `../../actions/generate_excel.php?bus_number=${busNumber}&remit_date=${remitDate}`;
+        };
+
+
         function loadRemitLogs(page = 1) {
             $.ajax({
                 url: '../../actions/fetch_remitlogs_admin.php', // Update this to your correct PHP file
@@ -81,6 +131,9 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
 
                     // Populate the remit logs table
                     remitLogs.forEach(log => {
+                        const remitDate = encodeURIComponent(log.remit_date);
+                        const busNo = encodeURIComponent(log.bus_no);
+
                         tableBody.append(`
                             <tr>
                                 <td>${log.remit_id}</td>
@@ -88,11 +141,16 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <td>${log.conductor_id}</td>
                                 <td>${parseFloat(log.total_net_amount).toFixed(2)}</td>
                                 <td>${log.remit_date}</td>
-                                <td>${log.created_at}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="generateExcel('${busNo}', '${remitDate}')">
+                                        Generate Excel
+                                    </button>
+                                </td>
                             </tr>
 
                         `);
                     });
+
 
                     // Responsive pagination logic
                     function addPageButton(pageNumber, isActive = false) {

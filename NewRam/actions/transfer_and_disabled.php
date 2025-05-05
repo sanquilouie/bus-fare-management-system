@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
 
         try {
             // Fetch current user details
-            $userQuery = "SELECT * FROM useracc WHERE id = ? AND is_activated = 1";
+            $userQuery = "SELECT * FROM useracc WHERE id = ? AND is_activated = 1 AND role = 'User'";
             $stmt = $conn->prepare($userQuery);
             $stmt->bind_param("i", $user_id);
             $stmt->execute();
@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
 
                 // Fetch updated list of users
                 $userListQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address, province, municipality, barangay, account_number, balance 
-                                  FROM useracc WHERE is_activated = 1";
+                                  FROM useracc WHERE is_activated = 1 AND role = 'User'";
                 $userResult = mysqli_query($conn, $userListQuery);
 
                 $updatedTableData = '';

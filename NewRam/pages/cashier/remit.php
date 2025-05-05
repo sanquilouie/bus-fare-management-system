@@ -19,71 +19,99 @@ $bus_number = '';
 $total_load = null; // Initialize the total load variable
 $rfid_scan = ''; // Initialize the RFID variable
 
-// Handle RFID scan and fetch data based on RFID
+$enableButton = isset($_SESSION['rfid_data']) && !empty($_SESSION['rfid_data']['rfid_scan']);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     $rfid_scan = $_POST['rfid_scan'];
 
     $stmt = $conn->prepare("
         SELECT 
+            u.account_number,
             u.firstname,
             u.lastname,
 
-            IFNULL(SUM(DISTINCT CASE 
-                WHEN t.status NOT IN ('edited', 'remitted') THEN t.amount 
-                ELSE 0 END), 0) AS total_load,
+            IFNULL((
+                SELECT SUM(DISTINCT t.amount)
+                FROM transactions t
+                WHERE t.conductor_id = u.account_number AND t.status NOT IN ('edited', 'remitted')
+            ), 0) AS total_load,
 
-            COALESCE(
-                MAX(CASE 
-                    WHEN pl.status = 'notremitted' THEN pl.bus_number 
-                    ELSE NULL 
-                END),
-                MAX(CASE 
-                    WHEN t.status NOT IN ('edited', 'remitted') THEN t.bus_number 
-                    ELSE NULL 
-                END)
+            (
+                SELECT pl.bus_number
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number AND pl.status = 'notremitted'
+                ORDER BY pl.timestamp DESC
+                LIMIT 1
             ) AS bus_number,
 
-            IFNULL(SUM(CASE 
-                WHEN pl.status = 'notremitted' AND pl.rfid = 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
-                ELSE 0 END), 0) AS total_cash_fare,
+            IFNULL((
+                SELECT SUM(pl.fare)
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number 
+                AND pl.status = 'notremitted' 
+                AND pl.rfid = 'cash' 
+                AND DATE(pl.timestamp) = CURDATE()
+            ), 0) AS total_cash_fare,
 
-            IFNULL(SUM(CASE 
-                WHEN pl.status = 'notremitted' AND pl.rfid != 'cash' AND DATE(pl.timestamp) = CURDATE() THEN pl.fare 
-                ELSE 0 END), 0) AS total_card_fare
+            IFNULL((
+                SELECT SUM(pl.fare)
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number 
+                AND pl.status = 'notremitted' 
+                AND pl.rfid != 'cash' 
+                AND DATE(pl.timestamp) = CURDATE()
+            ), 0) AS total_card_fare
 
-            FROM useracc u
-            LEFT JOIN transactions t ON t.conductor_id = u.account_number
-            LEFT JOIN passenger_logs pl ON pl.conductor_id = u.account_number
-            WHERE u.account_number = ?
+        FROM useracc u
+        WHERE u.account_number = ?;
+
     ");
 
     $stmt->bind_param("s", $rfid_scan);
     $stmt->execute();
-    $stmt->bind_result($firstname, $lastname, $total_load, $bus_number, $total_fare, $total_card);
+    $stmt->bind_result($account_number,$firstname, $lastname, $total_load, $bus_number, $total_fare, $total_card);
 
     if ($stmt->fetch()) {
-        $_SESSION['rfid_data'] = [
-            'rfid_scan' => $rfid_scan,
-            'conductor_name' => $firstname . ' ' . $lastname,
-            'total_load' => $total_load,
-            'bus_number' => $bus_number ?: "No Bus Assigned",
-            'total_fare' => $total_fare,
-            'total_card' => $total_card
-        ];
+        $has_data = ($bus_number !== null || $total_load > 0 || $total_fare > 0 || $total_card > 0);
+    
+        $net_amount = $total_load + $total_fare;
+
+        if ($has_data) {
+            // Conductor has some transaction ✅
+            $_SESSION['rfid_data'] = [
+                'rfid_scan' => $rfid_scan,
+                'conductor_name' => $firstname . ' ' . $lastname,
+                'total_load' => $total_load,
+                'bus_number' => $bus_number ?: "No Bus Assigned",
+                'total_fare' => $total_fare,
+                'total_card' => $total_card,
+                'net_amount' => $total_load + $total_fare
+            ];
+        } else {
+            // Conductor exists, but no transaction ❌
+            $_SESSION['rfid_data'] = [
+                'rfid_scan' => '',
+                'conductor_name' => "",
+                'total_load' => '',
+                'bus_number' => '',
+                'total_fare' => '',
+                'total_card' => '',
+                'net_amount' => ''
+            ];
+        }
     } else {
+        // No conductor found at all
         $_SESSION['rfid_data'] = [
             'rfid_scan' => '',
-            'conductor_name' => "Unknown Conductor",
-            'total_load' => 0,
-            'bus_number' => "No Bus Assigned",
-            'total_fare' => 0,
-            'total_card' => 0
+            'conductor_name' => "",
+            'total_load' => '',
+            'bus_number' => '',
+            'total_fare' => '',
+            'total_card' => '',
+            'net_amount' => ''
         ];
     }
-
     $stmt->close();
-
-    // 👇 Redirect to avoid form resubmission on reload
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -125,7 +153,7 @@ if ($rfid_data) {
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Conductor Remittance</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
@@ -145,15 +173,15 @@ if ($rfid_data) {
 
                 <label for="total_fare" class="form-label">Cash Payment (₱):</label>
                 <input type="number" class="form-control" id="total_fare" name="total_fare"
-                    step="0.01" readonly value="<?= htmlspecialchars($total_fare ?? '') ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($total_fare ?? null) ?>">
 
                 <label for="total_card" class="form-label">Card Payment (₱):</label>
                 <input type="number" class="form-control" id="total_card" name="total_card"
-                    step="0.01" readonly value="<?= htmlspecialchars($total_card ?? '') ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($total_card ?? null) ?>">
 
                 <label for="total_load" class="form-label">Total Load (₱):</label>
                 <input type="number" class="form-control" id="total_load" name="total_load"
-                    step="0.01" readonly value="<?= htmlspecialchars($total_load ?? '') ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($total_load ?? null) ?>">
 
                 <div id="deductions-container">
                     <div class="text-center mt-1">
@@ -170,11 +198,13 @@ if ($rfid_data) {
 
                 <label for="net_amount" class="form-label">Net Amount (₱):</label>
                 <input type="number" class="form-control" id="net_amount" name="net_amount"
-                    step="0.01" readonly value="<?= htmlspecialchars(($total_load ?? 0) + ($total_fare ?? 0)) ?>">
+                    step="0.01" readonly value="<?= htmlspecialchars($net_amount ?? null) ?>">
 
                 <div class="text-center mt-1">
                     <button type="submit" name="generate_remittance" id="remitButton"
-                        class="btn btn-primary w-100">Generate Remittance</button>
+                        class="btn btn-primary w-100" <?= $enableButton ? '' : 'disabled' ?>>
+                        Generate Remittance
+                    </button>
                 </div>
             </form>
 

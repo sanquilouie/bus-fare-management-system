@@ -24,7 +24,6 @@ function getRedirectURL($role)
          return '../index.php';
    }
 }
-
 if (isset($_POST['Login'])) {
    $username = mysqli_real_escape_string($conn, $_POST['username']);
    $password = mysqli_real_escape_string($conn, md5($_POST['password']));
@@ -34,7 +33,7 @@ if (isset($_POST['Login'])) {
       $username = '0' . substr($username, 3);
    }
 
-   // Validate inputs
+   $errors = [];
    if (empty($username)) {
       $errors[] = "Username is required!";
    }
@@ -45,10 +44,10 @@ if (isset($_POST['Login'])) {
    if (empty($errors)) {
       // Query to check user credentials
       $check_user_query = "
-            SELECT * 
-            FROM useracc 
-            WHERE (email = '{$username}' OR account_number = '{$username}') 
-            AND password = '{$password}'";
+         SELECT * 
+         FROM useracc 
+         WHERE (email = '{$username}' OR account_number = '{$username}') 
+         AND password = '{$password}'";
 
       $check_user = mysqli_query($conn, $check_user_query);
 
@@ -62,28 +61,129 @@ if (isset($_POST['Login'])) {
          if ($row['is_activated'] == 0) {
             $msg = "<div class='alert alert-warning' style='background-color:#FFA500; text-align:center; color:#FFFFFF;'>Your account is not activated! Please contact support.</div>";
          } else {
-            // Set session variables
-            foreach ($row as $key => $value) {
-               $_SESSION[$key] = $value;
-            }
+            $user_account_number = $row['account_number'];
+            $is_email_login = filter_var($username, FILTER_VALIDATE_EMAIL);
 
-            // Trigger SweetAlert2 for successful login using JavaScript
-            echo "
-            <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-            <script>
-            document.addEventListener('DOMContentLoaded', function () {
-               Swal.fire({
-                     title: 'Login Successfully',
-                     text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
-                     icon: 'success',
-                     showConfirmButton: false,
-                     timer: 1000
-               }).then((result) => {
-                     window.location.href = '" . getRedirectURL($row['role']) . "';
-               });
-            });
-            </script>";
-            exit;
+            // If logging in using email, check if that account_number is in use in businfo
+            if ($is_email_login) {
+               $businfo_check_query = "SELECT * FROM businfo WHERE conductorID = '{$user_account_number}' LIMIT 1";
+               $businfo_result = mysqli_query($conn, $businfo_check_query);
+
+               if (!$businfo_result) {
+                  die("Businfo query failed: " . mysqli_error($conn));
+               }
+
+               if (mysqli_num_rows($businfo_result) > 0) {
+                  if (!isset($_SESSION['account_number']) || $_SESSION['account_number'] !== $user_account_number) {
+                     $msg = "<div class='alert alert-danger' style='background-color:#BF0210; text-align:center; color:#FFFFFF;'>Login restricted: this account is currently in use.</div>";
+                  } else {
+                     // Session account matches, allow login
+                     foreach ($row as $key => $value) {
+                        $_SESSION[$key] = $value;
+                     }
+
+                     echo "
+                     <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                     <script>
+                     document.addEventListener('DOMContentLoaded', function () {
+                        Swal.fire({
+                              title: 'Login Successfully',
+                              text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
+                              icon: 'success',
+                              showConfirmButton: false,
+                              timer: 1000
+                        }).then((result) => {
+                              window.location.href = '" . getRedirectURL($row['role']) . "';
+                        });
+                     });
+                     </script>";
+                     exit;
+                  }
+               } else {
+                  // Not in businfo, proceed with login
+                  foreach ($row as $key => $value) {
+                     $_SESSION[$key] = $value;
+                  }
+
+                  echo "
+                  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                  <script>
+                  document.addEventListener('DOMContentLoaded', function () {
+                     Swal.fire({
+                           title: 'Login Successfully',
+                           text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
+                           icon: 'success',
+                           showConfirmButton: false,
+                           timer: 1000
+                     }).then((result) => {
+                           window.location.href = '" . getRedirectURL($row['role']) . "';
+                     });
+                  });
+                  </script>";
+                  exit;
+               }
+            } else {
+               // Username is not email (likely account_number)
+               if (!isset($_SESSION['account_number'])) {
+                  $businfo_check_query = "SELECT * FROM businfo WHERE conductorID = '{$username}' LIMIT 1";
+                  $businfo_result = mysqli_query($conn, $businfo_check_query);
+
+                  if (!$businfo_result) {
+                     die("Businfo query failed: " . mysqli_error($conn));
+                  }
+
+                  if (mysqli_num_rows($businfo_result) > 0) {
+                     $msg = "<div class='alert alert-danger' style='background-color:#BF0210; text-align:center; color:#FFFFFF;'>Login restricted: this account is currently in use.</div>";
+                  } else {
+                     foreach ($row as $key => $value) {
+                        $_SESSION[$key] = $value;
+                     }
+
+                     echo "
+                     <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                     <script>
+                     document.addEventListener('DOMContentLoaded', function () {
+                        Swal.fire({
+                              title: 'Login Successfully',
+                              text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
+                              icon: 'success',
+                              showConfirmButton: false,
+                              timer: 1000
+                        }).then((result) => {
+                              window.location.href = '" . getRedirectURL($row['role']) . "';
+                        });
+                     });
+                     </script>";
+                     exit;
+                  }
+               } else {
+                  // Session is set, compare account_number to username
+                  if ($_SESSION['account_number'] === $username) {
+                     foreach ($row as $key => $value) {
+                        $_SESSION[$key] = $value;
+                     }
+
+                     echo "
+                     <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                     <script>
+                     document.addEventListener('DOMContentLoaded', function () {
+                        Swal.fire({
+                              title: 'Login Successfully',
+                              text: 'Welcome! Your role is: " . htmlspecialchars($row['role']) . "',
+                              icon: 'success',
+                              showConfirmButton: false,
+                              timer: 1000
+                        }).then((result) => {
+                              window.location.href = '" . getRedirectURL($row['role']) . "';
+                        });
+                     });
+                     </script>";
+                     exit;
+                  } else {
+                     $msg = "<div class='alert alert-danger' style='background-color:#BF0210; text-align:center; color:#FFFFFF;'>Login restricted: you are not allowed to use another account while logged in.</div>";
+                  }
+               }
+            }
          }
       } else {
          $msg = "<div class='alert alert-danger' style='background-color:#BF0210; text-align:center; color:#FFFFFF;'>Invalid Credentials!</div>";
@@ -94,6 +194,7 @@ if (isset($_POST['Login'])) {
       }
    }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -312,7 +413,7 @@ if (isset($_POST['Login'])) {
               <div class="row gy-2 overflow-hidden">
                 <div class="col-12">
                   <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="username" id="username" placeholder="Account Number/Email" required>
+                  <input type="text" class="form-control" name="username" id="username" placeholder="Account Number/Email" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                     <label for="username" class="form-label">Account Number/Email</label>
                   </div>
                 </div>

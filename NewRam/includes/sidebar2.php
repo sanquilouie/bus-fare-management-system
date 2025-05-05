@@ -32,7 +32,8 @@ $menuItems = [
             'Transfer User Funds' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/admin/features/transfer_user_funds.php']
         ],
         'after' => [
-            'Load Transaction' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/admin/translogscon.php'],
+            'Remittance Logs' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/admin/translogscon.php'],
+            'Load Transaction' => ['icon' => 'fa-history', 'url' => '/NewRam/pages/admin/load_trans.php'],
             'Fare Update' => ['icon' => 'fa-arrow-up-1-9', 'url' => '/NewRam/pages/admin/fareupdate.php'],
             'Reg Bus Info' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/admin/businfo.php'],
             'View Bus Info' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/busviewinfo.php'],
@@ -66,6 +67,7 @@ $menuItems = [
     'User' => [
         'before' => [
             'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/user/dashboard.php'],
+            'Personal Info' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/user/personal_info.php'],
             'Recent Trips' => ['icon' => 'fa-route', 'url' => '/NewRam/pages/user/recent_trips.php'],
             'Bus In Transit' => ['icon' => 'fa-map-marker-alt', 'url' => '/NewRam/pages/user/bus_current_location.php'],
             'Convert Points' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/user/convert_points.php'],
@@ -121,7 +123,7 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
 }
 
 #main-content.sidebar-expanded {
-    margin-left: 300px; /* When sidebar is expanded */
+    margin-left: 150px; /* When sidebar is expanded */
 }
 
 .toggle-btn {
@@ -181,11 +183,12 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
     </style>
 </head>
 <body>
-    <button class="btn btn-light toggle-btn shadow-sm collapsed" onclick="toggleSidebar()">
+    <button class="btn btn-light toggle-btn shadow-sm <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? 'collapsed' : ''; ?>" onclick="toggleSidebar()">
         <i class="bi bi-list fs-5"></i>
     </button>
 
-    <div class="sidebar collapsed" id="sidebar">
+
+    <div class="sidebar <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? 'collapsed' : ''; ?>" id="sidebar">
     <div class="sidebar-header p-3">
         <div class="d-flex align-items-center justify-content-between">
             <h5 class="mb-0"><?php echo $_SESSION['role'] ?> Panel</h5>

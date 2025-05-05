@@ -26,14 +26,15 @@ $totalRows = $totalResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRows / $limit); // Calculate total pages
 
 // Fetch transactions with pagination
-function fetchTransactions($conn,$account_number, $limit, $offset)
+function fetchTransactions($conn, $account_number, $limit, $offset)
 {
     $transactionQuery = "SELECT 
     t.account_number AS user_account_number, 
     CONCAT(u.firstname, ' ', u.lastname) AS user_fullname, 
     t.amount, 
     t.transaction_type, 
-    t.transaction_date, 
+    t.transaction_date,
+    t.status, 
     CONCAT(c.firstname, ' ', c.lastname) AS loaded_by,
     c.role AS loaded_by_role 
     FROM transactions t
@@ -41,8 +42,6 @@ function fetchTransactions($conn,$account_number, $limit, $offset)
     LEFT JOIN useracc c ON BINARY TRIM(t.conductor_id) = BINARY TRIM(c.account_number)
     WHERE t.conductor_id = ?
     ORDER BY t.transaction_date DESC LIMIT ? OFFSET ?";
-
-    
 
     $stmt = $conn->prepare($transactionQuery);
     $stmt->bind_param('sii',$account_number, $limit, $offset); // Bind limit and offset
@@ -75,7 +74,14 @@ $transactions = fetchTransactions($conn,$account_number, $limit, $offset);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        .edited-row > td {
+            background-color: #fff8e1 !important;
+        }
+    </style>
 </head>
+
 <body>
 <?php
         include '../../includes/topbar.php';
@@ -84,7 +90,7 @@ $transactions = fetchTransactions($conn,$account_number, $limit, $offset);
     ?>
 
     <!-- Page Content  -->
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Transaction Logs</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
@@ -100,12 +106,13 @@ $transactions = fetchTransactions($conn,$account_number, $limit, $offset);
                                 <th>Transaction Time</th>
                                 <th>Loaded By</th>
                                 <th>Role of Loader</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (mysqli_num_rows($transactions) > 0): ?>
                                 <?php while ($row = mysqli_fetch_assoc($transactions)): ?>
-                                    <tr>
+                                    <tr class="<?= $row['status'] === 'edited' ? 'edited-row' : '' ?>">
                                         <td><?php echo $row['user_account_number']; ?></td>
                                         <td><?php echo htmlspecialchars($row['user_fullname']); ?></td>
                                         <td><?php echo number_format($row['amount'], 2); ?></td>
@@ -113,6 +120,17 @@ $transactions = fetchTransactions($conn,$account_number, $limit, $offset);
                                         <td><?php echo date('F-d-Y h:i:s A', strtotime($row['transaction_date'])); ?></td>
                                         <td><?php echo htmlspecialchars($row['loaded_by']); ?></td>
                                         <td><?php echo htmlspecialchars($row['loaded_by_role']); ?></td>
+                                        <td>
+                                        <?php if ($row['status'] === 'edited'): ?>
+                                            <span class="badge bg-warning text-dark" title="This transaction was edited after submission.">Edited</span>
+                                        <?php elseif ($row['status'] === 'notremitted'): ?>
+                                            <span class="badge bg-secondary">Unremitted</span>
+                                        <?php elseif ($row['status'] === 'remitted'): ?>
+                                            <span class="badge bg-success">Remitted</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-dark">Unknown</span> <!-- fallback for unexpected statuses -->
+                                        <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>

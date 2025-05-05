@@ -67,6 +67,9 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+
 </head>
 
 <body>
@@ -75,7 +78,7 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Revenue Report</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
@@ -96,7 +99,11 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
                     <h3>Total Revenue</h3>
                     <p>₱<?php echo number_format($selectedDayRevenue, 2); ?></p>
                 </div>
-                <div id="revenueChart"></div>
+                <div id="revenueChartWrapper" style="display: flex; justify-content: flex-start; width: 100%; height: 100%;">
+                    <div id="revenueChart" style="width: 100%; max-width: 600px;"></div>
+                </div>
+
+
             </div>
         </div>
     </div>
@@ -141,56 +148,58 @@ $selectedDayRevenue = $selectedDayRevenue ?? 0;
             chart.render();
         }
 
-        window.onload = function () {
-            const initialRevenue = <?php echo json_encode($selectedDayRevenue); ?>;
-            updateChart(initialRevenue);
-            document.getElementById('generatePdfBtn').disabled = true;
+        function downloadChartAsPDF() {
+        const chartElement = document.querySelector("#revenueChartWrapper");
+
+        // Use html2pdf to generate the PDF from the chart
+        const options = {
+            filename: 'RevenueChart.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 4, width: 600, height: 350 }, // Adjust size if needed
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Enable the PDF button after successful form submission
-        document.getElementById('filterForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
+        // Apply a wrapper to center the content
+        const wrapper = document.createElement('div');
+        wrapper.style.textAlign = 'center'; // Center align the content
+        wrapper.appendChild(chartElement.cloneNode(true));
 
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData,
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    document.querySelector('#revenueDisplay p').textContent = `₱${parseFloat(data.selectedDayRevenue).toFixed(2)}`;
-                    updateChart(data.selectedDayRevenue);
+        html2pdf().from(wrapper).set(options).save();
+    }
 
-                    // Enable the PDF button after data is updated
-                    document.getElementById('generatePdfBtn').disabled = false;
-                })
-                .catch(error => console.error('Error updating revenue data:', error));
-        });
-
-        // Handle PDF generation
+    window.onload = function () {
+        const initialRevenue = <?php echo json_encode($selectedDayRevenue); ?>;
+        updateChart(initialRevenue);
+        document.getElementById('generatePdfBtn').disabled = true;
+        
+        // Attach the download functionality to the button
         document.getElementById('generatePdfBtn').addEventListener('click', function () {
-            const formData = new FormData(document.getElementById('filterForm'));
-
-            fetch('../../actions/generate_pdf.php', {
-                method: 'POST',
-                body: formData,
-            })
-                .then(response => response.blob())  // PDF comes as a blob
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = 'Revenue_Report.pdf';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                })
-                .catch(error => console.error('Error generating PDF:', error));
+            downloadChartAsPDF();
         });
+    };
+
+    // Enable the PDF button after successful form submission
+    document.getElementById('filterForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                document.querySelector('#revenueDisplay p').textContent = `₱${parseFloat(data.selectedDayRevenue).toFixed(2)}`;
+                updateChart(data.selectedDayRevenue);
+
+                // Enable the PDF button after data is updated
+                document.getElementById('generatePdfBtn').disabled = false;
+            })
+            .catch(error => console.error('Error updating revenue data:', error));
+    });
     </script>
 </body>
 

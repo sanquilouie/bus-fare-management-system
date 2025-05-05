@@ -64,6 +64,9 @@ if ($data) {
 
     // Unset conductor session and update businfo
     $updateBusStmt = $conn->prepare("UPDATE businfo SET driverName ='', conductorName ='', status = 'available', destination = '', driverID = '', conductorID = '', current_stop = '' WHERE bus_number = ?");
+    if (!$updateBusStmt) {
+        die("Prepare failed: " . $conn->error);
+    }
     $updateBusStmt->bind_param("s", $busNo);
     $updateBusStmt->execute();
     $updateBusStmt->close();

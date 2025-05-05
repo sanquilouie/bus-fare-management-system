@@ -195,7 +195,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Superadmin')) {
         include '../../../includes/superadmin_sidebar.php';
         include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
                     <h2>Update Password</h2>

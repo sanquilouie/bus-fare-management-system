@@ -23,6 +23,7 @@ $totalRevenueQuery = "SELECT SUM(amount) as totalRevenue
                       FROM transactions 
                       WHERE transaction_type = 'Load' 
                       AND bus_number = '$bus_number'
+                      AND status != 'edited'
                       AND DATE(transaction_date) = CURDATE()";
 
 $totalRevenueResult = mysqli_query($conn, $totalRevenueQuery);
@@ -165,7 +166,7 @@ while ($row = mysqli_fetch_assoc($revenueByDateResult)) {
         include '../..//includes/loader.php';
     ?>
 
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
             <div class="dashboard">
@@ -213,10 +214,6 @@ while ($row = mysqli_fetch_assoc($revenueByDateResult)) {
             </div>
         </div>
     </div>
-
-
-    <!-- Revenue Chart -->
-
     </div>
     </div>
     </div>

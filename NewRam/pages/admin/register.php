@@ -76,30 +76,7 @@ $lastname = $_SESSION['lastname'];
                     content: " *";
                     color: red;
          }
-         #loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255,255,255,0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    z-index: 9999;
-    font-family: sans-serif;
-}
-
-.spinner {
-    border: 6px solid #f3f3f3;
-    border-top: 6px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 15px;
-}
+         
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -116,12 +93,10 @@ $lastname = $_SESSION['lastname'];
         include '../../includes/topbar.php';
         include '../../includes/sidebar2.php';
         include '../../includes/footer.php';
+        include '../../includes/email_loader.php';
     ?>
-    <div id="loader" style="display: none;">
-        <div class="spinner"></div>
-        <p>Sending confirmation email, please wait...</p>
-    </div>
-    <div id="main-content" class="container-fluid mt-5">
+    
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
                 <h2>User Registration</h2>
@@ -132,13 +107,13 @@ $lastname = $_SESSION['lastname'];
                             <input type="text" class="form-control" id="firstname" name="firstname" required>
                         </div>
                         <div class="col-md-4">
-                            <label for="lastname" class="form-label required">Last Name</label>
-                            <input type="text" class="form-control" id="lastname" name="lastname" required>
-                        </div>
-                        <div class="col-md-4">
                             <label for="middlename" class="form-label">Middle Name</label>
                             <input type="text" class="form-control" id="middlename" name="middlename">
                         </div>
+                        <div class="col-md-4">
+                            <label for="lastname" class="form-label required">Last Name</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        </div>  
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-4">
@@ -223,11 +198,6 @@ $lastname = $_SESSION['lastname'];
     </div>
     <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Loader
-        const form = document.querySelector("form");
-        form.addEventListener("submit", function () {
-            document.getElementById("loader").style.display = "flex";
-        });
 
         // Set max date to today minus 10 years (birthday restriction)
         const birthdayInput = document.getElementById('birthday');

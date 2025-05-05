@@ -9,7 +9,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 }
 
 // Fetch all users for fund transfer
-$allUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 ORDER BY created_at DESC";
+$allUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 AND role = 'User' ORDER BY created_at DESC";
 $allUsersResult = mysqli_query($conn, $allUsersQuery);
 
 // Handle fund transfer
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Transfer Funds</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">       

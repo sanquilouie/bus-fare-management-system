@@ -11,89 +11,26 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
 
-// Variables for today
-$today = date('Y-m-d');
 
-// Query to get all bus numbers
-$busQuery = "SELECT DISTINCT bus_number FROM passenger_logs";
+$sql = "
+SELECT 
+    b.status,
+    b.bus_number,
+    b.driverName AS driver_name,
+    b.conductorName AS conductor_name,
+    IFNULL(SUM(p.fare), 0) AS total_fare,
+    COUNT(p.id) AS total_passengers
+FROM 
+    businfo b
+LEFT JOIN 
+    passenger_logs p 
+    ON b.bus_number = p.bus_number 
+    AND DATE(p.timestamp) = CURDATE()
+GROUP BY 
+    b.bus_number, b.status, b.driverName, b.conductorName
+";
 
-if ($stmt = $conn->prepare($busQuery)) {
-    $stmt->execute();
-    $stmt->bind_result($busNumber);
-    $buses = [];
-
-    // Fetch all bus numbers
-    while ($stmt->fetch()) {
-        $buses[] = $busNumber;
-    }
-    $stmt->close();
-} else {
-    echo "<script>alert('Error preparing query for bus numbers');</script>";
-}
-
-// Fetch total fare and passenger count for each bus
-$busData = [];
-
-foreach ($buses as $bus) {
-    // Query to get total fare for today for the bus
-    $fareQuery = "SELECT SUM(fare) AS total_fare
-                  FROM passenger_logs
-                  WHERE bus_number = ? AND DATE(timestamp) = ?";
-
-    if ($stmt = $conn->prepare($fareQuery)) {
-        $stmt->bind_param("ss", $bus, $today);
-        $stmt->execute();
-        $stmt->bind_result($totalFare);
-        $stmt->fetch();
-        $stmt->close();
-    } else {
-        echo "<script>alert('Error preparing query for total fare');</script>";
-        continue;
-    }
-
-    // Query to get the number of passengers who boarded the bus today
-    $passengerQuery = "SELECT COUNT(*) AS passenger_count
-                       FROM passenger_logs
-                       WHERE bus_number = ? AND DATE(timestamp) = ?";
-
-    if ($stmt = $conn->prepare($passengerQuery)) {
-        $stmt->bind_param("ss", $bus, $today);
-        $stmt->execute();
-        $stmt->bind_result($passengerCount);
-        $stmt->fetch();
-        $stmt->close();
-    } else {
-        echo "<script>alert('Error preparing query for passenger count');</script>";
-        continue;
-    }
- // Query to get driver and conductor information
- $driverConductorQuery = "SELECT driverName, conductorName, status 
- FROM businfo
- WHERE bus_number = ?";
-
-if ($stmt = $conn->prepare($driverConductorQuery)) {
-$stmt->bind_param("s", $bus);
-$stmt->execute();
-$stmt->bind_result($driverName, $conductorName, $status);
-$stmt->fetch();
-$stmt->close();
-} else {
-echo "<script>alert('Error preparing query for driver and conductor info');</script>";
-$driverName = 'N/A';
-$conductorName = 'N/A';
-$status = 'Unknown';
-}
-
-// Store the data for each bus
-$busData[] = [
-'status' => $status,
-'bus_number' => $bus,
-'total_fare' => $totalFare,
-'passenger_count' => $passengerCount,
-'driverName' => $driverName,
-'conductorName' => $conductorName
-];
-}
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
@@ -141,34 +78,44 @@ $busData[] = [
     include '../../../includes/sidebar2.php';
     include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5">
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Bus Fare and Passengers Report for Today</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Bus Number</th>
-                            <th>Total Fare Collected Today</th>
-                            <th>Number of Passengers</th>
-                            <th>Driver</th>
-                            <th>Conductor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($busData as $data): ?>
-                            <tr>
-                            <td><?php echo htmlspecialchars($data['status']); ?></td>
-                                <td><?php echo htmlspecialchars($data['bus_number']); ?></td>
-                                <td>₱<?php echo number_format($data['total_fare'], 2); ?></td>
-                                <td><?php echo $data['passenger_count']; ?></td>
-                                <td><?php echo htmlspecialchars($data['driverName']); ?></td>
-                                <td><?php echo htmlspecialchars($data['conductorName']); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Bus Number</th>
+                        <th>Total Fare Collected Today</th>
+                        <th>Number of Passengers</th>
+                        <th>Driver</th>
+                        <th>Conductor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Display rows
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<tr>";
+                            echo "<td>" . htmlspecialchars($row['status']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['bus_number']) . "</td>";
+                            echo "<td>₱" . number_format($row['total_fare'], 2) . "</td>";
+                            echo "<td>" . $row['total_passengers'] . "</td>";
+                            echo "<td>" . htmlspecialchars($row['driver_name']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['conductor_name']) . "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='6'>No data found.</td></tr>";
+                    }
+
+                    $conn->close();
+                    ?>
+                </tbody>
+            </table>
+
             </div>
         </div>
     </div>
