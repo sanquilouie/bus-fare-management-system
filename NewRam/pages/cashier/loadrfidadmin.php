@@ -21,7 +21,7 @@ $offset = ($page - 1) * $perPage;
 
 // Count total records
 $totalRecordsQuery = "SELECT COUNT(*) AS total FROM transactions t JOIN useracc u ON t.account_number = u.account_number WHERE t.status = 'notremitted' 
-      AND t.conductor_id = '$account_number'";
+      AND t.conductor_id = '$account_number' AND DATE(t.transaction_date) = CURDATE()";
 $totalRecordsResult = $conn->query($totalRecordsQuery);
 $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRecords / $perPage);
@@ -30,16 +30,18 @@ $totalPages = ceil($totalRecords / $perPage);
 
 
 $sql = "SELECT t.id, 
-               t.account_number, 
-               CONCAT(u.firstname, ' ', u.lastname) AS name, 
-               t.amount,
-               t.status
+            t.account_number, 
+            CONCAT(u.firstname, ' ', u.lastname) AS name, 
+            t.amount,
+            t.status
         FROM transactions t
         JOIN useracc u ON t.account_number = u.account_number
         WHERE t.status = 'notremitted' 
-          AND t.conductor_id = '$account_number'
+        AND t.conductor_id = '$account_number'
+        AND DATE(t.transaction_date) = CURDATE()
         ORDER BY t.transaction_date DESC
-        LIMIT $offset, $perPage";
+        LIMIT $offset, $perPage
+";
 
 $result = $conn->query($sql);
 ?>
@@ -150,7 +152,7 @@ $result = $conn->query($sql);
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item <?php if ($page == 1) echo 'disabled'; ?>">
-                    <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Previous</a>
+                    <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Prev</a>
                 </li>
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                     <li class="page-item <?php if ($i == $page) echo 'active'; ?>">

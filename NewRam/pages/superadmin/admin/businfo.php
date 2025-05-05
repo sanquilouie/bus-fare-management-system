@@ -2,8 +2,9 @@
 session_start();
 include '../../../includes/connection.php';
 
+
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../.././index.php");
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -89,9 +90,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Information Form</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -102,8 +102,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use full version -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+
+        .swal2-popup {
+            font-size: 1.1rem !important;
+            font-family: 'Arial', sans-serif !important;
+        }
+
+
+    </style>
 </head>
 
 <body>
@@ -112,54 +120,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         include '../../../includes/superadmin_sidebar.php';
         include '../../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
-        <h2>Register Bus Information Form</h2>
-        <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <form action="" method="POST" id="busInfoForm">
-                    <div class="form-group">
-                        <label for="busNumber">Bus Number</label>
-                        <input type="text" class="form-control" id="busNumber" name="busNumber" required>
-                        <div id="busNumberMessage"></div> <!-- Message for Bus Number -->
-                    </div>
+<div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
+            <h2>Bus Registration</h2>
+            <form action="" method="POST" id="busInfoForm">
+                
+                <div class="mb-3">
+                    <label for="busNumber" class="form-label">Bus Number</label>
+                    <input type="text" class="form-control" id="busNumber" name="busNumber" required>
+                    <div id="busNumberMessage"></div> <!-- Message for Bus Number -->
+                </div>
 
-                    <div class="form-group">
-                        <label for="plateNumber">Plate Number</label>
-                        <input type="text" class="form-control" id="plateNumber" name="plateNumber" required>
-                        <div id="plateNumberMessage"></div> <!-- Message for Plate Number -->
-                    </div>
+                <div class="mb-3">
+                    <label for="plateNumber" class="form-label">Plate Number</label>
+                    <input type="text" class="form-control" id="plateNumber" name="plateNumber" required>
+                    <div id="plateNumberMessage"></div> <!-- Message for Plate Number -->
+                </div>
 
-                    <div class="form-group">
-                        <label for="capacity">Bus Capacity</label>
-                        <input type="number" class="form-control" id="capacity" name="capacity" required>
-                    </div>
+                <div class="mb-3">
+                    <label for="capacity" class="form-label">Bus Capacity</label>
+                    <input type="number" class="form-control" id="capacity" name="capacity" required>
+                </div>
 
+                <div class="mb-3">
+                    <label for="regTillDate" class="form-label">Registered Till Date</label>
+                    <input type="date" class="form-control" id="regTillDate" name="regTillDate" required>
+                </div>
 
-                    <div class="form-group">
-                        <label for="regTillDate">Registered Till Date</label>
-                        <input type="date" class="form-control" id="regTillDate" name="regTillDate" required>
-                    </div>
+                <div class="mb-3">
+                    <label for="busModel" class="form-label">Bus Model</label>
+                    <input type="text" class="form-control" id="busModel" name="busModel" required>
+                </div>
 
-                    <div class="form-group">
-                    <label for="busModel">Bus Model</label>
-                    <select class="form-control" id="busModel" name="busModel" required>
-                        <option value="">Select a Bus Model</option>
-                        <option value="JMC">JMC</option>
-                        <option value="model2">Model 2</option>
-                        <option value="model3">Model 3</option>
-                    </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="vehicleColor">Vehicle Color</label>
-                        <input type="text" class="form-control" id="vehicleColor" name="vehicleColor" required>
-                    </div>
-                    <div class="text-center mt-2">
-                        <button type="submit" class="btn btn-primary" id="submitButton">Save Bus Information</button>
-                    </div>
-                </form>
-            </div>
+                <div class="mb-3">
+                    <label for="vehicleColor" class="form-label">Vehicle Color</label>
+                    <input type="text" class="form-control" id="vehicleColor" name="vehicleColor" required>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary" id="submitButton">Save Bus Information</button>
+                </div>
+                
+            </form>
         </div>
     </div>
+</div>
+
+
     <script>
         document.getElementById('busInfoForm').addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent form submission
@@ -179,54 +187,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         });
 
         $(document).ready(function () {
-        // Function to check if bus number or plate number exists
-        function checkExistence(field, value) {
-            $.ajax({
-                url: 'validate.php',
-                method: 'POST',
-                data: field + '=' + value,
-                success: function (response) {
-                    var messageElement = $("#" + field + "Message");
-                    if (response === "exists") {
-                        messageElement.html("<span style='color: red;'>Bus number or plate number already exists.</span>");
-                        $('#submitButton').prop('disabled', true);
-                    } else {
-                        messageElement.html(""); // Clear message if not exists
-                        $('#submitButton').prop('disabled', false);
+            // Function to check if bus number or plate number exists
+            function checkExistence(field, value) {
+                $.ajax({
+                    url: '../../../actions/validate.php',
+                    method: 'POST',
+                    data: field + '=' + value,
+                    success: function (response) {
+                        var messageElement = $("#" + field + "Message");
+                        if (response === "exists") {
+                            messageElement.html("<span style='color: red;'>Bus number or plate number already exists.</span>");
+                            $('#submitButton').prop('disabled', true);
+                        } else {
+                            messageElement.html(""); // Clear message if not exists
+                            $('#submitButton').prop('disabled', false);
+                        }
                     }
+                });
+            }
+
+            // Event listener for bus number input
+            $('#busNumber').on('input', function () {
+                var busNumber = $(this).val();
+                if (busNumber.length > 0) {
+                    checkExistence('busNumber', busNumber);
+                } else {
+                    $("#busNumberMessage").html(""); // Clear message if input is empty
                 }
             });
-        }
 
-        // Event listener for bus number input
-        $('#busNumber').on('input', function () {
-            var busNumber = $(this).val();
-            if (busNumber.length > 0) {
-                checkExistence('busNumber', busNumber);
-            } else {
-                $("#busNumberMessage").html(""); // Clear message if input is empty
-            }
+            // Event listener for plate number input
+            $('#plateNumber').on('input', function () {
+                var plateNumber = $(this).val();
+                if (plateNumber.length > 0) {
+                    checkExistence('plateNumber', plateNumber);
+                } else {
+                    $("#plateNumberMessage").html(""); // Clear message if input is empty
+                }
+            });
         });
 
-        // Event listener for plate number input
-        $('#plateNumber').on('input', function () {
-            var plateNumber = $(this).val();
-            if (plateNumber.length > 0) {
-                checkExistence('plateNumber', plateNumber);
-            } else {
-                $("#plateNumberMessage").html(""); // Clear message if input is empty
-            }
+        document.getElementById('busNumber').addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '');
         });
-    });
 
-    document.getElementById('busNumber').addEventListener('input', function (e) {
-        e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '');
-    });
+        document.getElementById('plateNumber').addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '');
+        });
 
-    document.getElementById('plateNumber').addEventListener('input', function (e) {
-        e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '');
-    });
-   
     </script>
 </body>
 

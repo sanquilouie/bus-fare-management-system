@@ -7,7 +7,8 @@ $menuItems = [
     'Superadmin' => [
         'dropdown_superadmin' => [
             'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/superadmin/dashboard.php'],
-            'Registration' => ['icon' => 'fa-users-cog', 'url' => '/NewRam/pages/superadmin/admin/register.php'],
+            'User Registration' => ['icon' => 'fa-users-cog', 'url' => '/NewRam/pages/superadmin/admin/register.php'],
+            'Employees' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/superadmin/admin/regemployee.php'],
             'Accounts' => [
                 'icon' => 'fa-user-tie', 
                 'url' => '#',
@@ -18,10 +19,14 @@ $menuItems = [
                 ]
             ],
             'Revenue' => ['icon' => 'fa-coins', 'url' => '/NewRam/pages/superadmin/admin/revenue.php'],
+            'Remittance Logs' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/superadmin/admin/translogscon.php'],
+            'Load Transaction' => ['icon' => 'fa-history', 'url' => '/NewRam/pages/superadmin/admin/load_trans.php'],
             'Fare Update' => ['icon' => 'fa-money-bill-wave', 'url' => '/NewRam/pages/superadmin/admin/fareupdate.php'],
             'Reg Bus Info' => ['icon' => 'fa-bus', 'url' => '/NewRam/pages/superadmin/admin/businfo.php'],
             'Todays Bus Info' => ['icon' => 'fa-bus-alt', 'url' => '/NewRam/pages/superadmin/admin/busviewinfo.php'],
             'Registered Bus Info' => ['icon' => 'fa-list', 'url' => '/NewRam/pages/superadmin/admin/viewregbus.php'],
+            'Feedbacks' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/superadmin/admin/feedbackview.php'],
+            'Settings' => ['icon' => 'fa-cog', 'url' => '/NewRam/pages/superadmin/admin/settings.php'],
             'Activity Log' => ['icon' => 'fa-history', 'url' => '/NewRam/pages/superadmin/admin/activity_logs.php'],
         ],
 

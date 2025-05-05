@@ -17,26 +17,30 @@ $perPage = 5; // Records per page
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $perPage;
 
+$account_number = $_SESSION['account_number'];
 // Count total records
-$totalRecordsQuery = "SELECT COUNT(*) AS total FROM transactions t JOIN useracc u ON t.account_number = u.account_number";
+$totalRecordsQuery = "SELECT COUNT(*) AS total FROM transactions t JOIN useracc u ON t.account_number = u.account_number WHERE t.status = 'notremitted' 
+      AND t.conductor_id = '$account_number' AND DATE(t.transaction_date) = CURDATE()";
 $totalRecordsResult = $conn->query($totalRecordsQuery);
 $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRecords / $perPage);
 
 // Fetch paginated data
-$account_number = $_SESSION['account_number'];
+
 
 $sql = "SELECT t.id, 
-               t.account_number, 
-               CONCAT(u.firstname, ' ', u.lastname) AS name, 
-               t.amount,
-               t.status
+            t.account_number, 
+            CONCAT(u.firstname, ' ', u.lastname) AS name, 
+            t.amount,
+            t.status
         FROM transactions t
         JOIN useracc u ON t.account_number = u.account_number
         WHERE t.status = 'notremitted' 
-          AND t.conductor_id = '$account_number'
+        AND t.conductor_id = '$account_number'
+        AND DATE(t.transaction_date) = CURDATE()
         ORDER BY t.transaction_date DESC
-        LIMIT $offset, $perPage";
+        LIMIT $offset, $perPage
+";
 
 $result = $conn->query($sql);
 ?>

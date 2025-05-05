@@ -4,12 +4,12 @@ ob_start();
 include '../../../../includes/connection.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../../../../index.php");
+    header("Location: ../../../index.php");
     exit();
 }
 
 // Count total records
-$totalQuery = "SELECT COUNT(*) AS total FROM useracc WHERE is_activated = 1";
+$totalQuery = "SELECT COUNT(*) AS total FROM useracc WHERE is_activated = 1 AND role = 'User'";
 $totalResult = mysqli_query($conn, $totalQuery);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -70,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <th>ID</th>
                             <th>Firstname</th>
                             <th>Lastname</th>
+                            <th>Account Number</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -82,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 </div>
-</body>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function () {
@@ -187,6 +188,7 @@ $(document).on("click", ".disable-user", function () {
 });
 
 </script>
+</body>
 </html>
 <?php
 ob_end_flush();

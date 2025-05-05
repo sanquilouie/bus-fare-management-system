@@ -9,7 +9,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 }
 
 // Fetch all users for fund transfer
-$allUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 ORDER BY created_at DESC";
+$allUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 AND role = 'User' ORDER BY created_at DESC";
 $allUsersResult = mysqli_query($conn, $allUsersQuery);
 
 // Handle fund transfer
@@ -47,26 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
 </head>
 <body>
-    <?php
-        include '../../../../includes/topbar.php';
-        include '../../../../includes/superadmin_sidebar.php';
-        include '../../../../includes/footer.php';
+<?php
+    include '../../../../includes/topbar.php';
+    include '../../../../includes/superadmin_sidebar.php';
+    include '../../../../includes/footer.php';
     ?>
     <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Transfer Funds</h2>
         <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <?php if (isset($_SESSION['message'])): ?>
-                    <div class="alert alert-info">
-                        <?php
-                        echo $_SESSION['message'];
-                        unset($_SESSION['message']); // Clear message after displaying
-                        ?>
-                    </div>
-                <?php endif; ?>
-
+            <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">       
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
@@ -96,45 +88,56 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $('#actionForm').find('input[name="user_id"]').val(userId);
 
     Swal.fire({
-        title: 'Enter New Account Number',
-        input: 'text',
-        inputLabel: 'New Account Number for Fund Transfer',
-        inputPlaceholder: 'Enter account number...',
-        showCancelButton: true,
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'Please enter a new account number!';
-            }
+    title: 'Enter New Account Number',
+    input: 'text',
+    inputLabel: 'New Account Number for Fund Transfer',
+    inputPlaceholder: 'Enter account number...',
+    showCancelButton: true,
+    confirmButtonText: 'Confirm',
+    cancelButtonText: 'Cancel',
+    inputValidator: (value) => {
+        if (!value) {
+            return 'Please enter a new account number!';
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const newAccountNumber = result.value;
-            $.ajax({
-                url: '../../../../actions/transfer_and_disabled.php',
-                method: 'POST',
-                data: { user_id: userId, new_account_number: newAccountNumber },
-                success: function (response) {
-                    const result = JSON.parse(response);
-                    if (result.success) {
-                        $('#userTableBody').html(result.tableData);
-                        // Display the new account number in the success message
-                        Swal.fire('Transfered!', `Funds have been transferred successfully to new RFID: ${newAccountNumber}.`, 'success').then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire('Error!', result.message, 'error');
-                    }
-                },
-                error: function () {
-                    Swal.fire('Error!', 'There was an error disabling the user.', 'error');
-                }
-            });
-        }
-    });
-}
+    }
+}).then((result) => {
+    if (result.isConfirmed) {
+        const newAccountNumber = result.value;
 
+        // Ask for confirmation before submitting
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to transfer funds to account number ${newAccountNumber}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Transfer!',
+            cancelButtonText: 'No, Cancel'
+        }).then((confirmResult) => {
+            if (confirmResult.isConfirmed) {
+                $.ajax({
+                    url: '../../../../actions/transfer_and_disabled.php',
+                    method: 'POST',
+                    data: { user_id: userId, new_account_number: newAccountNumber },
+                    success: function (response) {
+                        const result = JSON.parse(response);
+                        if (result.success) {
+                            // Display the new account number in the success message
+                            Swal.fire('Transferred!', `Funds have been transferred successfully to new RFID: ${newAccountNumber}.`, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', result.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'There was an error disabling the user.', 'error');
+                    }
+                });
+            }
+        });
+    }
+});
+}
 $(document).ready(function () {
     function loadUsers(page = 1) {
         $.ajax({

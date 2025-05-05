@@ -13,7 +13,6 @@ $lastname = $_SESSION['lastname'];
 $bus_number = isset($_SESSION['bus_number']) ? $_SESSION['bus_number'] : null;  // Check if bus number is in session
 $conductorac = isset($_SESSION['conductor_name']) ? $_SESSION['conductor_name'] : 'unknown conductor account number';
 $driverac = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;  // Check if driver name is in session
-print_r($_SESSION['account_number']);
 
 // Fetch metrics
 $userCountQuery = "SELECT COUNT(*) as userCount FROM useracc";
