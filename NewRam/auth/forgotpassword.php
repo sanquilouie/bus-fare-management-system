@@ -180,7 +180,6 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -188,147 +187,164 @@ $conn->close();
    <link rel="stylesheet" href="../assets/css/login.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
    <link rel="stylesheet" href="https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-   <!-- SweetAlert2 CSS -->
    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.5/dist/sweetalert2.min.css" rel="stylesheet">
 
    <style>
      body {
-   background: white;
-   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   margin: 0;
-   padding: 0;
-   min-height: 100vh;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-}
+        background: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+     }
 
-      header {
-         background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
-         color: white;
-         padding: 15px 0;
-         width: 100%;
-         position: fixed;
-         top: 0;
-         z-index: 1000;
-         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
+     header {
+        background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
+        color: white;
+        padding: 15px 0;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+     }
 
-      header nav ul {
-         list-style: none;
-         margin: 0;
-         padding: 0;
-         text-align: center;
-      }
+     header nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+     }
 
-      header nav ul li {
-         display: inline-block;
-         margin: 0 15px;
-      }
+     header nav ul li {
+        display: inline-block;
+        margin: 0 15px;
+     }
 
-      header nav ul li a {
-         color: white;
-         font-size: 16px;
-         font-weight: bold;
-         text-decoration: none;
-         padding: 10px 20px;
-         background: #f1c40f;
-         border-radius: 30px;
-         transition: 0.3s;
-      }
+     header nav ul li a {
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        padding: 10px 20px;
+        background: #f1c40f;
+        border-radius: 30px;
+        transition: 0.3s;
+     }
 
-      header nav ul li a:hover {
-         background: #e67e22;
-         transform: scale(1.1);
-         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
+     header nav ul li a:hover {
+        background: #e67e22;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+     }
 
-      .page-content {
-         flex: 1;
-         display: flex;
-         justify-content: center;
-         align-items: center;
-         width: 100%;
-         padding: 20px;
-      }
+     .page-content {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+        margin-top: 100px;
+     }
 
-      .form-container {
-         background: rgba(255, 255, 255, 0.9);
-         backdrop-filter: blur(5px);
-         padding: 25px 20px; /* Reduced padding */
-         border-radius: 10px; /* Reduced border-radius */
-         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-         width: 100%;
-         max-width: 400px; /* Reduced max-width */
-         margin: 0 15px;
-      }
+     .form-container {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
+        padding: 25px 20px;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        margin: 0 15px;
+     }
 
-      .form-container h2 {
-         text-align: center;
-         color: #333;
-         margin-bottom: 15px; /* Reduced margin */
-         font-weight: bold;
-      }
+     .form-container h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: bold;
+     }
 
-      label {
-         font-size: 14px;
-         color: #555;
-         margin-bottom: 6px;
-         display: block;
-      }
+     label {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 6px;
+        display: block;
+     }
 
-      input[type="email"],
-      input[type="text"],
-      input[type="password"] {
-         width: 100%;
-         padding: 10px; /* Reduced padding */
-         margin: 6px 0 15px; /* Reduced margin */
-         border: 1px solid #ccc;
-         border-radius: 5px;
-         font-size: 14px; /* Reduced font size */
-         background: #f9f9f9;
-         transition: all 0.3s ease-in-out;
-      }
+     input[type="email"],
+     input[type="text"],
+     input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 6px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        background: #f9f9f9;
+        transition: all 0.3s ease-in-out;
+     }
 
-      input[type="email"]:focus,
-      input[type="text"]:focus,
-      input[type="password"]:focus {
-         border-color: #3498db;
-         outline: none;
-         background: #ffffff;
-      }
+     input[type="email"]:focus,
+     input[type="text"]:focus,
+     input[type="password"]:focus {
+        border-color: #3498db;
+        outline: none;
+        background: #ffffff;
+     }
 
-      button {
-         width: 100%;
-         padding: 10px; /* Reduced padding */
-         background-color: #f1c40f;
-         border: none;
-         color: black;
-         font-size: 14px; /* Reduced font size */
-         font-weight: bold;
-         border-radius: 25px;
-         margin-bottom: 10px;
-         transition: all 0.3s ease-in-out;
-         cursor: pointer;
-      }
+     button {
+        width: 100%;
+        padding: 10px;
+        background-color: #f1c40f;
+        border: none;
+        color: black;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 25px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease-in-out;
+        cursor: pointer;
+     }
 
-      button:hover {
-         background-color: #e67e22;
-         transform: scale(1.05);
-      }
+     button:hover {
+        background-color: #e67e22;
+        transform: scale(1.05);
+     }
 
-      @media (max-width: 600px) {
-         .form-container {
-            padding: 20px 15px; /* Further reduced padding */
-         }
+     .password-field {
+        position: relative;
+     }
 
-         header nav ul li a {
-            font-size: 14px;
-            padding: 8px 15px;
-         }
-      }
+     .password-field i {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+     }
+
+     small#password-strength-text,
+     small#match-text {
+        min-height: 1em;
+        display: block;
+        transition: all 0.3s ease-in-out;
+     }
+
+     @media (max-width: 600px) {
+        .form-container {
+           padding: 20px 15px;
+        }
+
+        header nav ul li a {
+           font-size: 14px;
+           padding: 8px 15px;
+        }
+     }
    </style>
 </head>
 
@@ -341,6 +357,13 @@ $conn->close();
       </nav>
    </header>
 
+   <?php if ($otp_sent && isset($email)) { ?>
+   <div class="alert alert-success text-center mt-5" role="alert" 
+        style="position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 1050; max-width: 500px; width: 90%;">
+      OTP has been sent to <strong><?php echo htmlspecialchars($email); ?></strong>. Please check your inbox.
+   </div>
+   <?php } ?>
+
    <div class="page-content">
       <?php if (!$otp_sent) { ?>
          <div class="form-container">
@@ -349,7 +372,6 @@ $conn->close();
                <input type="hidden" name="action" value="forgot_password">
                <label for="email">Email Address:</label>
                <input type="email" name="email" placeholder="Enter your email" required>
-
                <button type="submit">Send OTP</button>
                <button type="button" onclick="window.location.href='login.php'">Go Back</button>
             </form>
@@ -363,14 +385,19 @@ $conn->close();
                <input type="hidden" name="action" value="verify_otp">
                <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
 
-               <label for="otp">Enter OTP:</label>
                <input type="text" name="otp" placeholder="Enter OTP" required>
 
-               <label for="new_password">New Password:</label>
-               <input type="password" name="new_password" id="new_password" placeholder="Enter new password" required>
+               <div class="password-field">
+                  <input type="password" name="new_password" id="new_password" placeholder="Enter new password" required>
+                  <i id="toggleNew" class="fa-solid fa-eye"></i>
+               </div>
+               <small id="password-strength-text"></small>
 
-               <label for="confirm_password">Confirm Password:</label>
-               <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm new password" required>
+               <div class="password-field">
+                  <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm new password" required>
+                  <i id="toggleConfirm" class="fa-solid fa-eye"></i>
+               </div>
+               <small id="match-text"></small>
 
                <button type="submit">Reset Password</button>
                <button type="button" onclick="window.location.href='login.php'">Go Back</button>
@@ -379,14 +406,14 @@ $conn->close();
       <?php } ?>
    </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.5/dist/sweetalert2.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-   <script type="text/javascript">
+   <script>
       <?php if ($otp_sent) { ?>
          Swal.fire({
             icon: 'success',
             title: 'OTP Sent!',
-            text: 'An OTP has been sent to your email. Please check your inbox.',
+            text: 'OTP has been sent to your email. Please check your inbox.',
             confirmButtonText: 'OK'
          });
       <?php } elseif ($password_updated) { ?>
@@ -395,10 +422,8 @@ $conn->close();
             title: 'Password Reset Successful!',
             text: 'Your password has been updated successfully.',
             confirmButtonText: 'OK'
-         }).then((result) => {
-            if (result.isConfirmed) {
-               window.location.href = 'login.php';
-            }
+         }).then(() => {
+            window.location.href = 'login.php';
          });
       <?php } elseif ($error_message) { ?>
          Swal.fire({
@@ -409,11 +434,64 @@ $conn->close();
          });
       <?php } ?>
 
-      document.getElementById("reset-password-form")?.addEventListener('submit', function(event) {
-         var newPassword = document.getElementById("new_password").value;
-         var confirmPassword = document.getElementById("confirm_password").value;
+      function toggleVisibility(inputId, toggleIconId) {
+         const input = document.getElementById(inputId);
+         const icon = document.getElementById(toggleIconId);
+         icon.addEventListener('click', () => {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            icon.classList.toggle('fa-eye-slash');
+            icon.classList.toggle('fa-eye');
+         });
+      }
 
-         if (newPassword !== confirmPassword) {
+      toggleVisibility('new_password', 'toggleNew');
+      toggleVisibility('confirm_password', 'toggleConfirm');
+
+      const newPassword = document.getElementById('new_password');
+      const strengthText = document.getElementById('password-strength-text');
+
+      newPassword?.addEventListener('input', () => {
+         const pwd = newPassword.value;
+         let score = 0;
+         if (pwd.length >= 6) score++;
+         if (/[A-Z]/.test(pwd)) score++;
+         if (/[0-9]/.test(pwd)) score++;
+         if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+         let label = '', color = '';
+         if (pwd.length === 0) {
+            label = '';
+         } else if (score <= 1) {
+            label = 'Weak';
+            color = 'text-danger';
+         } else if (score === 2) {
+            label = 'Medium';
+            color = 'text-warning';
+         } else {
+            label = 'Strong';
+            color = 'text-success';
+         }
+
+         strengthText.textContent = label;
+         strengthText.className = `${color} mt-1 d-block`;
+      });
+
+      const confirmPassword = document.getElementById('confirm_password');
+      const matchText = document.getElementById('match-text');
+
+      confirmPassword?.addEventListener('input', () => {
+         if (confirmPassword.value !== newPassword.value) {
+            matchText.textContent = "Passwords do not match";
+            matchText.className = "text-danger mt-1 d-block";
+         } else {
+            matchText.textContent = "Passwords match";
+            matchText.className = "text-success mt-1 d-block";
+         }
+      });
+
+      document.getElementById("reset-password-form")?.addEventListener('submit', function(event) {
+         if (newPassword.value !== confirmPassword.value) {
             event.preventDefault();
             Swal.fire({
                icon: 'error',
@@ -424,6 +502,6 @@ $conn->close();
          }
       });
    </script>
-
 </body>
 </html>
+
