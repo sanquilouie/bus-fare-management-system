@@ -808,7 +808,7 @@ $conn->close();
             const toRouteValue = document.getElementById('toRoute').value;
             const distance = Math.abs(fromRoute.post - toRoute.post);
             const transactionNumber = generateTransactionNumber();
-            const paymentMethod = 'RFID';
+            const paymentMethod = 'CARD';
 
             console.log("Generated Transaction Number:", transactionNumber); // Debugging line
             console.log("Distance:", distance); // Debugging line
@@ -819,7 +819,7 @@ $conn->close();
                 return;
             }
             Swal.fire({
-                title: 'Enter RFID',
+                title: 'Enter NFC',
                 input: 'text',
                 inputAttributes: {
                     autocapitalize: 'off'
@@ -828,7 +828,7 @@ $conn->close();
                 showConfirmButton: true, // ✅ Show Confirm button
                 confirmButtonText: 'Submit',
                 cancelButtonText: 'Cancel',
-                inputPlaceholder: 'Scan your RFID here',
+                inputPlaceholder: 'Scan your NFC here',
                 didOpen: () => {
                     const inputField = Swal.getInput();
                     if (inputField) {
@@ -846,7 +846,7 @@ $conn->close();
                 preConfirm: () => {
                     const rfid = Swal.getInput().value.trim();
                     if (!rfid) {
-                        Swal.showValidationMessage('Please scan or enter your RFID.');
+                        Swal.showValidationMessage('Please scan or enter your NFC.');
                         return false;
                     }
 
