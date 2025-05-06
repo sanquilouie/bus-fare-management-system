@@ -526,7 +526,6 @@ $conn->close();
             })
             .catch(error => console.error("Error fetching route data:", error));
     }
-
     function isInsidePolygon(lat, lng, polygon) {
         let inside = false;
         let x = lat, y = lng;

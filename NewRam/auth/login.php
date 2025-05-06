@@ -5,7 +5,6 @@ include '../includes/connection.php';
 
 $errors = [];
 $msg = "";
-
 // Helper function to get redirect URL based on role
 function getRedirectURL($role)
 {

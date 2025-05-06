@@ -312,7 +312,7 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
     <header>
         <div class="container d-flex justify-content-between align-items-center">
             <div class="logo">
-                <h1>Ramstar Zaragoza Transport Cooperative</h1>
+                <h1>Zaragoza Ramstar Transport Cooperative</h1>
             </div>
             <div class="header-buttons d-flex">
                 <a href="NewRam/auth/login.php" class="login-button">Log In</a>
