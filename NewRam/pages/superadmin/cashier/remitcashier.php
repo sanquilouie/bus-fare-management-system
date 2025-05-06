@@ -1,165 +1,128 @@
 <?php
 session_start();
 include '../../../includes/connection.php';
-
+//print_r($_SESSION);
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['role'] != 'Superadmin')) {
     header("Location: ../../../index.php");
     exit();
 }
 
-// Ensure that the user is logged in
 if (!isset($_SESSION['account_number'])) {
     header("Location: ../../../auth/login.php");
     exit;
 }
 
+$conductor_id = $_SESSION['account_number']; // Conductor's ID from session
+$conductor_name = ''; // Initialize the conductor's name variable
+$bus_number = '';
+$total_load = null; // Initialize the total load variable
+$rfid_scan = ''; // Initialize the RFID variable
 
+$enableButton = isset($_SESSION['rfid_data']) && !empty($_SESSION['rfid_data']['rfid_scan']);
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
+    $rfid_scan = $_POST['rfid_scan'];
 
+    $stmt = $conn->prepare("
+        SELECT 
+            u.account_number,
+            u.firstname,
+            u.lastname,
 
-// Fetch total load transactions
-$stmtLoad = $conn->prepare("SELECT SUM(amount) FROM transactions WHERE status = 'notremitted' AND bus_number = ? AND conductor_id = ? AND DATE(transaction_date) = CURDATE()");
-$stmtLoad->bind_param("ss", $bus_number, $conductor_id);
-$stmtLoad->execute();
-$stmtLoad->bind_result($total_load);
-$stmtLoad->fetch();
-$stmtLoad->close();
+            IFNULL((
+                SELECT SUM(DISTINCT t.amount)
+                FROM transactions t
+                WHERE t.conductor_id = u.account_number AND t.status NOT IN ('edited', 'remitted')
+            ), 0) AS total_load,
 
-// Fetch total cash transactions (including the fare)
-$stmtCash = $conn->prepare("SELECT SUM(fare) FROM passenger_logs WHERE status = 'notremitted' AND bus_number = ? AND conductor_name = ? AND rfid = 'cash' AND DATE(timestamp) = CURDATE()");
-$stmtCash->bind_param("ss", $bus_number, $conductor_name);
-$stmtCash->execute();
-$stmtCash->bind_result($total_cash);
-$stmtCash->fetch();
-$stmtCash->close();
-// Default to 0 if NULL
+            (
+                SELECT pl.bus_number
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number AND pl.status = 'notremitted'
+                ORDER BY pl.timestamp DESC
+                LIMIT 1
+            ) AS bus_number,
 
-$total_cash = $total_cash ?? 0; // Default to 0 if NULL
+            IFNULL((
+                SELECT SUM(pl.fare)
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number 
+                AND pl.status = 'notremitted' 
+                AND pl.rfid = 'cash' 
+                AND DATE(pl.timestamp) = CURDATE()
+            ), 0) AS total_cash_fare,
 
+            IFNULL((
+                SELECT SUM(pl.fare)
+                FROM passenger_logs pl
+                WHERE pl.conductor_id = u.account_number 
+                AND pl.status = 'notremitted' 
+                AND pl.rfid != 'cash' 
+                AND DATE(pl.timestamp) = CURDATE()
+            ), 0) AS total_card_fare
 
+        FROM useracc u
+        WHERE u.account_number = ?;
 
+    ");
 
-
-$total_earnings = $total_load + $total_cash;
-// Rest of your remittance logic here (e.g., deductions, net amount)
-$net_amount = $total_earnings; // Default to total earnings
-
-// Generate remittance logic (after deductions, etc.)
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['generate_remittance'])) {
-    // Fetch the posted values and calculate total deductions
-    $bus_no = $_POST['bus_no'];
-    $conductor_name = $_POST['conductor_name'];
-    $conductor_id = $_POST['conductor_id'];
-    $total_fare = $_POST['total_fare'];
-    $total_load = $_POST['total_load'];
-    $deduction_desc = $_POST['deduction_desc'] ?? [];
-    $deduction_amount = $_POST['deduction_amount'] ?? [];
-    $total_earnings = $total_fare + $total_load;
-    $total_deductions = array_sum(array_map('floatval', $deduction_amount));
-    $net_amount = $total_earnings - $total_deductions;
-
-    // Display the remittance receipt (before saving)
-    echo "<div id='receiptPreview' style='padding:20px; background:#f0f0f0; border-radius:8px; border:1px solid #ddd;'>";
-    echo "<h3>Remittance Receipt Preview</h3>";
-    echo "<p><strong>Bus No:</strong> " . htmlspecialchars($bus_no) . "</p>";
-    echo "<p><strong>Conductor:</strong> " . htmlspecialchars($conductor_name) . "</p>";
-    echo "<p><strong>ConductorID:</strong> " . htmlspecialchars($conductor_id) . "</p>";
-    echo "<p><strong>Total Fare (₱):</strong> " . number_format($total_fare, 2) . "</p>";
-    echo "<p><strong>Total Load (₱):</strong> " . number_format($total_load, 2) . "</p>";
-    echo "<p><strong>Total Earnings (₱):</strong> " . number_format($net_amount, 2) . "</p>";
-
-    echo "<h4>Deductions:</h4>";
-    if (!empty($deduction_desc)) {
-        foreach ($deduction_desc as $index => $desc) {
-            echo "<p>" . htmlspecialchars($desc) . ": ₱" . number_format((float) $deduction_amount[$index], 2) . "</p>";
-        }
-        echo "<p><strong>Total Deductions (₱):</strong> " . number_format($total_deductions, 2) . "</p>";
-    } else {
-        echo "<p>No Deductions</p>";
-    }
-
-    echo "<p><strong>Net Amount (₱):</strong> " . number_format((float) $net_amount, 2) . "</p>";
-    echo "<form method='POST' action=''>";
-    echo "<input type='hidden' name='bus_no' value='" . htmlspecialchars($bus_no) . "'>";
-    echo "<input type='hidden' name='conductor_id' value='" . htmlspecialchars($conductor_id) . "'>";
-    echo "<input type='hidden' name='total_load' value='" . htmlspecialchars($total_fare) . "'>";
-    echo "<input type='hidden' name='total_load' value='" . htmlspecialchars($total_load) . "'>";
-    echo "<input type='hidden' name='deduction_desc' value='" . htmlspecialchars(implode(',', $deduction_desc)) . "'>";
-    echo "<input type='hidden' name='deduction_amount' value='" . htmlspecialchars(implode(',', $deduction_amount)) . "'>";
-    echo "<input type='hidden' name='net_amount' value='" . htmlspecialchars($net_amount) . "'>";
-    echo "<button type='submit' name='confirm_remittance' class='btn-confirm'>Confirm & Save</button>";
-    echo "</form>";
-    echo "</div>";
-
-    // Exit after displaying receipt preview
-    exit;
-}
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_remittance'])) {
-    // Confirm and save the remittance
-    $bus_no = $_POST['bus_no'];
-    $conductor_id = (string) $_POST['conductor_id'];
-    $total_load = (float) $_POST['total_load'];  // Ensure total load is a float
-    $total_cash = (float) $_POST['total_fare'];  // Ensure total load is a float
-    $deduction_desc = explode(',', $_POST['deduction_desc']);
-    $deduction_amount = array_map('floatval', explode(',', $_POST['deduction_amount']));  // Convert deductions to floats
-    $net_amount = (float) $_POST['net_amount'];  // Ensure net amount is a float
-    var_dump($total_cash);
-    // Insert into remittances
-    $remitDate = date('Y-m-d');
-    $stmt = $conn->prepare("INSERT INTO remittances (bus_no, conductor_id, remit_date, total_earning, total_deductions, net_amount) VALUES (?, ?, ?, ?, ?, ?)");
-    $total_deductions = array_sum($deduction_amount);
-    $stmt->bind_param("sssdds", $bus_no, $conductor_id, $remitDate, $total_load, $total_deductions, $net_amount);
+    $stmt->bind_param("s", $rfid_scan);
     $stmt->execute();
-    $remit_id = $stmt->insert_id;
+    $stmt->bind_result($account_number,$firstname, $lastname, $total_load, $bus_number, $total_fare, $total_card);
 
-    // Insert remittance log into remit_logs table
-    $stmtRemitLog = $conn->prepare("INSERT INTO remit_logs (remit_id, bus_no, conductor_id, total_load, total_cash, total_deductions, net_amount, remit_date) VALUES (?, ?,?, ?, ?, ?, ?, ?)");
-    $stmtRemitLog->bind_param("issdddds", $remit_id, $bus_no, $conductor_id, $total_load, $total_cash, $total_deductions, $net_amount, $remitDate);
-    $stmtRemitLog->execute();
+    if ($stmt->fetch()) {
+        $has_data = ($bus_number !== null || $total_load > 0 || $total_fare > 0 || $total_card > 0);
+    
+        $net_amount = $total_load + $total_fare;
 
-    // Insert deductions
-    $stmtDeduction = $conn->prepare("INSERT INTO deductions (remit_id, description, amount) VALUES (?, ?, ?)");
-    foreach ($deduction_desc as $key => $desc) {
-        $amount = $deduction_amount[$key];
-        $stmtDeduction->bind_param("isd", $remit_id, $desc, $amount);
-        $stmtDeduction->execute();
+        if ($has_data) {
+            // Conductor has some transaction ✅
+            $_SESSION['rfid_data'] = [
+                'rfid_scan' => $rfid_scan,
+                'conductor_name' => $firstname . ' ' . $lastname,
+                'total_load' => $total_load,
+                'bus_number' => $bus_number ?: "No Bus Assigned",
+                'total_fare' => $total_fare,
+                'total_card' => $total_card,
+                'net_amount' => $total_load + $total_fare
+            ];
+        } else {
+            // Conductor exists, but no transaction ❌
+            $_SESSION['rfid_data'] = [
+                'rfid_scan' => '',
+                'conductor_name' => "",
+                'total_load' => '',
+                'bus_number' => '',
+                'total_fare' => '',
+                'total_card' => '',
+                'net_amount' => ''
+            ];
+        }
+    } else {
+        // No conductor found at all
+        $_SESSION['rfid_data'] = [
+            'rfid_scan' => '',
+            'conductor_name' => "",
+            'total_load' => '',
+            'bus_number' => '',
+            'total_fare' => '',
+            'total_card' => '',
+            'net_amount' => ''
+        ];
     }
-
-    // Reset the daily revenue to 0 after remittance
-    $resetRevenueStmt = $conn->prepare("UPDATE transactions SET status = 'remitted' WHERE bus_number = ? AND DATE(transaction_date) = CURDATE()");
-    $resetRevenueStmt->bind_param("s", $bus_no);
-    $resetRevenueStmt->execute();
-
-    $resetPassengerLogsStmt = $conn->prepare("UPDATE passenger_logs SET status = 'remitted' WHERE bus_number = ? AND DATE(timestamp) = CURDATE()");
-    $resetPassengerLogsStmt->bind_param("s", $bus_no);
-    $resetPassengerLogsStmt->execute();
-
-    // Pass conductor name to printremit.php via POST
-    $_POST['conductor_name'] = $conductor_name;
-    include 'printremit.php';
-
-    // Success response
-    echo "<script>alert('Remittance saved successfully! Revenue for today has been reset.'); window.location.href='';</script>";
+    $stmt->close();
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 
-$firstname = $_SESSION['firstname'];
-$lastname = $_SESSION['lastname'];
-
-// Assuming you have the user id in session
-// Ensure you have user_id in the session
-
-$query = "SELECT firstname, lastname FROM useracc WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param('i', $user_id);
-$stmt->execute();
-$stmt->bind_result($firstname, $lastname);
-$stmt->fetch();
-$stmt->close(); // Close statement
-
-
+// ✅ Retrieve and clear session data (if available)
+$rfid_data = $_SESSION['rfid_data'] ?? null;
+if ($rfid_data) {
+    extract($rfid_data); // creates $rfid_scan, $conductor_name, etc.
+    unset($_SESSION['rfid_data']);
+}
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -167,7 +130,6 @@ $stmt->close(); // Close statement
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conductor Remittance</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
@@ -180,109 +142,236 @@ $stmt->close(); // Close statement
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use full version -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/NewRam/assets/js/NFCScanner.js"></script>
+    <title>Remittances</title>
 </head>
 
 <body>
-<?php
+    <?php
         include '../../../includes/topbar.php';
         include '../../../includes/superadmin_sidebar.php';
         include '../../../includes/footer.php';
     ?>
     <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
-        <h2>Conductor Remittance</h2>
+        <h2>Remittances</h2>
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <form id="remittanceForm" method="POST" action="">
-                    <label for="rfid_input" class="form-label">Scan RFID:</label>
-                    <input type="text" class="form-control" id="rfid_input" name="rfid_input" placeholder="Scan RFID here" autofocus>
+            <form id="remittanceForm" method="POST" action="" onsubmit="return showPreview(event)">
+                <label for="rfid_scan" class="form-label">NFC Scan:</label>
+                <input type="text" class="form-control" id="rfid_scan" name="rfid_scan"
+                    placeholder="Scan RFID..." required onkeydown="handleRFIDKey(event)"
+                    value="<?= htmlspecialchars($rfid_scan ?? '') ?>">
 
-                    <label for="bus_no" class="form-label">Bus No:</label>
-                    <input type="text" class="form-control" id="bus_no" name="bus_no" required value="" readonly>
+                <label for="bus_no" class="form-label">Bus No:</label>
+                <input type="text" class="form-control" id="bus_no" name="bus_no"
+                    required value="<?= htmlspecialchars($bus_number ?? '') ?>" readonly>
 
-                    <label for="conductor_name" class="form-label">Conductor Name:</label>
-                    <input type="text" class="form-control" id="conductor_name" name="conductor_name" required value="" readonly>
+                <label for="conductor_name" class="form-label">Conductor Name:</label>
+                <input type="text" class="form-control" id="conductor_name" name="conductor_name"
+                    required value="<?= htmlspecialchars($conductor_name ?? '') ?>" readonly>
 
-                    <label for="conductor_id" class="form-label">Conductor Name:</label>
-                    <input type="text" class="form-control" id="conductor_id" name="conductor_id" required value="" readonly>
+                <label for="total_fare" class="form-label">Cash Payment (₱):</label>
+                <input type="number" class="form-control" id="total_fare" name="total_fare"
+                    step="0.01" readonly value="<?= htmlspecialchars($total_fare ?? null) ?>">
 
-                    <label for="total_fare" class="form-label">Total Fare (₱):</label>
-                    <input type="number" class="form-control" id="total_fare" name="total_fare" step="0.01" readonly value="">
+                <label for="total_card" class="form-label">Card Payment (₱):</label>
+                <input type="number" class="form-control" id="total_card" name="total_card"
+                    step="0.01" readonly value="<?= htmlspecialchars($total_card ?? null) ?>">
 
+                <label for="total_load" class="form-label">Total Load (₱):</label>
+                <input type="number" class="form-control" id="total_load" name="total_load"
+                    step="0.01" readonly value="<?= htmlspecialchars($total_load ?? null) ?>">
 
-                    <label for="total_load" class="form-label">Total Load (₱):</label>
-                    <input type="number" class="form-control" id="total_load" name="total_load" step="0.01" readonly value="">
+                <div id="deductions-container">
+                    <div class="text-center mt-1">
+                        <button type="button" id="toggleDeductions" class="btn btn-primary w-100">+ Deductions</button>
+                    </div>
+                    <div id="deductions" style="display: none; margin-top: 10px;">
+                        <h3>Deductions</h3>
 
-                    <div id="deductions-container">
-                        <div class="text-center mt-2">
-                            <button type="button" id="toggleDeductions" class="btn btn-primary">+ Deductions</button>
-                        </div>
-                        <div id="deductions" style="display: none; margin-top: 10px;">
-                            <h3>Deductions</h3>
-                            <div class="deduction-row">
-                                <input type="text" class="form-control" name="deduction_desc[]" placeholder="Description">
-                                <input type="number" class="form-control mt-1" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)">
-                            </div>
-                            <div class="text-center mt-2">
-                                <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
-                            </div>
+                        <div class="text-center mt-1">
+                            <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
                         </div>
                     </div>
+                </div>
 
-                    <label for="net_amount" class="form-label">Net Amount (₱):</label>
-                    <input type="number" class="form-control" id="net_amount" name="net_amount" step="0.01" readonly value="">
+                <label for="net_amount" class="form-label">Net Amount (₱):</label>
+                <input type="number" class="form-control" id="net_amount" name="net_amount"
+                    step="0.01" readonly value="<?= htmlspecialchars($net_amount ?? null) ?>">
 
-                    <div class="text-center mt-2">
-                        <button type="submit"  name="generate_remittance" id="remitButton" class="btn btn-primary">Generate Remittance</button>
-                    </div>
-                </form>
+                <div class="text-center mt-1">
+                    <button type="submit" name="generate_remittance" id="remitButton"
+                        class="btn btn-primary w-100" <?= $enableButton ? '' : 'disabled' ?>>
+                        Generate Remittance
+                    </button>
+                </div>
+            </form>
+
             </div>
         </div>
     </div>
-
     <script>
+        function showPreview(event) {
+            event.preventDefault(); // Prevent actual form submission
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const totalLoadInput = document.getElementById('total_load');
-            const netAmountInput = document.getElementById('net_amount');
-            const deductionsContainer = document.getElementById('deductions-container');
+            // Get all the form values
+            const rfid = document.getElementById('rfid_scan').value;
+            const busNo = document.getElementById('bus_no').value;
+            const conductorName = document.getElementById('conductor_name').value;
+            const totalFare = document.getElementById('total_fare').value;
+            const totalCard = document.getElementById('total_card').value;
+            const totalLoad = document.getElementById('total_load').value; 
+            const netAmount = document.getElementById('net_amount').value;
 
-            function calculateNetAmount() {
-                const totalLoad = parseFloat(totalLoadInput.value) || 0;
-                let totalDeductions = 0;
+            // Gather deductions (if any)
+            const deductions = [];
+            const descs = document.querySelectorAll('input[name="deduction_desc[]"]');
+            const amounts = document.querySelectorAll('input[name="deduction_amount[]"]');
 
-                // Sum up all deduction amounts
-                document.querySelectorAll('[name="deduction_amount[]"]').forEach((input) => {
-                    totalDeductions += parseFloat(input.value) || 0;
-                });
-
-                // Calculate and update the Net Amount
-                netAmountInput.value = (totalLoad - totalDeductions).toFixed(2);
+            for (let i = 0; i < descs.length; i++) {
+                const desc = descs[i].value.trim();
+                const amount = amounts[i].value.trim();
+                if (desc || amount) {
+                    deductions.push(`${desc || 'No Description'}: ₱${amount || '0.00'}`);
+                }
             }
 
-            // Recalculate Net Amount when the total load or deductions change
-            totalLoadInput.addEventListener('input', calculateNetAmount);
-            deductionsContainer.addEventListener('input', calculateNetAmount);
+            // Create the preview message
+            let html = `
+                <strong>RFID:</strong> ${rfid}<br>
+                <strong>Bus No:</strong> ${busNo}<br>
+                <strong>Conductor:</strong> ${conductorName}<br>
+                <strong>Total Fare:</strong> ₱${totalFare}<br>
+                <strong>Total Card:</strong> ₱${totalCard}<br>
+                <strong>Total Load:</strong> ₱${totalLoad}<br>
+            `;
 
-            // Add new deduction rows dynamically
-            document.getElementById('addDeduction').addEventListener('click', function () {
-                const deductionRow = document.createElement('div');
-                deductionRow.className = 'deduction-row';
-                deductionRow.innerHTML = `
-            <input type="text" name="deduction_desc[]" placeholder="Description">
-            <input type="number" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)">
-        `;
-                deductionsContainer.appendChild(deductionRow);
+            if (deductions.length) {
+                html += `<strong>Deductions:</strong><br><ul>`;
+                deductions.forEach(d => {
+                    html += `<li>${d}</li>`;
+                });
+                html += `</ul>`;
+            }
+
+            html += `<strong>Net Amount:</strong> ₱${netAmount}`;
+
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Confirm Remittance?',
+                html: html,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Submit',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (busNo.trim() === "No Bus Assigned" || conductorName.trim() === "Unknown Conductor") {
+                        Swal.fire({
+                            title: 'Notice',
+                            text: 'Nothing to remit for this conductor. Please ensure a valid bus and conductor are assigned.',
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                        return;
+                    }
+
+                    // Send data to the backend for printing
+                    fetch('../../../actions/print_remit.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            rfid: rfid,
+                            bus_no: busNo,
+                            conductor_name: conductorName,
+                            total_fare: totalFare,
+                            total_card: totalCard,
+                            total_load: totalLoad,
+                            net_amount: netAmount,
+                            deductions: deductions
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+
+                        // Construct the receipt HTML
+                        let receiptHTML = `
+                            <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto;">
+                                <div style="text-align: center; font-size: 14px; font-weight: bold; margin-left: -45px;">
+                                    ZARAGOZA RAMSTAR
+                                </div>
+                                <div style="text-align: center; font-size: 10px; margin-left: -45px">
+                                    === REMITTANCE SLIP ===
+                                </div>
+                                <hr />
+                                <div style="font-size: 9px;">
+                                    <strong>RFID:</strong> ${data.rfid}<br>
+                                    <strong>Bus No:</strong> ${data.bus_no}<br>
+                                    <strong>Conductor:</strong> ${data.conductor_name}<br>
+                                    <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
+                                    <strong>Time:</strong> ${new Date().toLocaleTimeString()}
+                                </div>
+                                <div style="font-size: 9px;">
+                                    <hr />
+                                    <strong>Total Cash:</strong> PHP ${data.total_fare}<br>
+                                    <strong>Total Card:</strong> PHP ${data.total_card}<br>
+                                    <strong>Total Load:</strong> PHP ${data.total_load}<br>
+                                </div>
+                                <div style="font-size: 9px;">
+                                    ${data.deductions && data.deductions.length > 0 ? "<strong>Deductions:</strong><br>" : ""}
+                                    ${data.deductions.map(deduction => {
+                                        let parts = deduction.split(':');
+                                        let desc = parts[0] ?? 'No Desc';
+                                        let amount = parts[1] ?? '0.00';
+                                        return `<div>- ${desc}: PHP ${amount}</div>`;
+                                    }).join('')}
+                                </div>
+                                <hr />
+                                <div style="font-size: 10px;">
+                                    <strong>NET AMOUNT:</strong> PHP ${data.net_amount}
+                                </div>
+                                <div style="text-align: center; margin-top: 10px; margin-left: -45px; font-size: 10px;">
+                                    ${data.remit_id ? `<strong>${data.remit_id}</strong>` : ''}
+                                </div>
+                                <hr />
+                                <div style="text-align: center;font-size: 10px; margin-left: -45px">
+                                    THANK YOU!
+                                </div>
+                            </div>
+                        `;
+
+                        // Open a new window with the receipt HTML and print
+                        let printWindow = window.open('', '', 'width=800, height=600');
+                        printWindow.document.write(receiptHTML);
+                        printWindow.document.close();
+                        printWindow.print();
+
+                        // Optionally submit form afterward
+                        document.getElementById('remittanceForm').submit();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Could not print the receipt.', 'error');
+                    });
+                }
             });
+            return false;
+        }
 
-            // Initial calculation to ensure Net Amount matches Total Load on load
-            calculateNetAmount();
-        });
+        function handleRFIDKey(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("remittanceForm").onsubmit = null; // Bypass the Swal preview temporarily
+                document.getElementById("remittanceForm").submit();     
+            }
+        }
 
-
-
-        // Toggle the visibility of the deductions section
         document.getElementById('toggleDeductions').addEventListener('click', function () {
             const deductions = document.getElementById('deductions');
             if (deductions.style.display === 'none') {
@@ -293,29 +382,28 @@ $stmt->close(); // Close statement
                 this.textContent = '+ Deductions';
             }
         });
-
+        
         document.getElementById('addDeduction').addEventListener('click', function () {
-            // Create a new deduction row
             const deductionRow = document.createElement('div');
             deductionRow.classList.add('deduction-row');
-
             deductionRow.innerHTML = `
-            <input type="text" name="deduction_desc[]" placeholder="Description">
-            <input type="number" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)" class="deduction-amount">
-        `;
-
+                <div class="row g-2">
+                    <div class="col-7">
+                        <input type="text" class="form-control" name="deduction_desc[]" placeholder="Description">
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control deduction-amount" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)">
+                    </div>
+                </div>
+            `;
             document.getElementById('deductions').appendChild(deductionRow);
         });
-
-        // Automatically calculate the net amount when deductions are added or changed
         document.getElementById('remittanceForm').addEventListener('input', function (event) {
-            // Check if the event target is a deduction amount input
-            if (event.target.classList.contains('deduction-amount') || event.target.id === 'total_load' || event.target.id === 'total_fare') {
+            if (event.target.classList.contains('deduction-amount')) {
                 let totalLoad = parseFloat(document.getElementById('total_load').value) || 0;
                 let totalFare = parseFloat(document.getElementById('total_fare').value) || 0;
                 let totalDeductions = 0;
 
-                // Sum all deduction amounts
                 document.querySelectorAll('.deduction-amount').forEach(function (deductionInput) {
                     let value = parseFloat(deductionInput.value);
                     if (!isNaN(value)) {
@@ -323,66 +411,9 @@ $stmt->close(); // Close statement
                     }
                 });
 
-                // Update the net amount field
-                document.getElementById('net_amount').value = (totalLoad + totalFare - totalDeductions).toFixed(2);
+                document.getElementById('net_amount').value = (totalFare + totalLoad - totalDeductions).toFixed(2);
             }
         });
-        document.getElementById('rfid_input').addEventListener('change', function (event) {
-            event.preventDefault(); // Prevent form submission
-
-            const rfid = this.value;
-
-            if (rfid) {
-                // Send RFID data to the server via AJAX
-                fetch('../../../actions/fetch_conductor_info.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ rfid })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Populate the fields with the fetched data
-                            document.getElementById('bus_no').value = data.bus_number || 'N/A';
-                            document.getElementById('conductor_name').value = data.conductor_name || 'Unknown Conductor';
-                            document.getElementById('conductor_id').value = data.conductor_id || 'Unknown Conductor';
-                            document.getElementById('total_load').value = data.total_load || '0.00';
-                            document.getElementById('total_fare').value = data.total_fare || '0.00';
-                            document.getElementById('net_amount').value = data.net_amount || '0.00';
-
-                            // Check if conductor_id exists
-                            if (data.conductor_id) {
-                                let totalLoad = parseFloat(data.total_load) || 0;
-                                let totalFare = parseFloat(data.total_fare) || 0;
-                                let conductor_id = data.conductor_id; // Use the conductor_id directly
-                                let netAmount = totalLoad + totalFare;
-
-                                document.getElementById('net_amount').value = netAmount.toFixed(2) || '0.00';
-                            } else {
-                                alert('Conductor ID not found.');
-                            }
-                        } else {
-                            alert(data.message || 'Error fetching conductor info.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to fetch data.');
-                    });
-            }
-        });
-
-        // Optional: Handle form submission if needed
-        document.getElementById('remittanceForm').addEventListener('submit', function (event) {
-            // Ensure form submission does not reload the page
-            event.preventDefault();
-
-            // Your form submission logic here
-            // For example, you can send the form data using AJAX as well
-        });
-
     </script>
 </body>
 

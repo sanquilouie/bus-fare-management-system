@@ -31,15 +31,15 @@ $menuItems = [
         ],
 
         'dropdown_cashier' => [
-            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/superadmin/cashier/loadrfidadmin.php'],
+            'Load Card' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/superadmin/cashier/loadrfidadmin.php'],
             'Remit' => ['icon' => 'fa-wallet', 'url' => '/NewRam/pages/superadmin/cashier/remitcashier.php'],
             'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/superadmin/cashier/translogscashier.php'],
             'Remit Logs' => ['icon' => 'fa-file-invoice-dollar', 'url' => '/NewRam/pages/superadmin/cashier/remit_logs.php'],
             'Load Revenue' => ['icon' => 'fa-coins', 'url' => '/NewRam/pages/superadmin/cashier/loadtranscashier.php'],
         ],
         'dropdown_conductor' => [
-            'Bus Fare' => ['icon' => 'fa-money-check-alt', 'url' => '/NewRam/pages/superadmin/conductor/busfare.php'],
-            'Load RFID' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/superadmin/conductor/loadrfidconductor.php'],
+            //'Bus Fare' => ['icon' => 'fa-money-check-alt', 'url' => '/NewRam/pages/superadmin/conductor/busfare.php'],
+            'Load Card' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/superadmin/conductor/loadrfidconductor.php'],
             'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/superadmin/conductor/translogscon.php'],
             'Load Revenue' => ['icon' => 'fa-coins', 'url' => '/NewRam/pages/superadmin/conductor/loadtranscon.php'],
         ],
