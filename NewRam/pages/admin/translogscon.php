@@ -51,6 +51,10 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <th>ID</th>
                                 <th>Bus No</th>
                                 <th>Conductor ID</th>
+                                <th>Total Load</th>
+                                <th>Total Cash</th>
+                                <th>Total Card</th>
+                                <th>Total Deductions</th>
                                 <th>Total Net Amount</th>
                                 <th>Remit Date</th>
                                 <th>Actions</th>
@@ -139,6 +143,10 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <td>${log.remit_id}</td>
                                 <td>${log.bus_no}</td>
                                 <td>${log.conductor_id}</td>
+                                <td>${parseFloat(log.total_load).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_cash).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_card).toFixed(2)}</td>
+                                <td>${parseFloat(log.total_deductions).toFixed(2)}</td>
                                 <td>${parseFloat(log.total_net_amount).toFixed(2)}</td>
                                 <td>${log.remit_date}</td>
                                 <td>

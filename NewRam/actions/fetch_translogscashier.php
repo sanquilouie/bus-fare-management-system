@@ -18,7 +18,8 @@ $query = "SELECT
     c.firstname AS conductor_firstname, 
     c.lastname AS conductor_lastname, 
     c.account_number AS conductor_account_number,
-    c.role AS loaded_by_role
+    c.role AS loaded_by_role,
+    t.status
     FROM transactions t 
     JOIN useracc u ON t.account_number = u.account_number
     LEFT JOIN useracc c ON t.conductor_id = c.account_number

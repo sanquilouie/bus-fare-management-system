@@ -51,6 +51,7 @@ $account_number = $_SESSION['account_number']; // Fetch account number from sess
                                 <th>Transaction Time</th>
                                 <th>Loaded By</th>
                                 <th>Role of Loader</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="transactionTableBody"></tbody>
@@ -84,6 +85,17 @@ $(document).ready(function () {
 
                 // Populate the transactions table
                 transactions.forEach(transaction => {
+                    let statusBadge = '';
+                    if (transaction.status === 'edited') {
+                        statusBadge = `<span class="badge bg-warning text-dark" title="This transaction was edited after submission.">Edited</span>`;
+                    } else if (transaction.status === 'notremitted') {
+                        statusBadge = `<span class="badge bg-success">Remitted</span>`;
+                    } else if (transaction.status === 'remitted') {
+                        statusBadge = `<span class="badge bg-success">Remitted</span>`;
+                    } else {
+                        statusBadge = `<span class="badge bg-light text-dark">Unknown</span>`;
+                    }
+
                     tableBody.append(`
                         <tr>
                             <td>${transaction.account_number}</td>
@@ -93,6 +105,7 @@ $(document).ready(function () {
                             <td>${transaction.transaction_date}</td>
                             <td>${transaction.conductor_firstname} ${transaction.conductor_lastname}</td>
                             <td>${transaction.loaded_by_role}</td>
+                            <td>${statusBadge}</td>
                         </tr>
                     `);
                 });

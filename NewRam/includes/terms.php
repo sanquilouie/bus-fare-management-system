@@ -77,7 +77,7 @@ function goBack() {
     if (document.referrer !== "") {
         window.history.back();
     } else {
-        window.location.href = 'admindashboard.php';
+        window.location.href = typeof pageFallbackUrl !== 'undefined' ? pageFallbackUrl : 'admindashboard.php';
     }
 }
 </script>

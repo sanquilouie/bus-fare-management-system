@@ -72,7 +72,6 @@
     <h2>8. Contact Us</h2>
     <p>If you have questions about this Privacy Policy, please email us at <b><i>portfolio@example.invalid</b></i></p>
 </div>
-
 <button onclick="goBack()">Go Back</button>
 
 <script>
@@ -80,10 +79,9 @@ function goBack() {
     if (document.referrer !== "") {
         window.history.back();
     } else {
-        window.location.href = 'admindashboard.php';
+        window.location.href = typeof pageFallbackUrl !== 'undefined' ? pageFallbackUrl : 'admindashboard.php';
     }
 }
 </script>
-
 </body>
 </html>

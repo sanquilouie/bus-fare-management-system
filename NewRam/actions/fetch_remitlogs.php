@@ -7,15 +7,21 @@ $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
 // Paginated query for remit_logs
-// Updated query with JOIN and full name
 $query = "SELECT 
-        r.*, 
-        CONCAT(u.firstname, ' ', u.lastname) AS full_name
-    FROM remit_logs r
-    JOIN useracc u ON r.conductor_id = u.account_number
-    ORDER BY r.created_at DESC 
-    LIMIT ? OFFSET ?
-";
+        remit_id, 
+        bus_no,
+        conductor_id, 
+        total_load,
+        total_cash,
+        total_card,
+        total_deductions,
+        SUM(net_amount) AS total_net_amount,
+        remit_date,
+        MIN(created_at) AS created_at
+    FROM remit_logs
+    GROUP BY bus_no, conductor_id, remit_date
+    ORDER BY remit_date DESC
+    LIMIT ? OFFSET ?";
 
 
 $stmt = $conn->prepare($query);

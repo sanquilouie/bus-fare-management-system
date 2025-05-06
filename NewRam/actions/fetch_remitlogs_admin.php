@@ -13,12 +13,13 @@ $query = "SELECT
         conductor_id, 
         total_load,
         total_cash,
+        total_card,
         total_deductions,
         SUM(net_amount) AS total_net_amount,
         remit_date,
         MIN(created_at) AS created_at
     FROM remit_logs
-    GROUP BY conductor_id, remit_date
+    GROUP BY bus_no, conductor_id, remit_date
     ORDER BY remit_date DESC
     LIMIT ? OFFSET ?";
 
