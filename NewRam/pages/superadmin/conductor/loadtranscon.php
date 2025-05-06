@@ -4,7 +4,13 @@ require '../../../libraries/fpdf/fpdf.php';
 include '../../../includes/connection.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Conductor' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../.././index.php");
+    header("Location: ../../../index.php");
+    exit();
+}
+
+// Check if the user is logged in
+if (!isset($_SESSION['email'])) {
+    header("Location: ../../../index.php");
     exit();
 }
 
@@ -13,17 +19,14 @@ $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
 
 // Initialize variables
-$selectedDate = date('Y-m-d'); // Default to today's date
-$showWholeMonth = false;
 $dailyRevenue = [];
 $totalRevenue = 0;
+$showWholeMonth = false; // Initialize the variable to prevent the undefined variable warning
 
-// Handle initial page load and POST request
-if ($_SERVER['REQUEST_METHOD'] === 'POST' || !isset($_POST['selected_date'])) {
-    if (isset($_POST['selected_date'])) {
-        $selectedDate = $_POST['selected_date'];
-    }
-    $showWholeMonth = isset($_POST['show_whole_month']);
+// Handle POST request
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $selectedDate = isset($_POST['selected_date']) ? $_POST['selected_date'] : date('Y-m-d');
+    $showWholeMonth = isset($_POST['show_whole_month']); // This will now be set to true or false based on the checkbox
 
     $selectedMonth = date('m', strtotime($selectedDate));
     $selectedYear = date('Y', strtotime($selectedDate));
@@ -52,12 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !isset($_POST['selected_date'])) {
     if ($showWholeMonth) {
         $dailyRevenue = array_fill(1, 31, 0); // Default to 0 for all days
         while ($row = $result->fetch_assoc()) {
-            $dailyRevenue[(int)$row['day']] = (float)$row['total_revenue'];
+            $dailyRevenue[(int) $row['day']] = (float) $row['total_revenue'];
         }
     } else {
-        $dailyRevenue = array_fill(1, 31, 0); // Default to 0 for all days
+        $dailyRevenue[(int) $selectedDay] = 0; // Default to 0 for the selected day
         if ($row = $result->fetch_assoc()) {
-            $dailyRevenue[(int)$selectedDay] = (float)$row['total_revenue'];
+            $dailyRevenue[(int) $selectedDay] = (float) $row['total_revenue'];
         }
     }
 
@@ -68,8 +71,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !isset($_POST['selected_date'])) {
 $totalRevenue = array_sum($dailyRevenue);
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -83,18 +88,19 @@ $totalRevenue = array_sum($dailyRevenue);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="../../../assets/css/sidebars.css">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use full version -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
+
 <body>
-    <?php
+<?php
         include '../../../includes/topbar.php';
         include '../../../includes/superadmin_sidebar.php';
         include '../../../includes/footer.php';
     ?>
+
     <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Daily Revenue Report</h2>
         <div class="row justify-content-center">
@@ -102,7 +108,8 @@ $totalRevenue = array_sum($dailyRevenue);
                 <form method="POST" class="mb-4">
                     <div class="form-group">
                         <label for="selected_date">Select Date:</label>
-                        <input type="date" id="selected_date" name="selected_date" class="form-control" value="<?php echo htmlspecialchars($selectedDate); ?>">
+                        <input type="date" id="selected_date" name="selected_date" class="form-control"
+                            value="<?php echo htmlspecialchars($selectedDate); ?>">
                     </div>
                     <div class="form-group form-check">
                         <input type="checkbox" id="show_whole_month" name="show_whole_month" class="form-check-input" <?php echo $showWholeMonth ? 'checked' : ''; ?>>
@@ -110,51 +117,50 @@ $totalRevenue = array_sum($dailyRevenue);
                     </div>
                     <button type="submit" class="btn btn-primary">Generate Report</button>
                 </form>
-
                 <p>Total Revenue: <strong><?php echo number_format($totalRevenue, 2); ?></strong></p>
-
-                <div id="chart"></div>  
+                <div id="chart"></div>
             </div>
         </div>
     </div>
-
-<script>
-window.onload = function () {
-    const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;
-    updateChart(dailyRevenue);
-};
-
-function updateChart(dailyRevenue) {
-    const categories = <?php echo json_encode($showWholeMonth ? range(1, 31) : [$selectedDay]); ?>;
-
-    const options = {
-        chart: {
-            type: 'bar',
-            height: 350
-        },
-        series: [{
-            name: 'Revenue',
-            data: dailyRevenue
-        }],
-        xaxis: {
-            categories: categories
-        },
-        title: {
-            text: 'Daily Revenue',
-            align: 'center'
-        },
-        dataLabels: {
-            enabled: true
-        },
-        tooltip: {
-            shared: true,
-            intersect: false
-        }
-    };
-
-    const chart = new ApexCharts(document.querySelector("#chart"), options);
-    chart.render();
-}
-</script>
 </body>
+<script>
+        window.onload = function () {
+            const dailyRevenue = <?php echo json_encode(array_values($dailyRevenue)); ?>;
+            updateChart(dailyRevenue);
+        };
+
+        function updateChart(dailyRevenue) {
+            const categories = <?php echo json_encode($showWholeMonth ? range(1, 31) : [$selectedDay]); ?>;
+
+            const options = {
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                series: [{
+                    name: 'Revenue',
+                    data: dailyRevenue
+                }],
+                xaxis: {
+                    categories: categories
+                },
+                title: {
+                    text: 'Daily Revenue',
+                    align: 'center'
+                },
+                dataLabels: {
+                    enabled: true
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false
+                }
+            };
+
+            const chart = new ApexCharts(document.querySelector("#chart"), options);
+            chart.render();
+        }
+
+
+    </script>
 </html>
