@@ -44,6 +44,7 @@ $menuItems = [
             'Load Revenue' => ['icon' => 'fa-coins', 'url' => '/NewRam/pages/superadmin/conductor/loadtranscon.php'],
         ],
         'dropdown_user' => [
+            'Bus In Transit' => ['icon' => 'fa-map-marker-alt', 'url' => '/NewRam/pages/superadmin/user/bus_current_location.php'],
             'Recent Trips' => ['icon' => 'fa-route', 'url' => '/NewRam/pages/superadmin/user/recent_trips.php'],
             'Convert Points' => ['icon' => 'fa-gift', 'url' => '/NewRam/pages/superadmin/user/convert_points.php'],
             'Update Password' => ['icon' => 'fa-key', 'url' => '/NewRam/pages/superadmin/user/updatepass.php'],

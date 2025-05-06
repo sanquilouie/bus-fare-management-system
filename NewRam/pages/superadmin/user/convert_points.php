@@ -1,11 +1,10 @@
 <?php
 session_start();
 include '../../../includes/connection.php';
-
 // Check if the user is logged in or has appropriate permissions to access this form
 if (!isset($_SESSION['account_number'])) {
     $_SESSION['error_message'] = "You must be logged in to access this page.";
-    header("Location: ../.././index.php");
+    header('Location: ../../../users/index.php'); // Redirect to the dashboard or login page
     exit();
 }
 
@@ -20,11 +19,23 @@ $user = $result->fetch_assoc();
 
 if (!$user) {
     $_SESSION['error_message'] = "User not found.";
-    header('Location: ../admin/dashboard.php');
+    header('Location: ../../admin/dashboard.php');
     exit();
 }
 
 $availablePoints = $user['points'];
+
+// Fetch account number from the session
+$account_number = $_SESSION['account_number'];
+
+// Fetch user balance
+$balanceQuery = "SELECT balance FROM useracc WHERE account_number = ?";
+$stmt = $conn->prepare($balanceQuery);
+$stmt->bind_param('s', $account_number); // Use 's' for string
+$stmt->execute();
+$stmt->bind_result($balance);
+$stmt->fetch();
+$stmt->close(); // Close the statement
 ?>
 
 <!DOCTYPE html>
@@ -46,73 +57,96 @@ $availablePoints = $user['points'];
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use full version -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
-
 <body>
 <?php
         include '../../../includes/topbar.php';
         include '../../../includes/superadmin_sidebar.php';
         include '../../../includes/footer.php';
     ?>
-     <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
-        <h2>Convert Points to Balance</h2>
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <div class="card-body">
-                    <?php if (isset($_SESSION['success_message'])): ?>
-                        <script>
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: '<?php echo $_SESSION['success_message'];
-                                unset($_SESSION['success_message']); ?>',
-                                timer: 3000,
-                                showConfirmButton: false
-                            });
-                        </script>
-                    <?php endif; ?>
+                <h2>Convert Points to Balance</h2>
+            <div class="card-body">
+                <?php if (isset($_SESSION['success_message'])): ?>
+                    <script>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: '<?php echo $_SESSION['success_message'];
+                            unset($_SESSION['success_message']); ?>',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    </script>
+                <?php endif; ?>
 
-                    <?php if (isset($_SESSION['error_message'])): ?>
-                        <script>
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: '<?php echo $_SESSION['error_message'];
-                                unset($_SESSION['error_message']); ?>',
-                                timer: 3000,
-                                showConfirmButton: false
-                            });
-                        </script>
-                    <?php endif; ?>
+                <?php if (isset($_SESSION['error_message'])): ?>
+                    <script>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: '<?php echo $_SESSION['error_message'];
+                            unset($_SESSION['error_message']); ?>',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    </script>
+                <?php endif; ?>
 
-                    <form id="convertPointsForm">
-                        <div class="mb-3">
-                            <label class="form-label">Available Points:</label>
-                            <p class="form-control-plaintext fw-bold">
-                                <?php echo htmlspecialchars($availablePoints); ?>
-                            </p>
-                        </div>
-                        <div class="mb-3">
-                            <label for="points" class="form-label">Points to Convert:</label>
-                            <input type="number" class="form-control" name="points" id="points" min="1"
-                                max="<?php echo htmlspecialchars($availablePoints); ?>" required>
-                        </div>
-                        <div class="text-center">
-                            <button type="button" class="btn btn-secondary" onclick="inputAllPoints()">Input All Points</button>
-                            <button type="button" class="btn btn-primary" onclick="confirmConversion()">Convert Points</button>
-                        </div>
-                    </form>
+                <form id="convertPointsForm">
+                    <div class="mb-3">
+                        <label class="form-label">Available Points:</label>
+                        <p class="form-control-plaintext fw-bold">
+                            <?php echo htmlspecialchars($availablePoints); ?>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="points" class="form-label">Points to Convert:</label>
+                        <input type="number" class="form-control" name="points" id="points" min="1"
+                            max="<?php echo htmlspecialchars($availablePoints); ?>" required>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="inputAllPoints()">Input All Points</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmConversion()">Convert Points</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Modal for Updated Balance -->
+    <div class="modal fade" id="updatedBalanceModal" tabindex="-1" aria-labelledby="updatedBalanceLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatedBalanceLabel">Updated Balance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your new balance is: <strong id="newBalance">₱<?php echo number_format($balance, 2); ?></strong>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        onclick="reloadPage()">Close</button>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
-        // Function to input all available points into the points input field
+
+        function reloadPage() {
+            location.reload();  // This will reload the current page
+        }
         function inputAllPoints() {
-            var availablePoints = <?php echo $availablePoints; ?>; // Get available points from PHP
-            $('#points').val(availablePoints); // Set points input field to available points
+            var availablePoints = <?php echo $availablePoints; ?>;
+            $('#points').val(availablePoints);
         }
 
         function confirmConversion() {
@@ -126,36 +160,37 @@ $availablePoints = $user['points'];
                 confirmButtonText: 'Yes, convert it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Call converting_points.php via AJAX
                     convertPoints();
                 }
             });
         }
 
         function convertPoints() {
-            var pointsToConvert = $('#points').val(); // Get the points value
+            var pointsToConvert = $('#points').val();
             if (pointsToConvert) {
                 $.ajax({
-                    url: 'converting_points.php', // The PHP file handling the conversion
+                    url: '../../../actions/converting_points.php',
                     type: 'POST',
-                    data: { points: pointsToConvert }, // Send the points to convert
+                    data: { points: pointsToConvert },
                     success: function (response) {
-                        var result = JSON.parse(response); // Parse JSON response
+                        var result = JSON.parse(response);
                         if (result.status === 'success') {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Success',
-                                text: result.message, // Show success message from the response
+                                text: result.message,
                                 timer: 3000,
                                 showConfirmButton: false
                             }).then(() => {
-                                location.reload(); // Reload the page to update points after success
+                                $('#newBalance').text(result.new_balance);
+                                $('#updatedBalanceModal').modal('show');
+
                             });
                         } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Conversion Failed',
-                                text: result.message, // Show error message from the response
+                                text: result.message,
                                 timer: 3000,
                                 showConfirmButton: false
                             });
@@ -182,7 +217,4 @@ $availablePoints = $user['points'];
             }
         }
     </script>
-
 </body>
-
-</html>

@@ -2,8 +2,8 @@
 session_start();
 include '../../../includes/connection.php';
 
-if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../.././index.php");
+if (!isset($_SESSION['email'])) {
+    header("Location: ../../../index.php");
     exit();
 } ?>
 <!DOCTYPE html>
@@ -14,65 +14,46 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Superadmin')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Password</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="../../../assets/css/sidebars.css">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Use full version -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
-        body {
-            background-color: #f8f9fa;
+        .password-wrapper {
+            position: relative;
         }
 
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            background-color: rgba(133, 187, 101);
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            transition: 0.2s;
-            z-index: 100000;
-        }
-
-        header.sticky {
-            padding: 10px 10px;
-            background: rgba(133, 187, 101, 0.8);
-        }
-
-        .logo {
-            margin-left: 10px;
-            width: 50px;
-            height: 45px;
+        .password-wrapper i {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
         }
 
         .indicator {
             display: none;
-            margin-top: 5px;
+            margin-bottom: 10px;
         }
 
         .indicator span {
             display: inline-block;
-            width: 33%;
-            height: 5px;
-            margin-right: 2px;
-            background: lightgray;
+            width: 80px;
+            height: 10px;
+            background: #e0e0e0;
+            margin-right: 5px;
             border-radius: 5px;
         }
 
-        .indicator .weak.active {
+        .indicator .active {
             background: red;
         }
 
@@ -83,56 +64,133 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Superadmin')) {
         .indicator .strong.active {
             background: green;
         }
-
-        h4 {
-            color: black;
-        }
-
-        .btn-success {
-            background-color: #007BFF;
-            /* New background color */
-            color: white;
-            /* Text color */
-            border: none;
-            /* Optional: Remove border */
-        }
-
-        .btn-success:hover {
-            background-color: #0056b3;
-            /* Darker shade for hover effect */
-        }
     </style>
 </head>
 
-<script type="text/javascript">
-    window.addEventListener("scroll", function () {
-        var header = document.querySelector("header");
-        header.classList.toggle("sticky", window.scrollY > 0);
-    });
+<body>
+<?php
+    include '../../../includes/topbar.php';
+    include '../../../includes/superadmin_sidebar.php';
+    include '../../../includes/footer.php';
+?>
 
-    function myFunction1() {
-        var x = document.getElementById("pass1");
-        var y = document.getElementById("pass2");
-        var z = document.getElementById("pass3");
-        if (x.type === "password" || y.type === "password") {
-            x.type = "text";
-            y.type = "text";
-            z.type = "text";
+<div id="main-content" class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
+            <h2>Update Password</h2>
+            <form id="updatePasswordForm" onsubmit="updatePassword(event)">
+                <label for="pass2" class="form-label">Old Password</label>
+                <div class="password-wrapper">
+                    <input type="password" class="form-control" name="old_pass" id="pass2" placeholder="Old Password" required>
+                    <i class="fa-solid fa-eye" onclick="togglePassword('pass2', this)"></i>
+                </div>
+
+                <label for="pass1" class="form-label">New Password</label>
+                <div class="password-wrapper">
+                    <input onkeyup="trigger()" type="password" class="form-control" name="Password" id="pass1" placeholder="New Password" required>
+                    <i class="fa-solid fa-eye" onclick="togglePassword('pass1', this)"></i>
+                </div>
+
+                <div class="indicator">
+                    <span class="weak"></span>
+                    <span class="medium"></span>
+                    <span class="strong"></span>
+                </div>
+
+                <label for="pass3" class="form-label">Confirm Password</label>
+                <div class="password-wrapper">
+                    <input type="password" class="form-control mb-2" name="PasswordConf" id="pass3" placeholder="Confirm Password" required>
+                    <i class="fa-solid fa-eye" onclick="togglePassword('pass3', this)"></i>
+                </div>
+
+                <div id="matchMsg" class="mb-2"></div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success btn-block">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(inputId, icon) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
         } else {
-            x.type = "password";
-            y.type = "password";
-            z.type = "password";
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+
+    const input = document.querySelector("#pass1");
+    const weak = document.querySelector(".weak");
+    const medium = document.querySelector(".medium");
+    const strong = document.querySelector(".strong");
+    const indicator = document.querySelector(".indicator");
+
+    function trigger() {
+        const password = input.value;
+        indicator.style.display = password.length ? "block" : "none";
+
+        weak.classList.remove("active");
+        medium.classList.remove("active");
+        strong.classList.remove("active");
+
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        if (password.match(/[\W]/)) strength++;
+
+        if (strength <= 1) {
+            weak.classList.add("active");
+        } else if (strength === 2 || strength === 3) {
+            medium.classList.add("active");
+        } else if (strength >= 4) {
+            strong.classList.add("active");
+        }
+    }
+
+    const pass1 = document.getElementById("pass1");
+    const pass3 = document.getElementById("pass3");
+    const matchMsg = document.getElementById("matchMsg");
+
+    pass1.addEventListener("input", checkMatch);
+    pass3.addEventListener("input", checkMatch);
+
+    function checkMatch() {
+        if (pass3.value === "") {
+            matchMsg.textContent = "";
+        } else if (pass1.value === pass3.value) {
+            matchMsg.textContent = "Passwords match";
+            matchMsg.style.color = "green";
+        } else {
+            matchMsg.textContent = "Passwords do not match";
+            matchMsg.style.color = "red";
         }
     }
 
     function updatePassword(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
 
         const old_pass = document.getElementById("pass2").value;
         const Password = document.getElementById("pass1").value;
         const PasswordConf = document.getElementById("pass3").value;
 
-        // Confirm action with SweetAlert before submitting
+        if (Password !== PasswordConf) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Mismatch',
+                text: 'Passwords do not match.'
+            });
+            return;
+        }
+
         Swal.fire({
             title: 'Are you sure?',
             text: "Do you really want to update your password?",
@@ -143,8 +201,7 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Superadmin')) {
             confirmButtonText: 'Yes, update it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Make AJAX request to update password
-                fetch('update_password.php', {
+                fetch('../../../actions/update_password.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -155,90 +212,55 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Superadmin')) {
                         PasswordConf: PasswordConf
                     })
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            Swal.fire({
-                                title: 'Updated!',
-                                text: data.message,
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location = '../users/index.php'; // Redirect to profile page
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: data.message,
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Updated!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location = '/NewRam/pages/user/update_pass.php';
+                        });
+                    } else {
                         Swal.fire({
                             title: 'Error!',
-                            text: 'An error occurred while updating the password. Please try again.',
+                            text: data.message,
                             icon: 'error',
                             confirmButtonText: 'OK'
                         });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while updating the password. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
                     });
+                });
             }
         });
     }
 </script>
 
-<body>
-<?php
-        include '../../../includes/topbar.php';
-        include '../../../includes/superadmin_sidebar.php';
-        include '../../../includes/footer.php';
-    ?>
-    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                    <h2>Update Password</h2>
-                    <div class="card-body">
-                        <form id="updatePasswordForm" onsubmit="updatePassword(event)">
-                            <div class="form-group">
-                                <label for="pass2" class="form-label">Old Password</label>
-                                <input type="password" class="form-control" name="old_pass" id="pass2"
-                                    placeholder="Old Password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="pass1" class="form-label">New Password</label>
-                                <input onkeyup="trigger()" type="password" class="form-control" name="Password"
-                                    id="pass1" placeholder="New Password" required>
-                                <div class="indicator">
-                                    <span class="weak"></span>
-                                    <span class="medium"></span>
-                                    <span class="strong"></span>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="pass3" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" name="PasswordConf" id="pass3"
-                                    placeholder="Confirm Password" required>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" onclick="myFunction1()">
-                                <label class="form-check-label" class="form-label">Show Password</label>
-                            </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-success btn-block">Update Password</button>
-                            </div>
-                        </form>
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+            } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+            }
+        }
+
         const indicator = document.querySelector(".indicator");
         const input = document.querySelector("#pass1");
         const weak = document.querySelector(".weak");
@@ -278,5 +300,4 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Superadmin')) {
         }
     </script>
 </body>
-
 </html>
