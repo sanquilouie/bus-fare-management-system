@@ -47,7 +47,7 @@ $menuItems = [
             'Bus Fare' => ['icon' => 'fa-money-bill-wave', 'url' => '/NewRam/pages/conductor/busfare_auto.php'],
             'Load Card' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/conductor/loadrfidconductor.php'],
             'Load Transaction' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/conductor/translogscon.php'],
-            'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/conductor/loadtranscon.php'],
+            //'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/conductor/loadtranscon.php'],
         ],
         'dropdown' => [],
         'after' => []

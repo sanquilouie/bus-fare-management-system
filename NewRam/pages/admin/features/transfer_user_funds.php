@@ -114,6 +114,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             cancelButtonText: 'No, Cancel'
         }).then((confirmResult) => {
             if (confirmResult.isConfirmed) {
+                // Show loader before AJAX
+                Swal.fire({
+                    title: 'Transferring...',
+                    html: 'Please wait while we transfer the funds.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 $.ajax({
                     url: '../../../actions/transfer_and_disabled.php',
                     method: 'POST',
@@ -121,8 +131,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     success: function (response) {
                         const result = JSON.parse(response);
                         if (result.success) {
-                            // Display the new account number in the success message
-                            Swal.fire('Transferred!', `Funds have been transferred successfully to new RFID: ${newAccountNumber}.`, 'success').then(() => {
+                            Swal.fire(
+                                'Transferred!',
+                                `Funds have been transferred successfully to new NFC: ${newAccountNumber}.`,
+                                'success'
+                            ).then(() => {
                                 location.reload();
                             });
                         } else {

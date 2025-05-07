@@ -1,5 +1,13 @@
 <?php
 session_start();
+require '../libraries/PHPMailer/src/PHPMailer.php';
+require '../libraries/PHPMailer/src/SMTP.php';
+require '../libraries/PHPMailer/src/Exception.php';
+
+// Use PHPMailer namespace
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 include "../includes/connection.php";
 
 error_reporting(E_ALL);
@@ -81,28 +89,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
                     throw new Exception("Failed to update account number and balance: " . $stmt->error);
                 }
 
-                // Insert user details into the deactivated accounts table
-                $historyQuery = "INSERT INTO deactivated_accounts (original_account_number, firstname, middlename, lastname, birthday, age, gender, address, balance, deactivated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-                $stmt = $conn->prepare($historyQuery);
-                $stmt->bind_param(
-                    "ssssssssd",
-                    $userData['account_number'],
-                    $userData['firstname'],
-                    $userData['middlename'],
-                    $userData['lastname'],
-                    $userData['birthday'],
-                    $userData['age'],
-                    $userData['gender'],
-                    $userData['address'],
-                    $userData['balance']
-                );
-                $stmt->execute();
+                $mail = new PHPMailer(true);
+                    try {
+                        $mail->isSMTP();
+                        $mail->Host = 'smtp.gmail.com';
+                        $mail->SMTPAuth = true;
+                        $mail->Username = 'portfolio@example.invalid';
+                        $mail->Password = 'REDACTED_SMTP_PASSWORD';
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port = 587;
 
-                // Disable the original account
-                $disableAccountQuery = "UPDATE useracc SET is_activated = 0 WHERE id = ?";
-                $stmt = $conn->prepare($disableAccountQuery);
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
+                        $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+                        $mail->addAddress($userData['email'], $userData['firstname'] . ' ' . $userData['lastname']);
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Registration Successful';
+                        $mail->Body = "
+                            <p>Dear {$userData['firstname']},</p>
+                            <p>We’re pleased to inform you that your account has been successfully transferred.</p>
+                            <p><strong>Your new account number is:</strong> $newAccountNumber</p>
+                            <p>You can now log in at <a href='https://ramstarzaragosa.site/'>https://ramstarzaragosa.site/</a>.</p>
+                            <p>Best regards,<br>
+                            Ramstar Bus Transportation</p>
+                        ";
+
+
+                        $mail->send();
+                    } catch (Exception $e) {
+                        error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
+                    }
 
                 // Log the activity of disabling the user
                 logActivity($conn, $user_id, 'Transferred Funds And Disabled', $_SESSION['firstname'] . ' ' . $_SESSION['lastname']);

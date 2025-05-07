@@ -181,55 +181,54 @@ while ($row = mysqli_fetch_assoc($result2)) {
     ?>
 
     <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-            <div class="dashboard">
-                <div class="dashboard-item">
-                    <div class="card-body">
-                        <h3><i class="fas fa-users"></i></h3>
-                        <h4>Total Users</h4>
-                        <p class="h2"><?php echo $userCount; ?></p>
-                    </div>
-                </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
+                <div class="dashboard">
                     <div class="dashboard-item">
+                        <div class="card-body">
+                            <h3><i class="fas fa-users"></i></h3>
+                            <h4>Total Users</h4>
+                            <p class="h2"><?php echo $userCount; ?></p>
+                        </div>
+                    </div>
+                    <!--<div class="dashboard-item">
                         <div class="card-body">
                         <h3><i class="fas fa-coins"></i></h3>
                         <h4>Total Load(Today)</h4>
                         <p class="h2">₱<?php echo number_format($totalRevenue, 2); ?></p>
-                    </div>
-                </div>
+                        </div> 
+                        </div>-->
                     <div class="dashboard-item">
                         <div class="card-body">
-                        <h3><i class="fas fa-bus"></i></h3>
-                        <h4>Total Transactions Today</h4>
-                        <p class="h2"><?php echo $totalPassengers; ?></p>
+                            <h3><i class="fas fa-bus"></i></h3>
+                            <h4>Total Transactions Today</h4>
+                            <p class="h2"><?php echo $totalPassengers; ?></p>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Revenue Chart -->
+                <div class="row">
+                    <!--<div class="col-md-6 col-12">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Revenue Trends</h4>
+                                <div class="chart-container" id="revenueChart"></div>
+                            </div>
+                        </div>
+                    </div> -->
+            
+                    <div class="col-md-12 col-12">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Passenger Count Trends</h4>
+                                <div class="chart-container" id="passengerChart"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        
-
-    <!-- Revenue Chart -->
-    <div class="row">
-        <div class="col-md-6 col-12">
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h4 class="card-title">Revenue Trends</h4>
-                    <div class="chart-container" id="revenueChart"></div>
-                </div>
-            </div>
         </div>
-
-        <div class="col-md-6 col-12">
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h4 class="card-title">Passenger Count Trends</h4>
-                    <div class="chart-container" id="passengerChart"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-    </div>
     </div>
 <script src="../../assets/js/chartUtils.js"></script>
 <script>
@@ -272,8 +271,8 @@ const options2 = generateChartOptions({
     title: 'Monthly Passenger Logs'
 });
 
-const chart = new ApexCharts(document.querySelector("#revenueChart"), options);
-chart.render();
+//const chart = new ApexCharts(document.querySelector("#revenueChart"), options);
+//chart.render();
 
 const chart2 = new ApexCharts(document.querySelector("#passengerChart"), options2);
 chart2.render();
