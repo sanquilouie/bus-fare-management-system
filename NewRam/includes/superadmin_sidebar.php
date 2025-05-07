@@ -5,8 +5,12 @@ $currentPage = $_SERVER['REQUEST_URI'];
 // Define menu items per role
 $menuItems = [
     'Superadmin' => [
+        'Dashboard' => [
+            'icon' => 'fa-home',
+            'url' => '/NewRam/pages/superadmin/dashboard.php'
+        ],
+
         'dropdown_superadmin' => [
-            'Dashboard' => ['icon' => 'fa-home', 'url' => '/NewRam/pages/superadmin/dashboard.php'],
             'User Registration' => ['icon' => 'fa-users-cog', 'url' => '/NewRam/pages/superadmin/admin/register.php'],
             'Employees' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/superadmin/admin/regemployee.php'],
             'Accounts' => [
@@ -158,6 +162,13 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
     </div>
 
     <nav class="nav flex-column mt-2">
+        <?php if (isset($menu['Dashboard'])): ?>
+            <li class="nav-item">
+                <a class="nav-link <?= ($currentPage == $menu['Dashboard']['url']) ? 'active' : ''; ?>" href="<?= $menu['Dashboard']['url']; ?>">
+                    <i class="fa <?= $menu['Dashboard']['icon']; ?>"></i> Dashboard
+                </a>
+            </li>
+        <?php endif; ?>
         <?php if (!empty($menu['dropdown_superadmin'])): ?>
             <li class="nav-item">
                 <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#superadminMenu" aria-expanded="false">
