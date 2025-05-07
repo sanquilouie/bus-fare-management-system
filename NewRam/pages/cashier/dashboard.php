@@ -19,7 +19,7 @@ $totalRevenueResult = mysqli_query($conn, $totalRevenueQuery);
 $totalRevenue = mysqli_fetch_assoc($totalRevenueResult)['totalRevenue'] ?? 0;
 
 // Fetch today's revenue
-$todayRevenueQuery = "SELECT SUM(amount) as todayRevenue FROM transactions WHERE transaction_type = 'Load' AND DATE(transaction_date) = CURDATE()";
+$todayRevenueQuery = "SELECT SUM(amount) as todayRevenue FROM transactions WHERE transaction_type = 'Load' AND DATE(transaction_date) = CURDATE() AND status != 'edited'";
 $todayRevenueResult = mysqli_query($conn, $todayRevenueQuery);
 $todayRevenueRow = mysqli_fetch_assoc($todayRevenueResult);
 $todayRevenue = $todayRevenueRow['todayRevenue'] ?? 0;
