@@ -97,7 +97,7 @@ WHERE total_load > 0
             // Conductor exists, but no transaction ❌
             $_SESSION['rfid_data'] = [
                 'rfid_scan' => '',
-                'conductor_name' => "",
+                'conductor_name' => "asdsad",
                 'total_load' => '',
                 'bus_number' => '',
                 'total_fare' => '',
