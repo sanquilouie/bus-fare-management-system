@@ -109,7 +109,7 @@ WHERE total_load > 0
         // No conductor found at all
         $_SESSION['rfid_data'] = [
             'rfid_scan' => '',
-            'conductor_name' => "",
+            'conductor_name' => "asdsadsadsa",
             'total_load' => '',
             'bus_number' => '',
             'total_fare' => '',
