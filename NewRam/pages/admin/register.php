@@ -128,7 +128,7 @@ $lastname = $_SESSION['lastname'];
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="birthday" class="form-label required">Birthday</label>
+                            <label for="birthday" class="form-label">Birthday</label>
                             <input type="date" class="form-control" id="birthday" name="birthday" />
                         </div>
                         <div class="col-md-4">
@@ -168,7 +168,7 @@ $lastname = $_SESSION['lastname'];
                     </div>
                     <div class="row mb-3"> 
                         <div class="col-md-4">
-                            <label for="account_number" class="form-label">Account Number</label>
+                            <label for="account_number" class="form-label required">Account Number</label>
                             <input type="text" class="form-control" id="account_number" name="account_number" required>
                         </div>
                         <div class="col-md-4">
