@@ -40,7 +40,7 @@ function fetchTransactions($conn, $accountNumber, $limit, $offset)
     CONCAT(u.firstname, ' ', u.lastname) AS loaded_by
     FROM transactions t
     LEFT JOIN useracc u ON BINARY TRIM(t.conductor_id) = BINARY TRIM(u.account_number)
-    WHERE t.account_number = '$accountNumber'
+    WHERE t.account_number = '$accountNumber' AND t.status != 'edited'
     ORDER BY t.transaction_date DESC
     LIMIT $limit OFFSET $offset
     ";

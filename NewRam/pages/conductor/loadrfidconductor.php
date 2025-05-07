@@ -233,8 +233,25 @@ $result = $conn->query($sql);
                     title: 'Bus Number Not Set',
                     text: 'Please set the bus number in Bus Fare first before proceeding.',
                 });
-                return; // ⛔ Stop execution
-    }
+                return;
+            }
+
+            // ✅ Check if bus number (conductorID) exists in DB
+            const response = await fetch('../../actions/validate_bus.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ busNumber })
+            });
+
+            const data = await response.json();
+            if (!data.valid) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Bus Number Not Set',
+                    text: 'Please set the bus number in Bus Fare first before proceeding.',
+                });
+                return;
+            }
             try {
                 // First, prompt for the user account number
                 const { value: userAccountNumber } = await Swal.fire({
