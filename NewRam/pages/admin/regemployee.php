@@ -87,10 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $mail->Body = "
                         <p>Dear $firstName,</p>
                         <p>Congratulations! You are officially hired for the position of $role at our company.</p>
-                        <p>We look forward to working with you and are excited to have you on the team.</p>
-                        <p>Your Account Number is <strong>$accountNumber</strong> and your default password is <strong>ramstarbus123</strong></p>
+                        <p>We look forward to wor;king with you and are excited to have you on the team.</p>
+                        <p><strong>Account Number:</strong>  $accountNumber
+                        <br><strong>Default Password:</strong> ramstarbus123</p>
                         <p>To get started, please log in to our company portal using the link below:</p>
-                        <p>ramstarzaragosa.site</p>
+                        <p>https://ramstarzaragosa.site/</p>
                         <p>Best regards,
                         <br>Ramstar Bus Transportation</p>
                     ";
