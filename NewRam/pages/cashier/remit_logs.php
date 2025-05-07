@@ -111,9 +111,9 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                 row.style.display = busNo.includes(query) ? '' : 'none';
             });
         });
-    $(document).ready(function () {
-        window.generateExcel = function(busNumber, remitDate) {
-            window.location.href = `../../actions/generate_excel.php?bus_number=${busNumber}&remit_date=${remitDate}`;
+        $(document).ready(function () {
+            window.generateExcel = function(busNumber, remitDate) {
+                window.location.href = `../../actions/generate_excel.php?bus_number=${busNumber}&remit_date=${remitDate}`;
         };
 
 
