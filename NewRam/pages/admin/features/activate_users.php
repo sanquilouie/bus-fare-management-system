@@ -95,11 +95,10 @@ function sendActivationEmail($user_id, $account_number)
         $mail->Body = "
             <p>Dear $firstname,</p>
             <p>Your account has been successfully activated!.</p>
-            <p>Login to https://ramstarzaragosa.site/</p>
+            <p>Login to https://ramstarzaragosa.site/<p>
             <p><strong>Account Number:</strong> $account_number<br>
-            <strong>Password:</strong>$password</p>
-            <p>Change your password after logging in for security.</p>
-            <p>Best regards,<br>RAMSTAR</p>
+            <p>Best regards,
+            <br>Ramstar Bus Transportation</p>
         ";
 
         $mail->send();
