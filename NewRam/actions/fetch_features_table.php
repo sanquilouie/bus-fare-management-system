@@ -37,6 +37,7 @@ $features = $conn->query("SELECT * FROM features LIMIT $start, $perPage");
                 <td>
                 <button class="btn btn-sm btn-warning toggle-feature" data-id="<?= $row['id'] ?>">Toggle</button>
                 <button class="btn btn-sm btn-danger delete-feature" data-id="<?= $row['id'] ?>">Delete</button>
+                <button class="btn btn-sm btn-info edit-feature" onclick="window.location.href='features/edit_feature.php?id=<?= $row['id'] ?>'">Edit</button>
                 </td>
             </tr>
         <?php endwhile; ?>

@@ -208,6 +208,22 @@ if ($rfid_data) {
                             <button type="button" id="addDeduction" class="btn btn-secondary">Add Deduction</button>
                         </div>
                     </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-7">
+                            <input type="text" class="form-control" name="deduction_desc[]" placeholder="Description" value="Gas" disabled>
+                        </div>
+                        <div class="col-5">
+                            <input type="number" class="form-control deduction-amount" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)" value="0">
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-7">
+                            <input type="text" class="form-control" name="deduction_desc[]" placeholder="Description" value="Terminal Fee" disabled>
+                        </div>
+                        <div class="col-5">
+                            <input type="number" class="form-control deduction-amount" name="deduction_amount[]" step="0.01" placeholder="Amount (₱)" value="0">
+                        </div>
+                    </div>
                 </div>
 
                 <label for="net_amount" class="form-label">Net Amount (₱):</label>

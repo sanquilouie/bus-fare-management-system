@@ -65,6 +65,9 @@ if (isset($_GET['delete'])) {
     exit();
 }
 
+
+
+
 $limit = 5; // number of features per page
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
@@ -109,7 +112,6 @@ $features = $stmt->get_result();
 ?>
 <body>
 
-  <h2>Upload New Feature</h2>
   <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <h2>Upload New Feature</h2>
         <div class="row justify-content-center">
@@ -228,7 +230,6 @@ function openFeatureModal(page = 1) {
                     });
                 });
             });
-
         });
 
     const modal = new bootstrap.Modal(document.getElementById('featuresModal'));

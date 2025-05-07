@@ -15,3 +15,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
     }
 }
+
+if ($_POST['action'] === 'edit') {
+    $id = $_POST['id'];
+    $title = trim($_POST['title']);
+    $description = trim($_POST['description']);
+
+    $stmt = $conn->prepare("UPDATE features SET title = ?, description = ? WHERE id = ?");
+    $stmt->bind_param("ssi", $title, $description, $id);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Failed to update']);
+    }
+
+    exit;
+}

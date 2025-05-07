@@ -85,11 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $mail->isHTML(true);
                     $mail->Subject = 'Registration Received';
                     $mail->Body = "
-                        <p>Hi $firstName,</p>
-                        <p>Thank you for registering with Ramstar Bus Transportation.</p>
-                        <p>Your account has been successfully activated. You can now log in and start using your account.</p>
-                        <p>Your default password is: ramstarbus123</p>
-                        <p>Best regards,<br>Ramstar Bus Transportation</p>
+                        <p>Dear $firstName,</p>
+                        <p>Congratulations! You are officially hired for the position of $role at our company.</p>
+                        <p>We look forward to working with you and are excited to have you on the team.</p>
+                        <p>Your Your Account Number is $accountNumber and your default password is ramstarbus123</p>
+                        <p>To get started, please log in to our company portal using the link below:</p>
+                        <p>ramstarzaragosa.site</p>
+                        <p>Best regards,
+                        <br>Ramstar Bus Transportation</p>
                     ";
     
                     $mail->send();
