@@ -25,45 +25,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rfid_scan'])) {
     $rfid_scan = $_POST['rfid_scan'];
 
     $stmt = $conn->prepare("
-        SELECT 
-            u.account_number,
-            u.firstname,
-            u.lastname,
+        SELECT * FROM (
+    SELECT 
+        u.account_number,
+        u.firstname,
+        u.lastname,
 
-            IFNULL((
-                SELECT SUM(DISTINCT t.amount)
-                FROM transactions t
-                WHERE t.conductor_id = u.account_number AND t.status NOT IN ('edited', 'remitted')
-            ), 0) AS total_load,
+        IFNULL((
+            SELECT SUM(DISTINCT t.amount)
+            FROM transactions t
+            WHERE t.conductor_id = u.account_number AND t.status NOT IN ('edited', 'remitted')
+        ), 0) AS total_load,
 
-            (
-                SELECT pl.bus_number
-                FROM passenger_logs pl
-                WHERE pl.conductor_id = u.account_number AND pl.status = 'notremitted'
-                ORDER BY pl.timestamp DESC
-                LIMIT 1
-            ) AS bus_number,
+        (
+            SELECT pl.bus_number
+            FROM passenger_logs pl
+            WHERE pl.conductor_id = u.account_number
+            ORDER BY pl.timestamp DESC
+            LIMIT 1
+        ) AS bus_number,
 
-            IFNULL((
-                SELECT SUM(pl.fare)
-                FROM passenger_logs pl
-                WHERE pl.conductor_id = u.account_number 
-                AND pl.status = 'notremitted' 
-                AND pl.rfid = 'cash' 
-                AND DATE(pl.timestamp) = CURDATE()
-            ), 0) AS total_cash_fare,
+        IFNULL((
+            SELECT SUM(pl.fare)
+            FROM passenger_logs pl
+            WHERE pl.conductor_id = u.account_number 
+            AND pl.status = 'notremitted' 
+            AND pl.rfid = 'cash' 
+            AND DATE(pl.timestamp) = CURDATE()
+        ), 0) AS total_cash_fare,
 
-            IFNULL((
-                SELECT SUM(pl.fare)
-                FROM passenger_logs pl
-                WHERE pl.conductor_id = u.account_number 
-                AND pl.status = 'notremitted' 
-                AND pl.rfid != 'cash' 
-                AND DATE(pl.timestamp) = CURDATE()
-            ), 0) AS total_card_fare
+        IFNULL((
+            SELECT SUM(pl.fare)
+            FROM passenger_logs pl
+            WHERE pl.conductor_id = u.account_number 
+            AND pl.status = 'notremitted' 
+            AND pl.rfid != 'cash' 
+            AND DATE(pl.timestamp) = CURDATE()
+        ), 0) AS total_card_fare
 
-        FROM useracc u
-        WHERE u.account_number = ?;
+    FROM useracc u
+    WHERE u.account_number = ?
+) AS subquery
+WHERE total_load > 0 
+   OR total_cash_fare > 0 
+   OR total_card_fare > 0;
+;
 
     ");
 

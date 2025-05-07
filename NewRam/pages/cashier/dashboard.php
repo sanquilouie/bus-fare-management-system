@@ -49,13 +49,24 @@ while ($row = mysqli_fetch_assoc($pastMonthsLoadResult)) {
 $monthsJson = json_encode($pastMonths);
 $loadsJson = json_encode($totalLoads);
 
-// Fetch user data
-$query = "SELECT firstname, lastname FROM useracc WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param('i', $user_id);
-$stmt->execute();
-$stmt->bind_result($firstname, $lastname);
-$stmt->fetch();
+$currentYear = date('Y');
+
+$sql = "
+SELECT 
+    DATE_FORMAT(transaction_date, '%Y-%m') AS log_month,
+    SUM(amount) AS total_entries
+FROM transactions
+WHERE YEAR(transaction_date) = $currentYear
+GROUP BY log_month
+ORDER BY log_month
+";
+
+$result2 = mysqli_query($conn, $sql);
+
+$data2 = [];
+while ($row = mysqli_fetch_assoc($result2)) {
+    $data2[] = $row;
+}
 ?>
 
 <!doctype html>
@@ -114,61 +125,67 @@ $stmt->fetch();
     <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h2 class="card-title text-primary">Past Months' Total Load</h2>
-                        <div id="pastMonthsChart"></div>
+                <div class="row">
+                    <div class="col-md-6 col-12">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Monthly Total Load</h4>
+                                <div class="chart-container" id="passengerChart"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-12">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Today's Total Load</h4>
+                                <div class="chart-container" id="revenueChart"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card shadow-sm mt-5 mb-5">
-                    <div class="card-body">
-                        <h2 class="card-title text-primary">Today's Total Load</h2>
-                        <div id="revenueChart"></div>
-                    </div>
-                </div>
-            </div>
-            
+            </div>  
         </div>
     </div>
+    <script src="../../assets/js/chartUtils.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var options = {
-                chart: {
-                    type: 'bar',
-                    height: 350
-                },
-                series: [{
-                    name: 'Total Load',
-                    data: [<?php echo $todayRevenue; ?>] // Use PHP to echo the revenue data
-                }],
-                xaxis: {
-                    categories: ['Today'] // You can customize this as needed
-                }
-            };
+        const todayRevenue = <?php echo json_encode($todayRevenue); ?>;
+        const chartData2 = <?php echo json_encode($data2); ?>;
 
-            var chart = new ApexCharts(document.querySelector("#revenueChart"), options);
-            chart.render();
+        //Bar Chart
+        const options = generateChartOptions({
+            type: 'bar',
+            title: "Today's Total Load",
+            series: [{
+                name: "Revenue",
+                data: [{
+                    x: "Today",
+                    y: parseFloat(todayRevenue)
+                }]
+            }]
         });
 
-        document.addEventListener("DOMContentLoaded", function () {
-            var options = {
-                chart: {
-                    type: 'bar',
-                    height: 350
-                },
-                series: [{
-                    name: 'Total Load',
-                    data: <?php echo $loadsJson; ?>
-                }],
-                xaxis: {
-                    categories: <?php echo $monthsJson; ?>,
-                },
-                colors: ['#007bff']
-            };
+        //Line Chart
+        const seriesData = chartData2.map(item => ({
+            x: item.log_month,
+            y: parseInt(item.total_entries)
+        }));
 
-            var chart = new ApexCharts(document.querySelector("#pastMonthsChart"), options);
-            chart.render();
+        const options2 = generateChartOptions({
+            type: 'line',
+            series: [{
+                name: 'Total Load',
+                data: seriesData
+            }],
+            xaxisFormat: 'MMMM',
+            //title: 'Monthly Passenger Logs'
         });
+
+        const chart = new ApexCharts(document.querySelector("#revenueChart"), options);
+        chart.render();
+
+        const chart2 = new ApexCharts(document.querySelector("#passengerChart"), options2);
+        chart2.render();
     </script>
 </body>
 

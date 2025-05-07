@@ -67,6 +67,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $data[] = $row;
 }
 
+// Monthly Passenger Chart
 $sql = "
 SELECT 
     DATE_FORMAT(timestamp, '%Y-%m') AS log_month,
@@ -230,10 +231,12 @@ while ($row = mysqli_fetch_assoc($result2)) {
             </div>
         </div>
     </div>
-
+<script src="../../assets/js/chartUtils.js"></script>
 <script>
 const chartData = <?php echo json_encode($data); ?>;
+const chartData2 = <?php echo json_encode($data2); ?>;
 
+//Bar Chart
 const cashSeries = chartData.map(item => ({
     x: item.remit_month,
     y: parseFloat(item.total_cash)
@@ -244,93 +247,36 @@ const nfcSeries = chartData.map(item => ({
     y: parseFloat(item.total_nfc)
 }));
 
-const options = {
-    chart: {
-        type: 'bar',  // <-- changed from 'line' to 'bar'
-        zoom: {
-            enabled: true,
-            type: 'x',
-            autoScaleYaxis: true
-        },
-        toolbar: {
-            show: true,
-            tools: {
-                zoom: true,
-                zoomin: true,
-                zoomout: true,
-                reset: true
-            }
-        }
-    },
+const options = generateChartOptions({
+    type: 'bar',
     series: [
-        {
-            name: 'Total Cash',
-            data: cashSeries
-        },
-        {
-            name: 'Total NFC',
-            data: nfcSeries
-        }
+        { name: 'Total Cash', data: cashSeries },
+        { name: 'Total NFC', data: nfcSeries }
     ],
-    xaxis: {
-        type: 'datetime',
-        labels: {
-            format: 'MMMM'  // Shows "January", "February", etc.
-        }
-    },
-    plotOptions: {
-        bar: {
-            horizontal: false,
-            columnWidth: '60%',
-            dataLabels: {
-                position: 'top'
-            }
-        }
-    }
-};
+    title: 'Monthly Revenue'
+});
 
-const chartData2 = <?php echo json_encode($data2); ?>;
+//Line Chart
+const seriesData = chartData2.map(item => ({
+    x: item.log_month,
+    y: parseInt(item.total_entries)
+}));
 
-        const seriesData = chartData2.map(item => ({
-            x: item.log_month,
-            y: parseInt(item.total_entries)
-        }));
-
-        const options2 = {
-            chart: {
-                type: 'line',
-                zoom: {
-                    enabled: true,
-                    type: 'x',
-                    autoScaleYaxis: true
-                },
-                toolbar: {
-                    show: true
-                }
-            },
-            series: [{
-                name: 'Passenger Entries',
-                data: seriesData
-            }],
-            xaxis: {
-                type: 'datetime',
-                labels: {
-                    format: 'MMMM'
-                }
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            markers: {
-                size: 4
-            }
-        };
-
-const chart2 = new ApexCharts(document.querySelector("#passengerChart"), options2);
-chart2.render();
+const options2 = generateChartOptions({
+    type: 'line',
+    series: [{
+        name: 'Passenger Entries',
+        data: seriesData
+    }],
+    xaxisFormat: 'MMMM',
+    title: 'Monthly Passenger Logs'
+});
 
 const chart = new ApexCharts(document.querySelector("#revenueChart"), options);
 chart.render();
+
+const chart2 = new ApexCharts(document.querySelector("#passengerChart"), options2);
+chart2.render();
 </script>
 
 </body>

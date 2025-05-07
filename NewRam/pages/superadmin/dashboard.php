@@ -14,10 +14,6 @@ $userCountResult = mysqli_query($conn, $userCountQuery);
 $userCountRow = mysqli_fetch_assoc($userCountResult);
 $userCount = $userCountRow['userCount'];
 
-$totalRevenueQuery = "SELECT SUM(amount) as totalRevenue FROM revenue WHERE transaction_type = 'debit'";
-$totalRevenueResult = mysqli_query($conn, $totalRevenueQuery);
-$totalRevenueRow = mysqli_fetch_assoc($totalRevenueResult);
-$totalRevenue = $totalRevenueRow['totalRevenue'] ?? 0;
 
 // Fetch monthly revenue data for the chart
 $monthlyRevenueQuery = "SELECT MONTH(transaction_date) AS month, SUM(amount) AS total FROM revenue 
@@ -77,9 +73,7 @@ $userCount = mysqli_fetch_assoc($userCountResult)['userCount'] ?? 0;
 
 $totalRevenueQuery = "SELECT SUM(amount) as totalRevenue 
                       FROM transactions 
-                      WHERE transaction_type = 'Load' 
-                      AND bus_number = '$bus_number'
-                      AND DATE(transaction_date) = CURDATE()";
+                      WHERE DATE(transaction_date) = CURDATE()";
 
 $totalRevenueResult = mysqli_query($conn, $totalRevenueQuery);
 $totalRevenue = mysqli_fetch_assoc($totalRevenueResult)['totalRevenue'] ?? 0;
@@ -87,10 +81,10 @@ $totalRevenue = mysqli_fetch_assoc($totalRevenueResult)['totalRevenue'] ?? 0;
 // Fetch passenger count for today from the database
 $passengerCountQuery = "SELECT COUNT(*) as totalPassengers 
                         FROM passenger_logs
-                        WHERE DATE(timestamp) = CURDATE() AND bus_number = '$bus_number'";
+                        WHERE DATE(timestamp) = CURDATE()";
 
 $passengerCountResult = mysqli_query($conn, $passengerCountQuery);
-$totalPassengers = mysqli_fetch_assoc($passengerCountResult)['totalPassengers'] ?? 0;
+$totalPassengersBus = mysqli_fetch_assoc($passengerCountResult)['totalPassengers'] ?? 0;
 
 // Fetch passenger count by date for the chart
 $passengerCountByDateQuery = "SELECT DATE(timestamp) as date, COUNT(*) as total 
@@ -154,7 +148,7 @@ $recentTripsStmt->close(); // Close the statement
 <html lang="en">
 
 <head>
-    <title>Admin</title>
+    <title>Superadmin</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -231,207 +225,88 @@ $recentTripsStmt->close(); // Close the statement
                     <div class="dashboard-item">
                         <i class="fas fa-desktop"></i>
                         <h3>Total Passenger Today(All Bus)</h3>
-                        <p><?php echo $totalPassengers; ?></p>
+                        <p><?php echo $totalPassengersBus; ?></p>
                     </div>
                 </div>
-
-                <div id="content" class="p-4">
-                    <!-- Revenue Chart Card -->
-                    <div class="row">
-                        <div class="col-md-6 col-12">
-                            <div class="card mt-4">
-                                <div class="card-body">
-                                    <h4 class="card-title">Revenue Chart</h4>
-                                    <div class="chart-container">
-                                        <canvas id="revenueChart" width="400" height="200"></canvas>
-                                    </div>
-                                </div>
+                <div class="row">
+                    <div class="col-md-6 col-12">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Passenger Count Trends</h4>
+                                <div class="chart-container" id="passengerCharts"></div>
                             </div>
                         </div>
-
-                        <!-- Today's Revenue Chart Card -->
-                        <div class="col-md-6 col-12">
-                            <div class="card mt-4">
-                                <div class="card-body">
-                                    <h4 class="card-title">Today's Revenue</h4>
-                                    <div class="chart-container">
-                                        <canvas id="todayRevenueChart" width="400" height="200"></canvas>
-                                    </div>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Today's Revenue</h4>
+                                <div class="chart-container" id="todayRevenueChart">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Revenue and Passenger Count Charts -->
-                    <div class="row">
-                        <div class="col-md-6 col-12">
-                            <div class="card mt-4">
-                                <div class="card-body">
-                                    <h4 class="card-title">Revenue Trends</h4>
-                                    <div class="chart-container" id="revenueCharts"></div>
-                                </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-12">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">Revenue Trends</h4>
+                                <div class="chart-container" id="revenueCharts" style="height: 300px;"></div>
                             </div>
                         </div>
-
-                        <div class="col-md-6 col-12">
-                            <div class="card mt-4">
-                                <div class="card-body">
-                                    <h4 class="card-title">Passenger Count Trends</h4>
-                                    <div class="chart-container" id="passengerCharts"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </div>       
                 </div>
             </div>
         </div>
     </div>
+    <script src="../../assets/js/chartUtils.js"></script>
     <script>
+        const todayRevenue = <?php echo json_encode($todayRevenue); ?>;
+        const totalPassengers = <?php echo json_encode($totalPassengers); ?>;
 
-
-
-        // Revenue chart
-        const revenueData = <?php echo json_encode($revenueData); ?>;
-        const revenueLabels = revenueData.map(item => item.date);
-        const revenueValues = revenueData.map(item => item.total);
-
-        // Set up the Revenue Chart
-        const revenueOptions = {
-            chart: {
-                type: 'line',  // Set the chart type
-                height: 400,
-            },
-            series: [{
-                name: 'Revenue (₱)',
-                data: revenueValues
-            }],
-            xaxis: {
-                categories: revenueLabels,
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3,
-            },
-            markers: {
-                size: 5,
-            },
-            title: {
-                text: 'Revenue Trends',
-                align: 'center',
-            },
-            yaxis: {
-                title: {
-                    text: 'Revenue (₱)',
-                },
-                min: 0,
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return '₱' + val.toFixed(2);  // Format the tooltip to show currency
-                    }
-                }
-            },
+        const revenueTrends = {
+            months: <?php echo json_encode($months); ?>,
+            totals: <?php echo json_encode($revenues); ?>
         };
 
-        // Initialize and render the Revenue chart
-        const revenueCharts = new ApexCharts(document.querySelector("#revenueCharts"), revenueOptions);
-        revenueCharts.render();
-
-        // Passenger count chart
-        const passengerData = <?php echo json_encode($passengerData); ?>;
-        const passengerLabels = passengerData.map(item => item.date);
-        const passengerCounts = passengerData.map(item => item.total);
-
-        // Set up the Passenger Count Chart
-        const passengerOptions = {
-            chart: {
-                type: 'bar',
-                height: 400,
-            },
+        // Passenger Count (Bar with single value)
+        const passengerOptions = generateChartOptions({
+            type: 'bar',
+            title: "Today's Total Passengers",
             series: [{
-                name: 'Passengers',
-                data: passengerCounts
-            }],
-            xaxis: {
-                categories: passengerLabels,
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3,
-            },
-            markers: {
-                size: 5,
-            },
-            title: {
-                text: 'Passenger Count Trends',
-                align: 'center',
-            },
-            yaxis: {
-                title: {
-                    text: 'Passenger Count',
-                },
-                min: 0,
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return val + ' Passengers';  // Show the number of passengers
-                    }
-                }
-            },
-        };
-
-        // Initialize and render the Passenger Count chart
-        const passengerCharts = new ApexCharts(document.querySelector("#passengerCharts"), passengerOptions);
-        passengerCharts.render();
-
-        // Initialize Revenue Chart
-        var ctx = document.getElementById('revenueChart').getContext('2d');
-        var revenueChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode($months); ?>,
-                datasets: [{
-                    label: 'Monthly Revenue',
-                    data: <?php echo json_encode($revenues); ?>,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
+                name: "Passengers",
+                data: [{ x: "Today", y: parseInt(totalPassengers) }]
+            }]
         });
+        new ApexCharts(document.querySelector("#passengerCharts"), passengerOptions).render();
 
-        // Initialize Today's Revenue Chart
-        var todayRevenueCtx = document.getElementById('todayRevenueChart').getContext('2d');
-        var todayRevenueChart = new Chart(todayRevenueCtx, {
+        // Today's Revenue (Bar with single value)
+        const revenueOptions = generateChartOptions({
             type: 'bar',
-            data: {
-                labels: ['Today'],
-                datasets: [{
-                    label: 'Today\'s Revenue',
-                    data: [<?php echo $todayRevenue; ?>],
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    borderWidth: 1,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
+            title: "Today's Revenue",
+            series: [{
+                name: "Revenue",
+                data: [{ x: "Today", y: parseFloat(todayRevenue) }]
+            }]
         });
+        new ApexCharts(document.querySelector("#todayRevenueChart"), revenueOptions).render();
 
-        
+        // Monthly Revenue Trend (Line or Bar over months)
+        const revenueTrendOptions = generateChartOptions({
+            type: 'line',  // or 'bar' if you prefer
+            title: "Monthly Revenue Trends",
+            height: 300,
+            series: [{
+                name: "Revenue",
+                data: revenueTrends.months.map((month, i) => ({
+                    x: month,
+                    y: parseFloat(revenueTrends.totals[i])
+                }))
+            }]
+        });
+        new ApexCharts(document.querySelector("#revenueCharts"), revenueTrendOptions).render();
+
     </script>
 
 </body>

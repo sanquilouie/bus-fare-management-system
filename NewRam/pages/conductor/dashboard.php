@@ -37,30 +37,44 @@ $passengerCountQuery = "SELECT COUNT(*) as totalPassengers
 $passengerCountResult = mysqli_query($conn, $passengerCountQuery);
 $totalPassengers = mysqli_fetch_assoc($passengerCountResult)['totalPassengers'] ?? 0;
 
-// Fetch passenger count by date for the chart
-$passengerCountByDateQuery = "SELECT DATE(timestamp) as date, COUNT(*) as total 
-                              FROM passenger_logs
-                              WHERE bus_number = '$bus_number'
-                              GROUP BY DATE(timestamp)";
+// Monthly Revenue Chart
+$currentYear = date('Y');
+$conductor_id = $_SESSION['account_number'];
+$sql = "
+SELECT 
+    DATE_FORMAT(remit_date, '%Y-%m-01') AS remit_month,
+    SUM(total_cash) AS total_cash,
+    SUM(total_load) AS total_nfc
+FROM remit_logs
+WHERE YEAR(remit_date) = $currentYear AND conductor_id = '$conductor_id'
+GROUP BY remit_month
+ORDER BY remit_month
+";
 
-$passengerCountByDateResult = mysqli_query($conn, $passengerCountByDateQuery);
-$passengerData = [];
-while ($row = mysqli_fetch_assoc($passengerCountByDateResult)) {
-    $passengerData[] = $row;
+$result = mysqli_query($conn, $sql);
+
+$data = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $data[] = $row;
 }
 
-// Fetch revenue by date for chart
-$revenueByDateQuery = "SELECT DATE(transaction_date) as date, SUM(amount) as total 
-                       FROM revenue 
-                       WHERE transaction_type = 'debit' 
-                       GROUP BY DATE(transaction_date)";
-$revenueByDateResult = mysqli_query($conn, $revenueByDateQuery);
-$revenueData = [];
-while ($row = mysqli_fetch_assoc($revenueByDateResult)) {
-    $revenueData[] = $row;
+// Monthly Passenger Chart
+$sql = "
+SELECT 
+    DATE_FORMAT(timestamp, '%Y-%m') AS log_month,
+    COUNT(*) AS total_entries
+FROM passenger_logs
+WHERE YEAR(timestamp) = $currentYear AND conductor_id = '$conductor_id'
+GROUP BY log_month
+ORDER BY log_month
+";
+
+$result2 = mysqli_query($conn, $sql);
+
+$data2 = [];
+while ($row = mysqli_fetch_assoc($result2)) {
+    $data2[] = $row;
 }
-
-
 ?>
 
 <!doctype html>
@@ -217,103 +231,54 @@ while ($row = mysqli_fetch_assoc($revenueByDateResult)) {
     </div>
     </div>
     </div>
-    <script>
-        // Revenue chart
-        const revenueData = <?php echo json_encode($revenueData); ?>;
-        const revenueLabels = revenueData.map(item => item.date);
-        const revenueValues = revenueData.map(item => item.total);
+<script src="../../assets/js/chartUtils.js"></script>
+<script>
+const chartData = <?php echo json_encode($data); ?>;
+const chartData2 = <?php echo json_encode($data2); ?>;
 
-        // Set up the Revenue Chart
-        const revenueOptions = {
-            chart: {
-                type: 'line',  // Set the chart type
-                height: 400,
-            },
-            series: [{
-                name: 'Revenue (₱)',
-                data: revenueValues
-            }],
-            xaxis: {
-                categories: revenueLabels,
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3,
-            },
-            markers: {
-                size: 5,
-            },
-            title: {
-                text: 'Revenue Trends',
-                align: 'center',
-            },
-            yaxis: {
-                title: {
-                    text: 'Revenue (₱)',
-                },
-                min: 0,
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return '₱' + val.toFixed(2);  // Format the tooltip to show currency
-                    }
-                }
-            },
-        };
+//Bar Chart
+const cashSeries = chartData.map(item => ({
+    x: item.remit_month,
+    y: parseFloat(item.total_cash)
+}));
 
-        // Initialize and render the Revenue chart
-        const revenueChart = new ApexCharts(document.querySelector("#revenueChart"), revenueOptions);
-        revenueChart.render();
+const nfcSeries = chartData.map(item => ({
+    x: item.remit_month,
+    y: parseFloat(item.total_nfc)
+}));
 
-        // Passenger count chart
-        const passengerData = <?php echo json_encode($passengerData); ?>;
-        const passengerLabels = passengerData.map(item => item.date);
-        const passengerCounts = passengerData.map(item => item.total);
+const options = generateChartOptions({
+    type: 'bar',
+    series: [
+        { name: 'Total Cash', data: cashSeries },
+        { name: 'Total NFC', data: nfcSeries }
+    ],
+    title: 'Monthly Revenue'
+});
 
-        // Set up the Passenger Count Chart
-        const passengerOptions = {
-            chart: {
-                type: 'bar',
-                height: 400,
-            },
-            series: [{
-                name: 'Passengers',
-                data: passengerCounts
-            }],
-            xaxis: {
-                categories: passengerLabels,
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3,
-            },
-            markers: {
-                size: 5,
-            },
-            title: {
-                text: 'Passenger Count Trends',
-                align: 'center',
-            },
-            yaxis: {
-                title: {
-                    text: 'Passenger Count',
-                },
-                min: 0,
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return val + ' Passengers';  // Show the number of passengers
-                    }
-                }
-            },
-        };
+//Line Chart
+const seriesData = chartData2.map(item => ({
+    x: item.log_month,
+    y: parseInt(item.total_entries)
+}));
 
-        // Initialize and render the Passenger Count chart
-        const passengerChart = new ApexCharts(document.querySelector("#passengerChart"), passengerOptions);
-        passengerChart.render();
-    </script>
+const options2 = generateChartOptions({
+    type: 'line',
+    series: [{
+        name: 'Passenger Entries',
+        data: seriesData
+    }],
+    xaxisFormat: 'MMMM',
+    title: 'Monthly Passenger Logs'
+});
+
+const chart = new ApexCharts(document.querySelector("#revenueChart"), options);
+chart.render();
+
+const chart2 = new ApexCharts(document.querySelector("#passengerChart"), options2);
+chart2.render();
+      
+</script>
 
 </body>
 
