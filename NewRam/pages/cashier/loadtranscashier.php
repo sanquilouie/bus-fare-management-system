@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $sql = "SELECT SUM(amount) AS total_revenue
                 FROM transactions
-                WHERE transaction_type = 'Load' AND DATE(transaction_date) = ?";
+                WHERE transaction_type = 'Load' AND DATE(transaction_date) = ? AND status != 'edited'";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $selectedDate);

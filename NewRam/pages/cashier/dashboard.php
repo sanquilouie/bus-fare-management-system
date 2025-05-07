@@ -155,7 +155,7 @@ while ($row = mysqli_fetch_assoc($result2)) {
         //Bar Chart
         const options = generateChartOptions({
             type: 'bar',
-            title: "Today's Total Load",
+            //title: "Today's Total Load",
             series: [{
                 name: "Revenue",
                 data: [{
