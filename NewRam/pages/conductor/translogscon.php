@@ -20,7 +20,7 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Get current page from 
 $offset = ($page - 1) * $limit; // Calculate the offset
 
 // Fetch total number of transactions for pagination
-$totalQuery = "SELECT COUNT(*) AS total FROM transactions t";
+$totalQuery = "SELECT COUNT(*) AS total FROM transactions t WHERE t.conductor_id = '$account_number'";
 $totalResult = $conn->query($totalQuery);
 $totalRows = $totalResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRows / $limit); // Calculate total pages

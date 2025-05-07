@@ -18,7 +18,8 @@ $aggregatedFeedbackQuery = "
         driver_name,
         conductor_name,
         COUNT(*) AS feedback_count,
-        AVG(rating) AS average_rating
+        AVG(rating) AS average_rating,
+        feedback
     FROM passenger_logs
     WHERE feedback IS NOT NULL AND feedback != ''
     GROUP BY bus_number, driver_name, conductor_name
@@ -32,7 +33,8 @@ while ($row = $aggregatedFeedbackResult->fetch_assoc()) {
         'driver_name' => $row['driver_name'],
         'conductor_name' => $row['conductor_name'],
         'feedback_count' => $row['feedback_count'],
-        'average_rating' => $row['average_rating']
+        'average_rating' => $row['average_rating'],
+        'feedback' => $row['feedback']
     ];
 }
 
@@ -120,6 +122,7 @@ while ($row = $aggregatedFeedbackResult->fetch_assoc()) {
                                 <th>Conductor Name</th>
                                 <th>Feedback Count</th>
                                 <th>Average Rating</th>
+                                <th>Feedback</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -137,6 +140,7 @@ while ($row = $aggregatedFeedbackResult->fetch_assoc()) {
                                         </span>
                                         (<?php echo number_format($feedback['average_rating'], 1); ?>)
                                     </td>
+                                    <td><?php echo $feedback['feedback']; ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

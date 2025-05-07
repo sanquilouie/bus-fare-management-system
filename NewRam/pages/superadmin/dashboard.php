@@ -168,28 +168,72 @@ $recentTripsStmt->close(); // Close the statement
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
-        /* General Dashboard Styling */
+       .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 50px;
+    }
+
+    .dashboard-item {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        color: #333;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .dashboard-charts {
+        grid-column: span 2;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-item i {
+        font-size: 36px;
+        margin-bottom: 10px;
+        color: #3e64ff;
+    }
+
+    .dashboard-item h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #495057;
+    }
+
+    .dashboard-item p {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+        color: #212529;
+    }
+    @media (max-width: 768px) {
         .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .dashboard-item,
-        .dashboard-items {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            color: #3e64ff;
+        .dashboard-item {
+            flex: 1 1 calc(50% - 20px); /* Ensures 2 items per row */
+            max-width: calc(50% - 20px);
+            min-height: 120px; /* Set a minimum height */
         }
 
-        .dashboard-item i {
-            font-size: 40px;
-            margin-bottom: 20px;
+        .dashboard-charts {
+            flex: 1 1 100%;
+            max-width: 100%;
         }
+    }
     </style>
 </head>
 
