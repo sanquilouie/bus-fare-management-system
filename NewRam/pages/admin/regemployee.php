@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <p>Dear $firstName,</p>
                         <p>Congratulations! You are officially hired for the position of $role at our company.</p>
                         <p>We look forward to working with you and are excited to have you on the team.</p>
-                        <p>Your Your Account Number is $accountNumber and your default password is ramstarbus123</p>
+                        <p>Your Account Number is <strong>$accountNumber</strong> and your default password is <strong>ramstarbus123</strong></p>
                         <p>To get started, please log in to our company portal using the link below:</p>
                         <p>ramstarzaragosa.site</p>
                         <p>Best regards,
@@ -187,7 +187,7 @@ ob_end_flush();
                             <form method="POST" action="">
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                    <label for="employeeType" class="form-label required">Employee Type</label>
+                                    <label for="employeeType" class="form-label required">Employee Type<span class="text-danger">*</span></label>
                                         <select class="form-select" id="employeeType" name="employeeType" required>
                                             <option value="" disabled selected>Select Role</option>
                                             <option value="Conductor">Conductor</option>
@@ -197,7 +197,7 @@ ob_end_flush();
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="employeeNumber" class="form-label required">Employee No.</label>
+                                        <label for="employeeNumber" class="form-label required">Employee No.<span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="employeeNumber" name="employeeNumber" placeholder="Scan NFC Here" required>
                                         <div id="employeeNumberFeedback" class="invalid-feedback"></div>
                                     </div>
@@ -205,7 +205,7 @@ ob_end_flush();
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-md-4">
-                                        <label for="firstName" class="form-label">First Name</label>
+                                        <label for="firstName" class="form-label">First Name<span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required pattern="[A-Za-z\s]+" title="Letters only">
                                     </div>
                                     <div class="col-md-4">
@@ -213,7 +213,7 @@ ob_end_flush();
                                         <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Enter Middle name" pattern="[A-Za-z\s]+" title="Letters only">
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="lastName" class="form-label">Last Name</label>
+                                        <label for="lastName" class="form-label">Last Name<span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" required pattern="[A-Za-z\s]+" title="Letters only">
                                     </div>
                                 </div>
@@ -221,12 +221,12 @@ ob_end_flush();
                                 <div class="row mb-3">
                                     
                                     <div class="col-md-6">
-                                        <label for="email" class="form-label">Email</label>
+                                        <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
                                         <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
                                         <div id="emailFeedback" class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="phone" class="form-label">Phone</label>
+                                        <label for="phone" class="form-label">Phone<span class="text-danger">*</span></label>
                                         <div class="form-group position-relative">
                                             <input type="text" class="form-control ps-5" id="phone" name="contactnumber" placeholder="" required pattern="\d{10}" maxlength="10" required/>
                                             <span class="position-absolute top-50 start-0 translate-middle-y ps-2 text-muted">+63</span>
@@ -242,7 +242,7 @@ ob_end_flush();
                                         <input type="date" class="form-control" id="dob" name="dob">
                                 </div>
                                 <div class="col-md-6">   
-                                        <label for="gender" class="form-label">Gender</label>
+                                        <label for="gender" class="form-label">Gender<span class="text-danger">*</span></label>
                                         <select class="form-select" id="gender" name="gender" required>
                                             <option value="" disabled selected>Select Gender</option>
                                             <option value="Male">Male</option>
@@ -253,25 +253,25 @@ ob_end_flush();
                                 </div>
                                 <div class="row mb-3">   
                                     <div class="col-md-12">
-                                        <label for="address" class="form-label">Address</label>
+                                        <label for="address" class="form-label">Address<span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="address" name="address" placeholder="Purok#/Street/Sitio" required> 
                                     </div>
                                 </div>
                                 <div class="row mb-3">         
                                     <div class="col-md-4">
-                                        <label for="province" class="form-label">Province</label>
+                                        <label for="province" class="form-label">Province<span class="text-danger">*</span></label>
                                         <select class="form-select" id="province" name="province" required>
                                             <option value="">-- Select Province --</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="municipality" class="form-label">Municipality</label>
+                                        <label for="municipality" class="form-label">Municipality<span class="text-danger">*</span></label>
                                         <select class="form-select" id="municipality" name="municipality" required> 
                                             <option value="">-- Select Municipality --</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="barangay" class="form-label">Barangay</label>
+                                        <label for="barangay" class="form-label">Barangay<span class="text-danger">*</span></label>
                                         <select class="form-select" id="barangay" name="barangay" required>
                                             <option value="">-- Select Barangay --</option>
                                         </select>

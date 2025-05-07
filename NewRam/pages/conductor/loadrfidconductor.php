@@ -95,15 +95,14 @@ $result = $conn->query($sql);
                         <input type="number" id="loadAmount" name="loadAmount" class="form-control"
                             placeholder="Enter Amount" required>
                     </div>
-                    <div class="btn-group mb-3" role="group">
-                        <button type="button" class="btn btn-secondary load-button" data-amount="20">₱20</button>
-                        <button type="button" class="btn btn-secondary load-button" data-amount="50">₱50</button>
-                        <button type="button" class="btn btn-secondary load-button" data-amount="100">₱100</button>
-                        <button type="button" class="btn btn-secondary load-button" data-amount="200">₱200</button>
-                        <button type="button" class="btn btn-secondary load-button" data-amount="500">₱500</button>
-                        <button type="button" class="btn btn-secondary load-button" data-amount="1000">₱1000</button>
+                    <div class="btn-group mb-3 d-flex" role="group">
+                        <button type="button" class="btn btn-secondary load-button btn-sm" data-amount="20">₱20</button>
+                        <button type="button" class="btn btn-secondary load-button btn-sm" data-amount="50">₱50</button>
+                        <button type="button" class="btn btn-secondary load-button btn-sm" data-amount="100">₱100</button>
+                        <button type="button" class="btn btn-secondary load-button btn-sm" data-amount="200">₱200</button>
+                        <button type="button" class="btn btn-secondary load-button btn-sm" data-amount="500">₱500</button>
+                        <button type="button" class="btn btn-secondary load-button btn-sm" data-amount="1000">₱1000</button>
                     </div>
-
                     <button type="button" id="scanRFIDBtn" class="btn btn-primary w-100">Scan Card</button>
                     <input type="hidden" id="user_account_number" name="user_account_number">
                 </form>
