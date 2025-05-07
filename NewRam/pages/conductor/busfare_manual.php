@@ -197,6 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Driver dashboard functionality (for fetching passengers and their destinations)
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['dashboard'])) {
+
     // Fetch passengers currently on board
     $passengers = $_SESSION['passengers'];
 
