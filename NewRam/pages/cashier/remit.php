@@ -97,7 +97,7 @@ WHERE total_load > 0
             // Conductor exists, but no transaction ❌
             $_SESSION['rfid_data'] = [
                 'rfid_scan' => '',
-                'conductor_name' => "asdsad",
+                'conductor_name' => "",
                 'total_load' => '',
                 'bus_number' => '',
                 'total_fare' => '',
@@ -109,14 +109,22 @@ WHERE total_load > 0
         // No conductor found at all
         $_SESSION['rfid_data'] = [
             'rfid_scan' => '',
-            'conductor_name' => "asdsadsadsa",
+            'conductor_name' => "",
             'total_load' => '',
             'bus_number' => '',
             'total_fare' => '',
             'total_card' => '',
             'net_amount' => ''
         ];
-    }
+
+        $updateBusStmt = $conn->prepare("UPDATE businfo SET driverName ='', conductorName ='', status = 'available', destination = '', driverID = '', conductorID = '', current_stop = '' WHERE conductorID = ?");
+            if (!$updateBusStmt) {
+                die("Prepare failed: " . $conn->error);
+            }
+            $updateBusStmt->bind_param("s", $rfid_scan);
+            $updateBusStmt->execute();
+            $updateBusStmt->close();
+            }
     $stmt->close();
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
