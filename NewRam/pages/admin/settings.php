@@ -131,7 +131,7 @@ $features = $stmt->get_result();
                     <input type="text" name="title" class="form-control" placeholder="Feature Title" required>
                     </div>
                     <div class="mb-3">
-                    <textarea name="description" class="form-control" placeholder="Feature Description" required></textarea>
+                    <textarea name="description" class="form-control" placeholder="Feature Description" required maxlength="20"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Type</label>

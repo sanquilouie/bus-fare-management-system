@@ -122,10 +122,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Registration Form</title>
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-            background: url('../assets/images/newbus2.jpg') no-repeat center center fixed;
-        }
+         background: url('../assets/images/newbus2.jpg') no-repeat center center fixed;
+         background-size: cover;
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+         margin: 0;
+         padding: 0;
+         display: flex;
+         flex-direction: column;
+         min-height: 100vh;
+      }
 
         .container {
             background-color: white;
@@ -385,6 +390,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     this.value = this.value.replace(/[^A-Za-z\s-]/g, ''); // Allow only letters, spaces, and hyphens
                 });
             });
+
+            const capitalize = (input) => {
+                let value = input.value.trim();
+                if (value.length > 0) {
+                    input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                }
+            };
+
+            const firstName = document.getElementById('firstname');
+            const lastName = document.getElementById('lastname');
+            const middleName = document.getElementById('middlename');
+
+            firstName.addEventListener('blur', () => capitalize(firstName));
+            lastName.addEventListener('blur', () => capitalize(lastName));
+            middleName.addEventListener('blur', () => capitalize(middleName));
         });
 
         document.getElementById("registrationForm").addEventListener("submit", function(e) {

@@ -204,6 +204,21 @@ $lastname = $_SESSION['lastname'];
         const today = new Date();
         const tenYearsAgo = new Date(today.getFullYear() - 10, today.getMonth(), today.getDate());
         birthdayInput.max = tenYearsAgo.toISOString().split('T')[0];
+
+        const capitalize = (input) => {
+                let value = input.value.trim();
+                if (value.length > 0) {
+                    input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                }
+            };
+
+            const firstName = document.getElementById('firstname');
+            const lastName = document.getElementById('lastname');
+            const middleName = document.getElementById('middlename');
+
+            firstName.addEventListener('blur', () => capitalize(firstName));
+            lastName.addEventListener('blur', () => capitalize(lastName));
+            middleName.addEventListener('blur', () => capitalize(middleName));
     });
 </script>
 

@@ -395,6 +395,7 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
             <div class="header-buttons d-flex">
                 <a href="NewRam/auth/login.php" class="login-button">Log In</a>
                 <button id="register-button" type="button" class="btn btn-primary">How to register?</button>
+                <a href="NewRam/includes/bus_current_location.php" class="login-button">Bus Routes</a>
             </div>
         </div> 
     </header> 

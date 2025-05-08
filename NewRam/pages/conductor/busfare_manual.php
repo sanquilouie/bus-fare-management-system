@@ -1101,7 +1101,6 @@ TOTAL FARE      : ₱${totalFare}
         }
     });
 }
-
     </script>
 </body>
 

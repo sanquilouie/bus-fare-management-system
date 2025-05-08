@@ -57,7 +57,7 @@ if (!$feature) {
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" name="description" required><?= htmlspecialchars($feature['description']) ?></textarea>
+                            <textarea class="form-control" name="description" required maxlength="20"><?= htmlspecialchars($feature['description']) ?></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

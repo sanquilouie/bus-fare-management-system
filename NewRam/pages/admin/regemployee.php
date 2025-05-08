@@ -448,6 +448,22 @@ ob_end_flush();
 
 <script src="../../assets/js/address_api.js"></script>
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+const capitalize = (input) => {
+        let value = input.value.trim();
+        if (value.length > 0) {
+            input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        }
+    };
+
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    const middleName = document.getElementById('middleName');
+
+    firstName.addEventListener('blur', () => capitalize(firstName));
+    lastName.addEventListener('blur', () => capitalize(lastName));
+    middleName.addEventListener('blur', () => capitalize(middleName));
+});
 
 document.querySelectorAll('.confirm-status').forEach(button => {
     button.addEventListener('click', function () {

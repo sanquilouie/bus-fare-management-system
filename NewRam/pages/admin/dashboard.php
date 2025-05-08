@@ -213,7 +213,7 @@ while ($row = mysqli_fetch_assoc($result2)) {
                         <p>₱<?php echo number_format($totalRevenue, 2); ?></p>
                     </div>
                     <div class="dashboard-item" onclick="window.location.href='features/busviewinfo.php';">
-                        <i class="fas fa-car fa-2x"></i>
+                        <i class="fas fa-bus fa-2x"></i>
                         <h3>Total Buses</h3>
                         <p><?php echo $busCount; ?></p>
                     </div>

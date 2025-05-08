@@ -288,6 +288,34 @@ $result = $conn->query($sql);
                         const result = await response.json();
 
                         if (result.success) {
+                            let loadReceiptHTML = `
+                                <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto;">
+                                    <div style="text-align: center; font-size: 14px; font-weight: bold; margin-left: -45px;">
+                                        ZARAGOZA RAMSTAR
+                                    </div>
+                                    <div style="text-align: center; font-size: 10px; margin-left: -45px">
+                                        === LOAD RECEIPT ===
+                                    </div>
+                                    <hr />
+                                    <div style="font-size: 9px;">
+                                        <strong>RFID:</strong> ${rfid ?? 'N/A'}<br>
+                                        <strong>Account No:</strong> ${userAccountNumber}<br>
+                                        <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
+                                        <strong>Time:</strong> ${new Date().toLocaleTimeString()}<br>
+                                        <strong>Loaded Amount:</strong> PHP ${loadAmount}
+                                    </div>
+                                    <hr />
+                                    <div style="text-align: center;font-size: 10px; margin-left: -45px">
+                                        THANK YOU!
+                                    </div>
+                                </div>
+                            `;
+
+                            // === Print the receipt ===
+                            let printWindow = window.open('', '', 'width=800, height=600');
+                            printWindow.document.write(loadReceiptHTML);
+                            printWindow.document.close();
+                            printWindow.print();
                             Swal.fire('Success', `Load successful: ${result.success}`, 'success').then(() => {
                                 setTimeout(() => {
                                     location.reload();
