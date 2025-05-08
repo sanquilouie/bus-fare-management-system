@@ -440,22 +440,22 @@ if (isset($_POST['Login'])) {
   text-decoration: underline; /* Underline on hover */
 }
 
-footer {
+   footer {
         background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
         color: white;
         padding: 30px 20px;
     }
 
     .footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 20px;
-    width: 100%;
-    margin: 0;
-    padding: 0 20px; /* optional: add side padding if needed */
-}
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+      margin: 0;
+      padding: 0 20px; /* optional: add side padding if needed */
+   }
 
 
     .footer-left,

@@ -42,6 +42,18 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
         justify-content: space-between;
         flex-wrap: wrap;
     }
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Make body a flex container */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
 
     header {
         width: 100%;
@@ -173,14 +185,15 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
     }
 
     .footer-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+      margin: 0;
+      padding: 10px 20px; 
+   }
 
     .footer-left,
     .footer-center,
@@ -301,63 +314,63 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
             height: 350px;
         }
         .footer-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-    .footer-left,
-    .footer-center,
-    .footer-right {
-        text-align: center;
-    }
+        .footer-left,
+        .footer-center,
+        .footer-right {
+            text-align: center;
+        }
 
-    .social-icons {
-        justify-content: center;
-    }
-    }
+        .social-icons {
+            justify-content: center;
+        }
+        }
 
-    @media (max-width: 768px) {
-    .scrollable-item {
-        flex: 1 1 100%;
-    }
-    .footer-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .footer-left,
-    .footer-center,
-    .footer-right {
-        text-align: center;
-    }
-
-    .social-icons {
-        justify-content: center;
-    }
-}
-
-    @media (max-width: 480px) {
-        .slider {
-            height: 300px;
+        @media (max-width: 768px) {
+        .scrollable-item {
+            flex: 1 1 100%;
         }
         .footer-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .footer-left,
+        .footer-center,
+        .footer-right {
+            text-align: center;
+        }
+
+        .social-icons {
+            justify-content: center;
+        }
     }
 
-    .footer-left,
-    .footer-center,
-    .footer-right {
-        text-align: center;
-    }
+        @media (max-width: 480px) {
+            .slider {
+                height: 300px;
+            }
+            .footer-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-    .social-icons {
-        justify-content: center;
-    }
-    }
+        .footer-left,
+        .footer-center,
+        .footer-right {
+            text-align: center;
+        }
+
+        .social-icons {
+            justify-content: center;
+        }
+        }
 
 
 .swal2-html-container .left-align {
@@ -413,36 +426,37 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
     </div>
 
 
-    <section class="hero">
-        <div class="slider">
-        <?php
-            $isFirst = true;
-            while ($row = $sliderFeatures->fetch_assoc()):
-            ?>
-                <div class="slide <?= $isFirst ? 'active' : '' ?>">
-                    <img src="NewRam/assets/images/<?= $row['image'] ?>" alt="<?= htmlspecialchars($row['title']) ?>" loading="lazy">
-                </div>
+    <div class="main-content">
+        <section class="hero">
+            <div class="slider">
             <?php
-            $isFirst = false;
-            endwhile;
-            ?>
-            <div class="navigation">
-                <button id="prev">&#10094;</button>
-                <button id="next">&#10095;</button>
+                $isFirst = true;
+                while ($row = $sliderFeatures->fetch_assoc()):
+                ?>
+                    <div class="slide <?= $isFirst ? 'active' : '' ?>">
+                        <img src="NewRam/assets/images/<?= $row['image'] ?>" alt="<?= htmlspecialchars($row['title']) ?>" loading="lazy">
+                    </div>
+                <?php
+                $isFirst = false;
+                endwhile;
+                ?>
+                <div class="navigation">
+                    <button id="prev">&#10094;</button>
+                    <button id="next">&#10095;</button>
+                </div>
             </div>
-        </div>
-    </section>
-    <section class="scrollable">
-        <?php while ($row = $cardFeatures->fetch_assoc()): ?>
-            <div class="scrollable-item">
-                <img src="NewRam/assets/images/<?= $row['image'] ?>" alt="<?= htmlspecialchars($row['title']) ?>" loading="lazy">
-                <h3><?= htmlspecialchars($row['title']) ?></h3>
-                <p><?= htmlspecialchars($row['description']) ?></p>
-            </div>
-        <?php endwhile; ?>
-    </section>
-    <footer>
-        <div class="footer-content">
+        </section>
+        <section class="scrollable">
+            <?php while ($row = $cardFeatures->fetch_assoc()): ?>
+                <div class="scrollable-item">
+                    <img src="NewRam/assets/images/<?= $row['image'] ?>" alt="<?= htmlspecialchars($row['title']) ?>" loading="lazy">
+                    <h3><?= htmlspecialchars($row['title']) ?></h3>
+                    <p><?= htmlspecialchars($row['description']) ?></p>
+                </div>
+            <?php endwhile; ?>
+        </section>
+    </div>
+    <footer class="footer-content">
             <div class="footer-left">
                 <p>&copy; 2024 Ramstar Bus Transportation Cooperative | All rights reserved</p>
             </div>
@@ -468,7 +482,7 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
                     </a>
                 </div>
             </div>
-        </div>
+
     </footer>
 
     
