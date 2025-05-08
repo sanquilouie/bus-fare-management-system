@@ -482,8 +482,8 @@ $conn->close();
                     <label for="directionDropdown" class="form-label">Direction</label>
                     <select class="form-select" id="directionDropdown">
                         <option value="">**Select Direction**</option>
-                        <option value="East to West">East to West</option>
-                        <option value="West to East">West to East</option>
+                        <option value="Cab to Tarlac">Cab to Tarlac</option>
+                        <option value="Tarlac to Cab">Tarlac to Cab</option>
                     </select>
                 </div>
             `,

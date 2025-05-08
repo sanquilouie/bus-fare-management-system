@@ -527,14 +527,14 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
                 html: `
                 <p>Follow these steps to create your account:</p>
                 <ul class="left-align">
-                    <li>Visit the registration page.</li>
-                    <li>Fill in your personal details (Full name, email, contact number, etc.).</li>
-                    <li>Use a valid, active email address </li>
-                    <li>Only register one account per person </li>
-                    <li>Provide accurate personal information </li>
-                    <li>Keep your email account secured</li>
-                    <li>Check your spam/junk folder after registering</li>
-                    <li>Click on the "Register" button to complete the process.</li>
+                    <li>Visit the registration page.<i>(Bisitahin ang pahina ng pagpaparehistro)</i></li>
+                        <li>Fill in your personal details (Full name, email, contact number, etc.).<i>(Punan ang iyong mga personal na detalye (Buong pangalan, email, numero ng kontak, atbp.).)</i></li>
+                        <li>Use a valid, active email address<i>(Gumamit ng wastong at aktibong email address.)</i></li>
+                        <li>Only register one account per person<li>(Magrehistro lamang ng isang account bawat tao.)</i><li>
+                        <li>Provide accurate personal information<i>(Provide accurate personal information) </i><li>
+                        <li>Keep your email account secured<i>(Panatilihing ligtas ang iyong email account.)</i></li>
+                        <li>Check your spam/junk folder after registering<i>(Pagkatapos magrehistro, suriin ang iyong folder ng spam/junk.)</i></li>
+                        <li>Click on the "Register" button to complete the process.<i>(I-click ang button na “Register” upang tapusin ang proseso.)</i></li>
                 </ul>
                 `,
                 icon: 'info',

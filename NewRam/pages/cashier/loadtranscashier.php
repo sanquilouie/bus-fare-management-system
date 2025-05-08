@@ -140,7 +140,7 @@ function updateChart(dailyRevenue) {
 
     const options = {
         chart: {
-            type: 'bar',
+            type: 'line',
             height: 350
         },
         series: [{
