@@ -60,6 +60,7 @@ $menuItems = [
             'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/cashier/translogscashier.php'],
             'Remit Logs' => ['icon' => 'fa-clipboard-list', 'url' => '/NewRam/pages/cashier/remit_logs.php'],
             'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/cashier/loadtranscashier.php'],
+            'Profile' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/cashier/profile.php'],
         ],
         'dropdown' => [],
         'after' => []
@@ -151,7 +152,7 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
     }
 
     .nav-link.active {
-        background: #e5e7eb;
+        background: #f1c40f;
         color: #1f2937;
         font-weight: 500;
     }

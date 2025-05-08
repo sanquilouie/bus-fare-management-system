@@ -114,7 +114,11 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
         $(document).ready(function () {
             window.generateExcel = function(busNumber, remitDate) {
                 window.location.href = `../../actions/generate_excel.php?bus_number=${busNumber}&remit_date=${remitDate}`;
-        };
+            };
+
+            window.generatePDF = function(busNumber, remitDate) {
+                window.location.href = `../../actions/generate_pdf_remit.php?bus_number=${busNumber}&remit_date=${remitDate}`;
+            };
 
 
         function loadRemitLogs(page = 1) {
@@ -152,6 +156,11 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['
                                 <td>
                                     <button class="btn btn-sm btn-primary" onclick="generateExcel('${busNo}', '${remitDate}')">
                                         Generate Excel
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="generatePDF('${busNo}', '${remitDate}')">
+                                        Generate PDF
                                     </button>
                                 </td>
                             </tr>
