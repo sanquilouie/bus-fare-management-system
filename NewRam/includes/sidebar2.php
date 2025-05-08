@@ -39,6 +39,7 @@ $menuItems = [
             'View Bus Info' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/busviewinfo.php'],
             'Feedbacks' => ['icon' => 'fa-eye', 'url' => '/NewRam/pages/admin/feedbackview.php'],
             'Settings' => ['icon' => 'fa-cog', 'url' => '/NewRam/pages/admin/settings.php'],
+            'Profile' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/admin/profile.php'],
         ]
     ],
     'Conductor' => [
@@ -47,6 +48,7 @@ $menuItems = [
             'Bus Fare' => ['icon' => 'fa-money-bill-wave', 'url' => '/NewRam/pages/conductor/busfare_auto.php'],
             'Load Card' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/conductor/loadrfidconductor.php'],
             'Load Transaction' => ['icon' => 'fa-list-alt', 'url' => '/NewRam/pages/conductor/translogscon.php'],
+            'Profile' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/conductor/profile.php'],
             //'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/conductor/loadtranscon.php'],
         ],
         'dropdown' => [],
@@ -60,7 +62,7 @@ $menuItems = [
             'Load Transaction' => ['icon' => 'fa-exchange-alt', 'url' => '/NewRam/pages/cashier/translogscashier.php'],
             'Remit Logs' => ['icon' => 'fa-clipboard-list', 'url' => '/NewRam/pages/cashier/remit_logs.php'],
             'Load Revenue' => ['icon' => 'fa-chart-line', 'url' => '/NewRam/pages/cashier/loadtranscashier.php'],
-            'Profile' => ['icon' => 'fa-id-card', 'url' => '/NewRam/pages/cashier/profile.php'],
+            'Profile' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/cashier/profile.php'],
         ],
         'dropdown' => [],
         'after' => []
