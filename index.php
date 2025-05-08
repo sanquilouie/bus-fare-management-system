@@ -169,31 +169,51 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
     footer {
         background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
         color: white;
-        padding: 30px 0;
-        text-align: center;
+        padding: 30px 20px;
     }
 
-    footer .footer-content {
+    .footer-content {
         display: flex;
         justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 30px;
         align-items: flex-start;
-        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        flex: 1;
+        min-width: 250px;
     }
 
     footer h3 {
-        margin-top: 15px;
         font-size: 18px;
         font-weight: bold;
+        margin-bottom: 10px;
     }
 
-    footer .social-icons {
+    .social-icons {
         display: flex;
-        justify-content: center;
+        justify-content: flex-end;
         gap: 15px;
-        margin-top: 20px;
+        margin-top: 10px;
     }
+
+    .footer-center {
+        text-align: center;
+    }
+
+    .footer-left {
+        text-align: left;
+    }
+
+    .footer-right {
+        text-align: right;
+    }
+
 
     .social-icon {
         width: 40px;
@@ -280,11 +300,41 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
         .slider {
             height: 350px;
         }
+        .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        text-align: center;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
     }
 
     @media (max-width: 768px) {
     .scrollable-item {
         flex: 1 1 100%;
+    }
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        text-align: center;
+    }
+
+    .social-icons {
+        justify-content: center;
     }
 }
 
@@ -292,6 +342,21 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
         .slider {
             height: 300px;
         }
+        .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        text-align: center;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
     }
 
 
@@ -378,20 +443,18 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
     </section>
     <footer>
         <div class="footer-content">
-            <div>
+            <div class="footer-left">
                 <p>&copy; 2024 Ramstar Bus Transportation Cooperative | All rights reserved</p>
             </div>
-            <div>
+            <div class="footer-center">
                 <h3>Contact Us:</h3>
                 <p>Phone No.: <i>(0967) 235 2590</i></p>
                 <p>Email: <i>portfolio@example.invalid</i></p>
                 <p>Address: <i>Purok 5, #235, San Rafael, Zaragoza, Nueva Ecija 3110</i></p>
             </div>
-            <div>
-                <h3>Follow Us:</h3>
+            <div class="footer-right">
                 <div class="social-icons">
-                    <a href="https://www.facebook.com/people/Zaragoza-Ramstar-Transport-Cooperative/61550838758867/"
-                        target="_blank" class="social-icon facebook">
+                    <a href="https://www.facebook.com/people/Zaragoza-Ramstar-Transport-Cooperative/61550838758867/" target="_blank" class="social-icon facebook">
                         <i class="fab fa-facebook-f"></i>
                     </a>
                     <a target="_blank" class="social-icon twitter">
@@ -407,6 +470,7 @@ $cardFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND typ
             </div>
         </div>
     </footer>
+
     
 
 </body>

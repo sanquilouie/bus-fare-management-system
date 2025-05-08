@@ -124,6 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
+            background: url('../assets/images/newbus2.jpg') no-repeat center center fixed;
         }
 
         .container {
@@ -230,6 +231,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             /* Align items to the left */
             padding: 0;
             margin: 0;
+            margin-left: 5px;
         }
 
         header nav ul li a {

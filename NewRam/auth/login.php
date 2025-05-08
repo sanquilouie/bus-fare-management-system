@@ -202,45 +202,33 @@ if (isset($_POST['Login'])) {
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Login</title>
-   <link rel="stylesheet" href="../assets/css/login.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
    <link rel="stylesheet" href="https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css">
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script src="/NewRam/assets/js/NFCScanner.js"></script>
    <style>
-      body {
-         background: url('../assets/images/newbus2.jpg') no-repeat center center fixed;
-         /* Add your image path here */
-         background-size: cover;
-         /* Ensures the image covers the full page */
-         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      html, body {
+         height: 100%;
          margin: 0;
          padding: 0;
       }
-
-      .wrapper {
-         max-width: 400px;
-         margin: 100px auto;
-         padding: 40px;
-         background-color: rgba(255, 255, 255, 0.8);
-         /* Transparent background */
-         border-radius: 8px;
-         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      body {
+         background: url('../assets/images/newbus2.jpg') no-repeat center center fixed;
+         background-size: cover;
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+         margin: 0;
+         padding: 0;
+         display: flex;
+         flex-direction: column;
+         min-height: 100vh;
       }
 
-      .title-text {
-         text-align: center;
-         margin-bottom: 30px;
-      }
-
-      .title-text p {
-         font-size: 28px;
-         font-weight: 600;
-         color: #333;
-      }
-
-      .form-container {
-         margin-top: 10px;
+      .main-content {
+         flex: 1;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px; /* optional */
       }
 
       .field {
@@ -296,8 +284,6 @@ if (isset($_POST['Login'])) {
          margin-bottom: 10px;
       }
 
-     
-
       .btn:hover {
          background-color: #e67e22;
          transform: scale(1.05);
@@ -333,7 +319,11 @@ if (isset($_POST['Login'])) {
          list-style: none;
          margin: 0;
          padding: 0;
-         text-align: center;
+         margin-left: 5px;
+      }
+
+      header nav ul li {
+         display: inline;
       }
 
       header nav ul li a {
@@ -358,6 +348,67 @@ if (isset($_POST['Login'])) {
          background: #f1c40f;
          transform: scale(1);
       }
+
+      .social-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .social-icon:hover {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+
+    /* Social Media Icons Styling */
+    .social-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .social-icon:hover {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+
+    /* Facebook Icon */
+    .social-icon.facebook {
+        background-color: #1877F2;
+        /* Facebook Blue */
+        color: white;
+    }
+
+    /* Twitter Icon */
+    .social-icon.twitter {
+        background-color: #1DA1F2;
+        /* Twitter Blue */
+        color: white;
+    }
+
+    /* Instagram Icon */
+    .social-icon.instagram {
+        background-color: #E1306C;
+        /* Instagram Gradient Pink */
+        color: white;
+    }
+
+    /* Gmail Icon */
+    .social-icon.gmail {
+        background-color: #DB4437;
+        /* Gmail Red */
+        color: white;
+    }
       @media (max-width: 768px) {
          header nav ul li a {
             font-size: 18px;
@@ -389,6 +440,115 @@ if (isset($_POST['Login'])) {
   text-decoration: underline; /* Underline on hover */
 }
 
+footer {
+        background: linear-gradient(to right, rgb(243, 75, 83), rgb(131, 4, 4));
+        color: white;
+        padding: 30px 20px;
+    }
+
+    .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    margin: 0;
+    padding: 0 20px; /* optional: add side padding if needed */
+}
+
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    footer h3 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .social-icons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .footer-center {
+        text-align: center;
+    }
+
+    .footer-left {
+        text-align: left;
+    }
+
+    .footer-right {
+        text-align: right;
+    }
+@media (max-width: 1024px) {
+        .slider {
+            height: 350px;
+        }
+        .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        text-align: center;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+    }
+
+    @media (max-width: 768px) {
+    .scrollable-item {
+        flex: 1 1 100%;
+    }
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        text-align: center;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+}
+
+    @media (max-width: 480px) {
+      .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+       }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        text-align: center;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+    }
+
    </style>
 </head>
 
@@ -400,49 +560,77 @@ if (isset($_POST['Login'])) {
          </ul>
       </nav>
    </header>
-
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
-        <div class="card border border-light-subtle rounded-3 shadow-sm" style="background-color: rgba(255, 255, 255, 0.7);">
-          <div class="card-body p-3 p-md-4 p-xl-5">
-          <h2 class="fw-bold text-center mb-4" style="color: rgb(215, 185, 75);">Login Form</h2>
-            <form method="POST" action="#" class="login">
-               <?php echo $msg; ?>
-              <div class="row gy-2 overflow-hidden">
-                <div class="col-12">
-                  <div class="form-floating mb-3">
-                  <input type="text" class="form-control" name="username" id="username" placeholder="Account Number/Email" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
-                    <label for="username" class="form-label">Account Number/Email</label>
+   <div class="main-content">
+      <div class="container">
+         <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+            <div class="card border border-light-subtle rounded-3 shadow-sm" style="background-color: rgba(255, 255, 255, 0.7);">
+               <div class="card-body p-3 p-md-4 p-xl-5">
+                  <h2 class="fw-bold text-center mb-4" style="color: rgb(215, 185, 75);">Login Form</h2>
+                  <form method="POST" action="#" class="login">
+                     <?php echo $msg; ?>
+                  <div class="row gy-2 overflow-hidden">
+                     <div class="col-12">
+                        <div class="form-floating mb-3">
+                        <input type="text" class="form-control" name="username" id="username" placeholder="Account Number/Email" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                        <label for="username" class="form-label">Account Number/Email</label>
+                        </div>
+                     </div>
+                     <div class="col-12">
+                        <div class="form-floating mb-3 position-relative">
+                           <input type="password" class="form-control" name="password" id="pass2" placeholder="Password" required>
+                           <label for="password" class="form-label">Password</label>
+                           <i class="fa fa-eye-slash position-absolute" id="togglePassword" style="right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                        </div>
+                     </div>
+                     <div class="col-12">
+                        <div class="d-grid">
+                        <button class="btn btn-primary btn-lg" type="submit" name="Login">Log in</button>
+                        </div>
+                     </div>
+                     <div class="col-12">
+                        <div class="d-grid">
+                        <button class="btn btn-primary btn-lg" type="submit" onclick="window.location.href='userregister.php'">Sign Up</button>
+                        </div>
+                     </div>
+                     <div class="col-12">
+                        <p class="m-0 text-secondary text-center">Forgot Password? <a href="forgotpassword.php" class="link-primary text-decoration-none">Click Here</a></p>
+                     </div>
                   </div>
-                </div>
-                <div class="col-12">
-                  <div class="form-floating mb-3 position-relative">
-                     <input type="password" class="form-control" name="password" id="pass2" placeholder="Password" required>
-                     <label for="password" class="form-label">Password</label>
-                     <i class="fa fa-eye-slash position-absolute" id="togglePassword" style="right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
-                  </div>
+                  </form>
                </div>
-                <div class="col-12">
-                  <div class="d-grid">
-                    <button class="btn btn-primary btn-lg" type="submit" name="Login">Log in</button>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="d-grid">
-                    <button class="btn btn-primary btn-lg" type="submit" onclick="window.location.href='userregister.php'">Sign Up</button>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <p class="m-0 text-secondary text-center">Forgot Password? <a href="forgotpassword.php" class="link-primary text-decoration-none">Click Here</a></p>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
+            </div>
+            </div>
+         </div>
       </div>
-    </div>
-  </div>
+   </div>
+  <!-- <footer class="footer-content">
+      <div class="footer-left">
+            <p>&copy; 2024 Ramstar Bus Transportation Cooperative | All rights reserved</p>
+      </div>
+      <div class="footer-center">
+            <h3>Contact Us:</h3>
+            <p>Phone No.: <i>(0967) 235 2590</i></p>
+            <p>Email: <i>portfolio@example.invalid</i></p>
+            <p>Address: <i>Purok 5, #235, San Rafael, Zaragoza, Nueva Ecija 3110</i></p>
+      </div>
+      <div class="footer-right">
+         <div class="social-icons">
+            <a href="https://www.facebook.com/people/Zaragoza-Ramstar-Transport-Cooperative/61550838758867/" target="_blank" class="social-icon facebook">
+               <i class="fab fa-facebook-f"></i>
+            </a>
+            <a target="_blank" class="social-icon twitter">
+               <i class="fab fa-twitter"></i>
+            </a>
+            <a class="social-icon instagram">
+               <i class="fab fa-instagram"></i>
+            </a>
+            <a class="social-icon gmail">
+               <i class="fab fa-google"></i>
+            </a>
+         </div>
+      </div>
+    </footer> -->
 </body>
 <script>
   // Toggle the password visibility
