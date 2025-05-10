@@ -26,6 +26,8 @@ LEFT JOIN
     passenger_logs p 
     ON b.bus_number = p.bus_number 
     AND DATE(p.timestamp) = CURDATE()
+WHERE
+    b.statusofbus != 'inactive'
 GROUP BY 
     b.bus_number, b.status, b.driverName, b.conductorName
 ";

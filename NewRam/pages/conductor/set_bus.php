@@ -11,7 +11,7 @@ while ($row = $driverResult->fetch_assoc()) {
     $drivers[] = $row;
 }
 
-    $bus_query = "SELECT bus_number FROM businfo WHERE status = 'available'";
+    $bus_query = "SELECT bus_number FROM businfo WHERE status = 'available' AND statusofbus = 'active'";
     $bus_result = mysqli_query($conn, $bus_query);
 
     // Prepare options for SweetAlert

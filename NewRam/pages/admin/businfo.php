@@ -11,82 +11,75 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $busNumber = $_POST['busNumber'];
-    $plateNumber = $_POST['plateNumber'];
-    $capacity = $_POST['capacity'];
-    $status = "Available";
-    $registrationDate = date("Y-m-d");
-    $regTillDate = $_POST['regTillDate'];
-    $busModel = $_POST['busModel'];
-    $vehicleColor = $_POST['vehicleColor'];
+// Handle Bus Status Toggle
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['toggleBusId'])) {
+    $busId = $_POST['toggleBusId'];
+    $newStatus = $_POST['newStatus'];
 
-    // Check if the bus number or plate number already exists
-    $queryCheck = "SELECT * FROM businfo WHERE bus_number = ? OR plate_number = ?";
-    $stmtCheck = $conn->prepare($queryCheck);
-    $stmtCheck->bind_param("ss", $busNumber, $plateNumber);
-    $stmtCheck->execute();
-    $resultCheck = $stmtCheck->get_result();
-
-    if ($resultCheck->num_rows > 0) {
-        // If the bus number or plate number exists, display the message
-        $existsMessage = "<span style='color: red;'>Bus number or plate number already exists.</span>";
-    } else {
-        // If no duplicate, proceed to insert data
-        $query = "INSERT INTO businfo (bus_number, plate_number, capacity, statusofbus, registration_date, last_service_date, bus_model, vehicle_color, status)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        if ($stmt = $conn->prepare($query)) {
-            $stmt->bind_param("ssisissss", $busNumber, $plateNumber, $capacity, $status, $registrationDate, $regTillDate, $busModel, $vehicleColor, $status);
-
-            if ($stmt->execute()) {
-                echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Bus Information Saved Successfully',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.href = 'businfo.php';
-                        });
-                    });
-                </script>";
-            } else {
-                echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Error saving bus information',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    });
-                </script>";
-            }
-            $stmt->close();
-        } else {
-            echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Error preparing query',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                });
-            </script>";
+    $stmt = $conn->prepare("UPDATE businfo SET statusofbus = ? WHERE bus_id = ?");
+        if (!$stmt) {
+            die("Prepare failed: " . $conn->error);
         }
-    }
+    $stmt->bind_param("si", $newStatus, $busId);
+    $stmt->execute();
+    $stmt->close();
 
-    $conn->close();
+    echo "<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                text: 'Bus status updated successfully.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = window.location.href;
+            });
+        });
+    </script>";
 }
 
-?>
+// Handle New Bus Registration
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['bus_number']) && !isset($_POST['toggleBusId'])) {
+    $bus_number = $_POST['bus_number'];
+    $plate_number = $_POST['plate_number'];
+    $capacity = $_POST['capacity'];
+    $statusofbus = 'active';
+    $last_service_date = $_POST['last_service_date'];
+    $bus_model = $_POST['bus_model'];
+    $vehicle_color = $_POST['vehicle_color'];
+    $status = 'available';
 
+    $stmt = $conn->prepare("INSERT INTO businfo (bus_number, plate_number, capacity, statusofbus, last_service_date, bus_model, vehicle_color, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssisssss", $bus_number, $plate_number, $capacity, $statusofbus, $last_service_date, $bus_model, $vehicle_color, $status);
+    
+    if ($stmt->execute()) {
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    text: 'Bus information saved successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = window.location.href;
+                });
+            });
+        </script>";
+    } else {
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    text: 'Error saving bus information!',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>";
+    }
+    $stmt->close();
+}
+?>
+?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,66 +97,116 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
-
         .swal2-popup {
             font-size: 1.1rem !important;
             font-family: 'Arial', sans-serif !important;
         }
-
-
     </style>
 </head>
-
 <body>
 <?php
-        include '../../includes/topbar.php';
-        include '../../includes/sidebar2.php';
-        include '../../includes/footer.php';
-    ?>
+    include '../../includes/topbar.php';
+    include '../../includes/sidebar2.php';
+    include '../../includes/footer.php';
+?>
 <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-            <h2>Bus Registration</h2>
-            <form action="" method="POST" id="busInfoForm">
-                
-                <div class="mb-3">
-                    <label for="busNumber" class="form-label">Bus Number</label>
-                    <input type="text" class="form-control" id="busNumber" name="busNumber" required>
-                    <div id="busNumberMessage"></div> <!-- Message for Bus Number -->
-                </div>
+            <h2>Bus Management</h2>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerBusModal">
+                Register Bus
+            </button>
 
-                <div class="mb-3">
-                    <label for="plateNumber" class="form-label">Plate Number</label>
-                    <input type="text" class="form-control" id="plateNumber" name="plateNumber" required>
-                    <div id="plateNumberMessage"></div> <!-- Message for Plate Number -->
+    <!-- Register Bus Modal -->
+    <div class="modal fade" id="registerBusModal" tabindex="-1" aria-labelledby="registerBusModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form action="" method="POST" id="busInfoForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="registerBusModalLabel">Register Bus</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body row g-3">
+                <div class="col-md-6">
+                    <label for="bus_number" class="form-label">Bus Number</label>
+                    <input type="text" class="form-control" name="bus_number" required>
                 </div>
-
-                <div class="mb-3">
-                    <label for="capacity" class="form-label">Bus Capacity</label>
-                    <input type="number" class="form-control" id="capacity" name="capacity" required>
+                <div class="col-md-6">
+                    <label for="plate_number" class="form-label">Plate Number</label>
+                    <input type="text" class="form-control" name="plate_number" required>
                 </div>
-
-                <div class="mb-3">
-                    <label for="regTillDate" class="form-label">Registered Till Date</label>
-                    <input type="date" class="form-control" id="regTillDate" name="regTillDate" required>
+                <div class="col-md-6">
+                    <label for="capacity" class="form-label">Capacity</label>
+                    <input type="number" class="form-control" name="capacity" required>
                 </div>
-
-                <div class="mb-3">
-                    <label for="busModel" class="form-label">Bus Model</label>
-                    <input type="text" class="form-control" id="busModel" name="busModel" required>
+                <div class="col-md-6">
+                    <label for="last_service_date" class="form-label">Registered Till</label>
+                    <input type="date" class="form-control" name="last_service_date" required>
                 </div>
-
-                <div class="mb-3">
-                    <label for="vehicleColor" class="form-label">Vehicle Color</label>
-                    <input type="text" class="form-control" id="vehicleColor" name="vehicleColor" required>
+                <div class="col-md-6">
+                    <label for="bus_model" class="form-label">Bus Model</label>
+                    <input type="text" class="form-control" name="bus_model" required>
                 </div>
-
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary" id="submitButton">Save Bus Information</button>
+                <div class="col-md-6">
+                    <label for="vehicle_color" class="form-label">Vehicle Color</label>
+                    <input type="text" class="form-control" name="vehicle_color" required>
                 </div>
-                
-            </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="submitButton">Save Bus Information</button>
+            </div>
+          </form>
         </div>
+      </div>
+    </div>
+
+    <!-- Bus List Table -->
+    <div class="table-responsive mt-4">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Bus Number</th>
+                    <th>Plate Number</th>
+                    <th>Capacity</th>
+                    <th>Status</th>
+                    <th>Registered Till</th>
+                    <th>Model</th>
+                    <th>Color</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
+                $sql = "SELECT * FROM businfo";
+                $result = $conn->query($sql);
+                $i = 1;
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>
+                        <td>{$i}</td>
+                        <td>{$row['bus_number']}</td>
+                        <td>{$row['plate_number']}</td>
+                        <td>{$row['capacity']}</td>
+                        <td>" . ucfirst($row['statusofbus']) . "</td>
+                        <td>{$row['last_service_date']}</td>
+                        <td>{$row['bus_model']}</td>
+                        <td>{$row['vehicle_color']}</td>
+                        <td>
+                            <form method='POST' style='display:inline;'>
+                                <input type='hidden' name='toggleBusId' value='{$row['bus_id']}'>
+                                <input type='hidden' name='newStatus' value='" . ($row['statusofbus'] == 'active' ? 'inactive' : 'active') . "'>
+                                <button type='submit' class='btn btn-sm " . ($row['statusofbus'] == 'active' ? 'btn-danger' : 'btn-success') . "'>
+                                    " . ($row['statusofbus'] == 'active' ? 'Deactivate' : 'Activate') . "
+                                </button>
+                            </form>
+                        </td>
+                    </tr>";
+                    $i++;
+                }
+            ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
