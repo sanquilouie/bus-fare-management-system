@@ -53,7 +53,7 @@ if (!$feature) {
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="title" class="form-label">Title</label>
-                            <input class="form-control" type="text" name="title" value="<?= htmlspecialchars($feature['title']) ?>" required>
+                            <input class="form-control" type="text" name="title" value="<?= htmlspecialchars($feature['title']) ?>" required maxlength="10">
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>

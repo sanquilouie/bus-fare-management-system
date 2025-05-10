@@ -128,7 +128,7 @@ $features = $stmt->get_result();
                     <input type="file" name="image" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                    <input type="text" name="title" class="form-control" placeholder="Feature Title" required>
+                    <input type="text" name="title" class="form-control" placeholder="Feature Title" required maxlength="10">
                     </div>
                     <div class="mb-3">
                     <textarea name="description" class="form-control" placeholder="Feature Description" required maxlength="20"></textarea>

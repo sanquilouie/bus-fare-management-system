@@ -149,7 +149,7 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
     }
 
     .nav-link:hover {
-        background: #f3f4f6;
+        background: #499dde;
         color: #1f2937;
     }
 
