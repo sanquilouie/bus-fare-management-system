@@ -819,51 +819,18 @@ $conn->close();
                 return;
             }
             Swal.fire({
-                title: 'Enter NFC',
-                input: 'text',
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                title: 'Tap your card',
+                html: '<div id="nfc-status" style="font-size: 1.2em;">Waiting for NFC scan...</div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
                 showCancelButton: true,
-                showConfirmButton: true, // ✅ Show Confirm button
-                confirmButtonText: 'Submit',
                 cancelButtonText: 'Cancel',
-                inputPlaceholder: 'Scan your NFC here',
                 didOpen: () => {
-                    const inputField = Swal.getInput();
-                    if (inputField) {
-                        activeInput = inputField;
-                        inputField.focus();
-
-                        // Optional: still allow Enter key for quick submission
-                        inputField.addEventListener('keydown', (event) => {
-                            if (event.key === 'Enter') {
-                                Swal.clickConfirm();  // Simulate clicking the confirm button
-                            }
-                        });
-                    }
-                },
-                preConfirm: () => {
-                    const rfid = Swal.getInput().value.trim();
-                    if (!rfid) {
-                        Swal.showValidationMessage('Please scan or enter your NFC.');
-                        return false;
-                    }
-
-                    const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
-                    const toRoute = JSON.parse(document.getElementById('toRoute').value);
-                    const fareType = document.getElementById('fareType').value;
-                    const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
-
-                    if (!fromRoute || !toRoute) {
-                        Swal.fire('Error', 'Please select both starting point and destination.', 'error');
-                        return false;
-                    }
-
-                    // Call your processing function
-                    getUserBalance(rfid, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod);
+                    activeInput = null;  // Prevent showing any input field
                 }
             });
+
         }
 
         // Function to get user balance based on RFID (account_number)
