@@ -909,7 +909,7 @@ $conn->close();
         async function promptRFIDInput() {
             const fromRouteValue = document.getElementById('fromRoute').innerText;
             const toRouteValue = document.getElementById('toRoute').value;
-            const distance = Math.abs(fromRoute.post - toRoute.post);
+            const distance = Math.abs(fromRouteValue.post - toRouteValue.post);
             const transactionNumber = generateTransactionNumber();
             const paymentMethod = 'CARD';
             const fareType = document.getElementById('fareType').value;
