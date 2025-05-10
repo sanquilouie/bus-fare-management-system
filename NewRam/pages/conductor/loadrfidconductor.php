@@ -309,13 +309,33 @@ $result = $conn->query($sql);
                         });
 
                         const result = await response.json();
-
+                        console.log('Load Balance Result:', result);
                         if (result.success) {
-                            Swal.fire('Success', `Load successful: ${result.success}`, 'success').then(() => {
-                                setTimeout(() => {
+                            const transactionNumber = result.transactionId;
+                            const date = result.date;
+                            const time = result.time;
+                            const totalFare = result.success.replace(' loaded successfully.', '');
+                            const newBalance = result.newBalance;
+                            
+                            if (window.AndroidPrinter) {
+                                AndroidPrinter.printloadrfid(
+                                    transactionNumber,
+                                    date,
+                                    time,
+                                    totalFare,
+                                    newBalance,
+                                );
+                            } else {
+                                console.error("AndroidPrinter interface not available");
+                            }
+
+                            setTimeout(() => {
+                                // Display Swal after printing
+                                Swal.fire('Load Successful', `₱${totalFare} loaded successfully. New Balance: PHP ${newBalance}`, 'success').then(() => {
                                     location.reload();
-                                }, 800); // 2 seconds delay before reload
-                            });
+                                });
+                            }, 800);  // Adjust the timeout if needed to give the printer enough time
+
                         } else {
                             Swal.fire('Error', result.error, 'error');
                         }

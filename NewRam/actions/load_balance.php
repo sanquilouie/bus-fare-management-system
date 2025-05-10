@@ -42,6 +42,9 @@ function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
             $logQuery = "INSERT INTO transactions (user_id, account_number, amount, transaction_type, bus_number, conductor_id) VALUES ($id, '$userAccountNumber', $balanceToLoad, 'load', '$busNumber', '$conductorId')";
             mysqli_query($conn, $logQuery);
 
+            $transactionId = mysqli_insert_id($conn);
+            $transactionIdFormatted = date('ymd') . str_pad($transactionId, 3, '0', STR_PAD_LEFT);
+
             // Fetch contact number
             $phoneQuery = $conn->prepare("SELECT contactnumber, balance FROM useracc WHERE account_number = ?");
             $phoneQuery->bind_param("s", $userAccountNumber);
@@ -58,7 +61,14 @@ function loadUserBalance($conn, $userAccountNumber, $balanceToLoad, $rfid)
                 sendSMS($phoneNumber, $smsMessage);
             }
 
-            return ['success' => '₱' . number_format($balanceToLoad, 2) . ' loaded successfully.'];
+            echo json_encode([
+                'success' => '₱' . number_format($balanceToLoad, 2) . ' loaded successfully.',
+                'transactionId' => $transactionIdFormatted,
+                'date' => date('Y-m-d'),
+                'time' => date('H:i:s'),
+                'newBalance' => number_format($newBalance, 2)
+            ]);
+            exit;
         } else {
             return ['error' => 'Failed to update balance.'];
         }
