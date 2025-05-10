@@ -809,6 +809,8 @@ $conn->close();
             const distance = Math.abs(fromRoute.post - toRoute.post);
             const transactionNumber = generateTransactionNumber();
             const paymentMethod = 'CARD';
+            const fareType = document.getElementById('fareType').value;
+            const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
 
             console.log("Generated Transaction Number:", transactionNumber);
             console.log("Distance:", distance);
