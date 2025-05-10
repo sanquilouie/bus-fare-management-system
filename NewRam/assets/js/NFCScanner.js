@@ -14,23 +14,13 @@ let activeInput = null;
       });
 
       function updateNfcText(nfcId) {
-         if (Swal.isVisible()) {
-             const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
-             const toRoute = JSON.parse(document.getElementById('toRoute').value);
-             const fareType = document.getElementById('fareType').value;
-             const passengerQuantity = parseInt(document.getElementById('passengerQuantity').value, 10);
-     
-             if (!fromRoute || !toRoute) {
-                 Swal.fire('Error', 'Please select both starting point and destination.', 'error');
-                 return;
-             }
-     
-             Swal.close();  // Close the modal before proceeding
-             getUserBalance(nfcId, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod);
+         if (typeof window.updateNfcText === "function") {
+             window.updateNfcText(nfcId);
          } else {
-             alert("Please tap your card while the prompt is visible.");
+             console.warn("updateNfcText handler is not defined yet.");
          }
      }
+     
      
     
      

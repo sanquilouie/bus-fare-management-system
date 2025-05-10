@@ -804,20 +804,19 @@ $conn->close();
         }
 
         async function promptRFIDInput() {
-            const fromRouteValue = document.getElementById('fromRoute').value;
-            const toRouteValue = document.getElementById('toRoute').value;
+            const fromRoute = JSON.parse(document.getElementById('fromRoute').value);
+            const toRoute = JSON.parse(document.getElementById('toRoute').value);
             const distance = Math.abs(fromRoute.post - toRoute.post);
             const transactionNumber = generateTransactionNumber();
             const paymentMethod = 'CARD';
 
-            console.log("Generated Transaction Number:", transactionNumber); // Debugging line
-            console.log("Distance:", distance); // Debugging line
+            console.log("Generated Transaction Number:", transactionNumber);
+            console.log("Distance:", distance);
             console.log("Payment Method:", paymentMethod);
 
             const isValid = await validateRoutesAndBus();
-            if (!isValid) {
-                return;
-            }
+            if (!isValid) return;
+
             Swal.fire({
                 title: 'Tap your card',
                 html: '<div id="nfc-status" style="font-size: 1.2em;">Waiting for NFC scan...</div>',
@@ -827,11 +826,27 @@ $conn->close();
                 showCancelButton: true,
                 cancelButtonText: 'Cancel',
                 didOpen: () => {
-                    activeInput = null;  // Prevent showing any input field
+                    activeInput = null;
                 }
             });
 
+            // Define updateNfcText inside the function to access scoped vars
+            window.updateNfcText = function(nfcId) {
+                if (!Swal.isVisible()) {
+                    alert("Please tap your card while the prompt is visible.");
+                    return;
+                }
+
+                if (!fromRoute || !toRoute) {
+                    Swal.fire('Error', 'Please select both starting point and destination.', 'error');
+                    return;
+                }
+
+                Swal.close();
+                getUserBalance(nfcId, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod);
+            };
         }
+
 
         // Function to get user balance based on RFID (account_number)
         async function processPayment(paymentType) {
