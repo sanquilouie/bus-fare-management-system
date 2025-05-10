@@ -821,7 +821,12 @@ $conn->close();
 
             Swal.fire({
                 title: 'Tap your card',
-                html: '<div id="nfc-status" style="font-size: 1.2em;">Waiting for NFC scan...</div>',
+                html: `
+                <div style="text-align: center;">
+                    <img src="../../assets/images/tap-card.gif" alt="Tap your card" style="width: 100px; margin-bottom: 10px;" />
+                    <div id="nfc-status" style="font-size: 1.2em;">Waiting for NFC scan...</div>
+                </div>
+                `,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 showConfirmButton: false,
