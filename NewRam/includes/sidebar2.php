@@ -79,6 +79,17 @@ $menuItems = [
         ],
         'after' => [],
     ],
+    'Inspector' => [
+        'before' => [
+            'Dashboard' => ['icon' => 'fa-gauge', 'url' => '/NewRam/pages/inspector/dashboard.php'], 
+            'Inspection' => ['icon' => 'fa-magnifying-glass', 'url' => '/NewRam/pages/inspector/inspection.php'], 
+            // 'Remit' => ['icon' => 'fa-money-bill-wave', 'url' => '/NewRam/pages/inspector/remit.php'], 
+            'History Logs' => ['icon' => 'fa-clock-rotate-left', 'url' => '/NewRam/pages/inspector/history.php'], 
+            'Profile' => ['icon' => 'fa-user', 'url' => '/NewRam/pages/inspector/profile.php'] 
+        ],
+        'dropdown' => [],
+        'after' => []
+    ],
 ];
 
 // Default to an empty array if role doesn't match
