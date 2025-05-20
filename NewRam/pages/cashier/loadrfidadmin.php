@@ -229,107 +229,99 @@ $result = $conn->query($sql);
     const busNumber = <?= isset($_SESSION['bus_number']) ? json_encode($_SESSION['bus_number']) : 'null' ?>;
         document.getElementById('scanRFIDBtn').addEventListener('click', async () => { 
             try {
-                // First, prompt for the user account number
-                const { value: userAccountNumber } = await Swal.fire({
-                    title: 'Enter Account Number',
-                    input: 'text',
-                    inputPlaceholder: 'Enter the account number',
-                    showCancelButton: true
+                let rfid = null;
+                let userAccountNumber = null;
+
+                await Swal.fire({
+                    title: 'Scan RFID',
+                    html: `
+                        <div style="text-align: center;">
+                            <img src="../../assets/images/tap-card.gif" alt="Tap your card" style="width: 100px; margin-bottom: 10px;" />
+                            <div id="nfc-status" style="font-size: 1.2em;">Waiting for NFC scan...</div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        currentNfcCallback = function(nfcId) {
+                            Swal.close();
+                            userAccountNumber = nfcId;
+                            rfid = nfcId;
+                        };
+                    }
                 });
 
-                // If account number is provided, check if RFID scan is needed
-                if (userAccountNumber) {
-                    let rfid = userAccountNumber;
+                if (!rfid) return;
 
-                    // If RFID is required, prompt for it
-                    if (!userAccountNumber) {
-                        const { value: rfidInput } = await Swal.fire({
-                            title: 'Scan RFID',
-                            input: 'text',
-                            inputPlaceholder: 'Enter RFID code',
-                            showCancelButton: true,
-                            didOpen: () => {
-                                const inputField = Swal.getInput();
-                                if (inputField) {
-                                    activeInput = inputField;  // Track the Swal input
-                                    inputField.focus();  // Ensure it has focus
-                                }
-                            }
-                        });
+                const loadAmount = document.getElementById('loadAmount').value;
 
-                        rfid = rfidInput;
-                    }
+                const { isConfirmed } = await Swal.fire({
+                    title: 'Confirm Load',
+                    text: `You are about to load ₱${loadAmount} to account number ${userAccountNumber}. Do you want to proceed?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, proceed',
+                    cancelButtonText: 'Cancel'
+                });
 
+                if (isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('loadAmount', loadAmount);
+                    formData.append('user_account_number', userAccountNumber);
+                    formData.append('rfid', rfid);
 
-                    const loadAmount = document.getElementById('loadAmount').value;
-
-                    // Confirm the load transaction
-                    const { isConfirmed } = await Swal.fire({
-                        title: 'Confirm Load',
-                        text: `You are about to load ₱${loadAmount} to account number ${userAccountNumber}. Do you want to proceed?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, proceed',
-                        cancelButtonText: 'Cancel'
+                    const response = await fetch('../../actions/load_balance.php', {
+                        method: 'POST',
+                        body: formData
                     });
 
-                    // If confirmed, send the request to load balance
-                    if (isConfirmed) {
-                        const formData = new FormData();
-                        formData.append('loadAmount', loadAmount);
-                        formData.append('user_account_number', userAccountNumber);
-                        if (rfid) formData.append('rfid', rfid);  // Append RFID if it's available
+                    const result = await response.json();
 
-                        const response = await fetch('../../actions/load_balance.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        const result = await response.json();
-
-                        if (result.success) {
-                            let loadReceiptHTML = `
-                                <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto;">
-                                    <div style="text-align: center; font-size: 14px; font-weight: bold; margin-left: -45px;">
-                                        ZARAGOZA RAMSTAR
-                                    </div>
-                                    <div style="text-align: center; font-size: 10px; margin-left: -45px">
-                                        === LOAD RECEIPT ===
-                                    </div>
-                                    <hr />
-                                    <div style="font-size: 9px;">
-                                        <strong>RFID:</strong> ${rfid ?? 'N/A'}<br>
-                                        <strong>Account No:</strong> ${userAccountNumber}<br>
-                                        <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
-                                        <strong>Time:</strong> ${new Date().toLocaleTimeString()}<br>
-                                        <strong>Loaded Amount:</strong> PHP ${loadAmount}
-                                    </div>
-                                    <hr />
-                                    <div style="text-align: center;font-size: 10px; margin-left: -45px">
-                                        THANK YOU!
-                                    </div>
+                    if (result.success) {
+                        let loadReceiptHTML = `
+                            <div style="font-family: Arial, sans-serif; width: 227px; margin: 0 auto;">
+                                <div style="text-align: center; font-size: 14px; font-weight: bold; margin-left: -45px;">
+                                    ZARAGOZA RAMSTAR
                                 </div>
-                            `;
+                                <div style="text-align: center; font-size: 10px; margin-left: -45px">
+                                    === LOAD RECEIPT ===
+                                </div>
+                                <hr />
+                                <div style="font-size: 9px;">
+                                    <strong>RFID:</strong> ${rfid}<br>
+                                    <strong>Account No:</strong> ${userAccountNumber}<br>
+                                    <strong>Date:</strong> ${new Date().toLocaleDateString()}<br>
+                                    <strong>Time:</strong> ${new Date().toLocaleTimeString()}<br>
+                                    <strong>Loaded Amount:</strong> PHP ${loadAmount}
+                                </div>
+                                <hr />
+                                <div style="text-align: center;font-size: 10px; margin-left: -45px">
+                                    THANK YOU!
+                                </div>
+                            </div>
+                        `;
 
-                            // === Print the receipt ===
-                            let printWindow = window.open('', '', 'width=800, height=600');
-                            printWindow.document.write(loadReceiptHTML);
-                            printWindow.document.close();
-                            printWindow.print();
-                            Swal.fire('Success', `Load successful: ${result.success}`, 'success').then(() => {
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 800); // 2 seconds delay before reload
-                            });
-                        } else {
-                            Swal.fire('Error', result.error, 'error');
-                        }
+                        let printWindow = window.open('', '', 'width=800, height=600');
+                        printWindow.document.write(loadReceiptHTML);
+                        printWindow.document.close();
+                        printWindow.print();
+
+                        Swal.fire('Success', `Load successful: ${result.success}`, 'success').then(() => {
+                            setTimeout(() => {
+                                location.reload();
+                            }, 800);
+                        });
+                    } else {
+                        Swal.fire('Error', result.error, 'error');
                     }
                 }
             } catch (error) {
                 console.error('Error:', error);
                 Swal.fire('Error', 'There was an error processing your request.', 'error');
             }
+
         });
     </script>
 
