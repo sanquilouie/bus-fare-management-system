@@ -284,7 +284,7 @@ $result = $conn->query($sql);
 
                 const { isConfirmed } = await Swal.fire({
                     title: 'Confirm Load',
-                    text: `You are about to load ₱${loadAmount} to account number ${userAccountNumber}. Do you want to proceed?`,
+                    text: `You are about to load ₱${loadAmount} to this user. Do you want to proceed?`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, proceed',
@@ -323,7 +323,7 @@ $result = $conn->query($sql);
                         }
 
                         setTimeout(() => {
-                            Swal.fire('Load Successful', `₱${totalFare} loaded successfully. New Balance: PHP ${newBalance}`, 'success').then(() => {
+                            Swal.fire('Load Successful', `${totalFare} loaded successfully. New Balance: PHP ${newBalance}`, 'success').then(() => {
                                 location.reload();
                             });
                         }, 800);
