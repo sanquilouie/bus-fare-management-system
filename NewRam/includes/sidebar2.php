@@ -190,7 +190,7 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
         color: #3e64ff;
         } 
         #main-content {
-            margin-left: 0 !important; /* Ensure it doesn't shift when sidebar is collapsed */
+            margin-left: 0 !important; 
         }
     }
 
@@ -202,7 +202,7 @@ $menu = $menuItems[$role] ?? ['before' => [], 'dropdown' => [], 'after' => []];
     </button>
 
 
-    <div class="sidebar <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? 'collapsed' : ''; ?>" id="sidebar">
+    <div class="sidebar <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashierr') ? 'collapsed' : ''; ?>" id="sidebar">
     <div class="sidebar-header p-3">
         <div class="d-flex align-items-center justify-content-between">
             <h5 class="mb-0"><?php echo $_SESSION['role'] ?> Panel</h5>
