@@ -252,93 +252,83 @@ $result = $conn->query($sql);
                 return;
             }
             try {
-                // First, prompt for the user account number
-                const { value: userAccountNumber } = await Swal.fire({
-                    title: 'Enter Account Number',
-                    input: 'text',
-                    inputPlaceholder: 'Enter the account number',
-                    showCancelButton: true
+                let rfid = null;
+                let userAccountNumber = null;
+
+                await Swal.fire({
+                    title: 'Scan RFID',
+                    html: `
+                        <div style="text-align: center;">
+                            <img src="../../assets/images/tap-card.gif" alt="Tap your card" style="width: 100px; margin-bottom: 10px;" />
+                            <div id="nfc-status" style="font-size: 1.2em;">Waiting for NFC scan...</div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        // Assign a callback that will be called when RFID is scanned
+                        currentNfcCallback = function(nfcId) {
+                            Swal.close();
+                            userAccountNumber = nfcId;
+                            rfid = nfcId;
+                        };
+                    }
                 });
 
-                // If account number is provided, check if RFID scan is needed
-                if (userAccountNumber) {
-                    let rfid = userAccountNumber;
+                // If no scan occurred, exit early
+                if (!rfid) return;
 
-                    // If RFID is required, prompt for it
-                    if (!userAccountNumber) {
-                        const { value: rfidInput } = await Swal.fire({
-                            title: 'Scan RFID',
-                            input: 'text',
-                            inputPlaceholder: 'Enter RFID code',
-                            showCancelButton: true,
-                            didOpen: () => {
-                                const inputField = Swal.getInput();
-                                if (inputField) {
-                                    activeInput = inputField;  // Track the Swal input
-                                    inputField.focus();  // Ensure it has focus
-                                }
-                            }
-                        });
+                const loadAmount = document.getElementById('loadAmount').value;
 
-                        rfid = rfidInput;
-                    }
+                const { isConfirmed } = await Swal.fire({
+                    title: 'Confirm Load',
+                    text: `You are about to load ₱${loadAmount} to account number ${userAccountNumber}. Do you want to proceed?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, proceed',
+                    cancelButtonText: 'Cancel'
+                });
 
+                if (isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('loadAmount', loadAmount);
+                    formData.append('user_account_number', userAccountNumber);
+                    formData.append('rfid', rfid);
 
-                    const loadAmount = document.getElementById('loadAmount').value;
-
-                    // Confirm the load transaction
-                    const { isConfirmed } = await Swal.fire({
-                        title: 'Confirm Load',
-                        text: `You are about to load ₱${loadAmount} to account number ${userAccountNumber}. Do you want to proceed?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, proceed',
-                        cancelButtonText: 'Cancel'
+                    const response = await fetch('../../actions/load_balance.php', {
+                        method: 'POST',
+                        body: formData
                     });
 
-                    // If confirmed, send the request to load balance
-                    if (isConfirmed) {
-                        const formData = new FormData();
-                        formData.append('loadAmount', loadAmount);
-                        formData.append('user_account_number', userAccountNumber);
-                        if (rfid) formData.append('rfid', rfid);  // Append RFID if it's available
+                    const result = await response.json();
+                    console.log('Load Balance Result:', result);
 
-                        const response = await fetch('../../actions/load_balance.php', {
-                            method: 'POST',
-                            body: formData
-                        });
+                    if (result.success) {
+                        const transactionNumber = result.transactionId;
+                        const date = result.date;
+                        const time = result.time;
+                        const totalFare = result.success.replace(' loaded successfully.', '');
+                        const newBalance = result.newBalance;
 
-                        const result = await response.json();
-                        console.log('Load Balance Result:', result);
-                        if (result.success) {
-                            const transactionNumber = result.transactionId;
-                            const date = result.date;
-                            const time = result.time;
-                            const totalFare = result.success.replace(' loaded successfully.', '');
-                            const newBalance = result.newBalance;
-                            
-                            if (window.AndroidPrinter) {
-                                AndroidPrinter.printloadrfid(
-                                    transactionNumber,
-                                    date,
-                                    time,
-                                    totalFare,
-                                    newBalance,
-                                );
-                            } else {
-                                console.error("AndroidPrinter interface not available");
-                            }
-
-                            setTimeout(() => {
-                                // Display Swal after printing
-                                Swal.fire('Load Successful', `₱${totalFare} loaded successfully. New Balance: PHP ${newBalance}`, 'success').then(() => {
-                                    location.reload();
-                                });
-                            }, 800);  // Adjust the timeout if needed to give the printer enough time
-
-                        } else {
-                            Swal.fire('Error', result.error, 'error');
+                        if (window.AndroidPrinter) {
+                            AndroidPrinter.printloadrfid(
+                                transactionNumber,
+                                date,
+                                time,
+                                totalFare,
+                                newBalance,
+                            );
                         }
+
+                        setTimeout(() => {
+                            Swal.fire('Load Successful', `₱${totalFare} loaded successfully. New Balance: PHP ${newBalance}`, 'success').then(() => {
+                                location.reload();
+                            });
+                        }, 800);
+                    } else {
+                        Swal.fire('Error', result.error, 'error');
                     }
                 }
             } catch (error) {

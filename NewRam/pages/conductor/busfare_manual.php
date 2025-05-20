@@ -838,7 +838,7 @@ $conn->close();
             });
 
             // Define updateNfcText inside the function to access scoped vars
-            window.updateNfcText = function(nfcId) {
+            currentNfcCallback = function(nfcId) {
                 if (!Swal.isVisible()) {
                     alert("Please tap your card while the prompt is visible.");
                     return;
@@ -852,6 +852,7 @@ $conn->close();
                 Swal.close();
                 getUserBalance(nfcId, fromRoute, toRoute, fareType, passengerQuantity, true, transactionNumber, distance, paymentMethod);
             };
+
         }
 
 
