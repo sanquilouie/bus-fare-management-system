@@ -14,10 +14,13 @@ $lastname = $_SESSION['lastname'];
 
 $sql = "
 SELECT 
-    b.status,
+    CASE 
+        WHEN b.statusofbus = 'inactive' THEN 'Under Maintenance'
+        ELSE b.status
+    END AS status,
     b.bus_number,
-    p.driver_name AS driver_name,
-    p.conductor_name AS conductor_name,
+    p.driver_name,
+    p.conductor_name,
     IFNULL(SUM(p.fare), 0) AS total_fare,
     COUNT(p.id) AS total_passengers
 FROM 
@@ -26,10 +29,9 @@ LEFT JOIN
     passenger_logs p 
     ON b.bus_number = p.bus_number 
     AND DATE(p.timestamp) = CURDATE()
-WHERE
-    b.statusofbus != 'inactive'
+    AND b.statusofbus != 'inactive'  -- Prevents joining inactive buses for fare/passenger count
 GROUP BY 
-    b.bus_number, b.status, b.driverName, b.conductorName
+    b.bus_number, b.statusofbus, b.status, p.driver_name, p.conductor_name
 ";
 
 $result = $conn->query($sql);

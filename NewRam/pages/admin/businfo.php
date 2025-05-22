@@ -196,8 +196,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['bus_number']) && !isse
                             <form method='POST' style='display:inline;'>
                                 <input type='hidden' name='toggleBusId' value='{$row['bus_id']}'>
                                 <input type='hidden' name='newStatus' value='" . ($row['statusofbus'] == 'active' ? 'inactive' : 'active') . "'>
-                                <button type='submit' class='btn btn-sm " . ($row['statusofbus'] == 'active' ? 'btn-danger' : 'btn-success') . "'>
-                                    " . ($row['statusofbus'] == 'active' ? 'Deactivate' : 'Activate') . "
+                                <button type='submit' class='btn btn-sm " . ($row['statusofbus'] == 'active' ? 'btn-success' : 'btn-danger') . "'>
+                                    " . ($row['statusofbus'] == 'active' ? 'Activated' : 'Under Maintenance') . "
                                 </button>
                             </form>
                         </td>

@@ -54,12 +54,12 @@ if (!isset($_SESSION['passengers'])) {
 }
 
 // Function to log passenger entry
-function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac, $driverID, $busNumber, $transactionNumber, $conn)
+function logPassengerEntry($rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac, $driverID, $busNumber, $transactionNumber, $passengerQuantity, $conn)
 {
     // First, insert the passenger log
-    $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name, conductor_id, driver_name, driver_id, bus_number, transaction_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO passenger_logs (rfid, from_route, to_route, fare, conductor_name, conductor_id, driver_name, driver_id, bus_number, transaction_number, passenger_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssssssss", $rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac, $driverID, $busNumber, $transactionNumber);
+    $stmt->bind_param("sssssssssss", $rfid, $fromRoute, $toRoute, $fare, $conductorName, $conductorac, $driverac, $driverID, $busNumber, $transactionNumber, $passengerQuantity);
     $stmt->execute();
     $stmt->close();
 
@@ -176,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
 
             $loggedRfid = !empty($rfid) ? $rfid : 'cash'; // Use 'cash' if payment is made in cash
-            logPassengerEntry($loggedRfid, $fromRoute['route_name'], $toRoute['route_name'], $totalFare, $conductorName, $conductorac, $driverac,$driverID, $bus_number, $transactionNumber, $conn);
+            logPassengerEntry($loggedRfid, $fromRoute['route_name'], $toRoute['route_name'], $totalFare, $conductorName, $conductorac, $driverac,$driverID, $bus_number, $transactionNumber, $passengerQuantity, $conn);
 
             echo json_encode([
                 'status' => 'success',

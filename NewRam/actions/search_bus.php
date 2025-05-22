@@ -10,11 +10,17 @@ SELECT
     p.driver_name AS driver_name,
     p.conductor_name AS conductor_name,
     IFNULL(SUM(p.fare), 0) AS total_fare,
-    COUNT(p.id) AS total_passengers,
+    IFNULL(SUM(p.passenger_count), 0) AS total_passengers,
     CASE 
-        WHEN b.status = 'assigned' AND il.inspection_id IS NOT NULL AND il.driver_violation != 'None' OR il.conductor_violation != 'None' THEN 'Inspected with Violation'
-        WHEN b.status = 'assigned' AND il.inspection_id IS NOT NULL THEN 'Inspected'
-        WHEN b.status = 'assigned' THEN 'Pending'
+        WHEN b.status = 'assigned' 
+             AND il.inspection_id IS NOT NULL 
+             AND (il.driver_violation != 'None' OR il.conductor_violation != 'None') 
+            THEN 'Inspected with Violation'
+        WHEN b.status = 'assigned' 
+             AND il.inspection_id IS NOT NULL 
+            THEN 'Inspected'
+        WHEN b.status = 'assigned' 
+            THEN 'Pending'
         ELSE 'N/A'
     END AS inspection_status
 FROM 
