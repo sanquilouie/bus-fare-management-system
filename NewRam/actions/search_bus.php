@@ -12,11 +12,11 @@ SELECT
     IFNULL(SUM(p.fare), 0) AS total_fare,
     COUNT(p.id) AS total_passengers,
     CASE 
+        WHEN b.status = 'assigned' AND il.inspection_id IS NOT NULL AND il.violation != 'None' THEN 'Inspected with Violation'
         WHEN b.status = 'assigned' AND il.inspection_id IS NOT NULL THEN 'Inspected'
         WHEN b.status = 'assigned' THEN 'Pending'
         ELSE 'N/A'
     END AS inspection_status
-
 FROM 
     businfo b
 LEFT JOIN 
@@ -37,9 +37,8 @@ if (!empty($search)) {
 
 $sql .= "
 GROUP BY 
-    b.bus_number, b.status, p.driver_name, p.conductor_name, il.inspection_id
+    b.bus_number, b.status, p.driver_name, p.conductor_name, il.inspection_id, il.violation
 ";
-;
 
 $result = $conn->query($sql);
 
@@ -81,6 +80,8 @@ if ($result->num_rows > 0) {
                 >Pending</button>";
             } elseif ($row['inspection_status'] === 'Inspected') {
                 $output .= "<span class='badge bg-success'>Inspected</span>";
+            }elseif ($row['inspection_status'] === 'Inspected with Violation') {
+                $output .= "<span class='badge bg-danger'>Inspected with Violation</span>";
             } else {
                 $output .= "N/A";
             }

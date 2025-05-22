@@ -109,6 +109,7 @@ $lastname = $_SESSION['lastname'];
                 <label for="issue" style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Select Violation:</label>
                 <select id="issue" class="swal2-select" style="width: 80%; padding: 8px; font-size: 14px;">
                     <option value="" disabled selected>-- Select an issue --</option>
+                    <option>None</option>
                     <option>Reckless Driving</option>
                     <option>Seatbelt Violation</option>
                     <option>Driver Misconduct</option>
