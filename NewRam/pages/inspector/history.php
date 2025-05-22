@@ -74,7 +74,8 @@ $result = $conn->query($sql);
                         <th>Passenger Count</th>
                         <th>Driver</th>
                         <th>Conductor</th>
-                        <th>Violation</th>
+                        <th>Driver Violation</th>
+                        <th>Conductor Violation</th>
                         <th>Remarks</th>
                         <th>Inspection Date</th>
                     </tr>
@@ -90,7 +91,8 @@ $result = $conn->query($sql);
                             echo "<td>" . htmlspecialchars($row['pass_count']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['driver']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['conductor']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['violation']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['driver_violation']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['conductor_violation']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['remarks']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['inspection_date']) . "</td>";
                             echo "</tr>";

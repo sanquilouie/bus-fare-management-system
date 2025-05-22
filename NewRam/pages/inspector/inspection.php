@@ -106,8 +106,8 @@ $lastname = $_SESSION['lastname'];
                 <p><strong>Driver:</strong> ${driver}</p>
                 <p><strong>Conductor:</strong> ${conductor}</p>
 
-                <label for="issue" style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Select Violation:</label>
-                <select id="issue" class="swal2-select" style="width: 80%; padding: 8px; font-size: 14px;">
+                <label for="issue" style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Select Driver Violation:</label>
+                <select id="driver_issue" class="swal2-select" style="width: 80%; padding: 8px; font-size: 14px;">
                     <option value="" disabled selected>-- Select an issue --</option>
                     <option>None</option>
                     <option>Reckless Driving</option>
@@ -115,6 +115,12 @@ $lastname = $_SESSION['lastname'];
                     <option>Driver Misconduct</option>
                     <option>Unlicensed Driving</option>
                     <option>Driving Negligence</option>
+                </select>
+
+                <label for="issue" style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Select Conductor Violation:</label>
+                <select id="conductor_issue" class="swal2-select" style="width: 80%; padding: 8px; font-size: 14px;">
+                    <option value="" disabled selected>-- Select an issue --</option>
+                    <option>None</option>
                     <option>Collecting Fare Without Ticket</option>
                     <option>Improper Pickup/Dropoff</option>
                     <option>Late Ticket Issuance</option>
@@ -129,16 +135,21 @@ $lastname = $_SESSION['lastname'];
             showCancelButton: true,
             confirmButtonText: 'Submit Inspection',
             preConfirm: () => {
-                const issue = $('#issue').val();
+                const driver_issue = $('#driver_issue').val();
+                const conductor_issue = $('#conductor_issue').val();
                 const remarks = $('#remarks').val();
 
-                if (!issue) {
-                    Swal.showValidationMessage('Please select a violation');
+                if (!driver_issue) {
+                    Swal.showValidationMessage('Please select a driver violation');
+                    return false;
+                }
+                if (!conductor_issue) {
+                    Swal.showValidationMessage('Please select a conductor violation');
                     return false;
                 }
 
                 // Optionally send the data to the backend here
-                return { busNumber, passengers, driver, conductor, issue, remarks };
+                return { busNumber, passengers, driver, conductor, driver_issue, conductor_issue, remarks };
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -151,7 +162,8 @@ $lastname = $_SESSION['lastname'];
                     passengers: result.value.passengers,
                     driver: result.value.driver,
                     conductor: result.value.conductor,
-                    issue: result.value.issue,
+                    driver_issue: result.value.driver_issue,
+                    conductor_issue: result.value.conductor_issue,
                     remarks: result.value.remarks
                 }, function (response) {
                     Swal.fire('Success', 'Inspection has been recorded.', 'success').then(() => {

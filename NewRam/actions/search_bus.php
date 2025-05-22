@@ -12,7 +12,7 @@ SELECT
     IFNULL(SUM(p.fare), 0) AS total_fare,
     COUNT(p.id) AS total_passengers,
     CASE 
-        WHEN b.status = 'assigned' AND il.inspection_id IS NOT NULL AND il.violation != 'None' THEN 'Inspected with Violation'
+        WHEN b.status = 'assigned' AND il.inspection_id IS NOT NULL AND il.driver_violation != 'None' OR il.conductor_violation != 'None' THEN 'Inspected with Violation'
         WHEN b.status = 'assigned' AND il.inspection_id IS NOT NULL THEN 'Inspected'
         WHEN b.status = 'assigned' THEN 'Pending'
         ELSE 'N/A'
@@ -37,7 +37,7 @@ if (!empty($search)) {
 
 $sql .= "
 GROUP BY 
-    b.bus_number, b.status, p.driver_name, p.conductor_name, il.inspection_id, il.violation
+    b.bus_number, b.status, p.driver_name, p.conductor_name, il.inspection_id, il.driver_violation, il.conductor_violation
 ";
 
 $result = $conn->query($sql);
