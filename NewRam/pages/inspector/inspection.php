@@ -7,43 +7,19 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Inspector' && $_SESSION
     exit();
 }
 
-// Assuming the user is logged in and their session is active
 $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
-
-
-$sql = "
-SELECT 
-    b.status,
-    b.bus_number,
-    p.driver_name AS driver_name,
-    p.conductor_name AS conductor_name,
-    IFNULL(SUM(p.fare), 0) AS total_fare,
-    COUNT(p.id) AS total_passengers
-FROM 
-    businfo b
-LEFT JOIN 
-    passenger_logs p 
-    ON b.bus_number = p.bus_number 
-    AND DATE(p.timestamp) = CURDATE()
-WHERE
-    b.statusofbus != 'inactive'
-GROUP BY 
-    b.bus_number, b.status, b.driverName, b.conductorName
-";
-
-$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bus Fare and Passengers</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -62,15 +38,11 @@ $result = $conn->query($sql);
             margin-bottom: 20px;
             font-weight: bold;
             color: transparent;
-            /* Make the text color transparent */
             background-image: linear-gradient(to right, #f1c40f, #e67e22);
             background-clip: text;
             -webkit-background-clip: text;
-            /* WebKit compatibility */
             -webkit-text-fill-color: transparent;
-            /* Ensures only the gradient is visible */
             -webkit-text-stroke: 0.5px black;
-            /* Outline effect */
         }
     </style>
 </head>
@@ -80,46 +52,115 @@ $result = $conn->query($sql);
     include '../../includes/sidebar2.php';
     include '../../includes/footer.php';
     ?>
-    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>" class="container-fluid mt-5">
-        <h2>Bus Inspection</h2>
+
+    <div id="main-content" class="container-fluid mt-5 <?php echo ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Cashier') ? '' : 'sidebar-expanded'; ?>">
         <div class="row justify-content-center">
+            <h2>Bus Inspection</h2>
             <div class="col-12 col-sm-10 col-md-10 col-lg-8 col-xl-8 col-xxl-8">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Bus Number</th>
-                        <th>Total Fare Collected Today</th>
-                        <th>Number of Passengers</th>
-                        <th>Driver</th>
-                        <th>Conductor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Display rows
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['status']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['bus_number']) . "</td>";
-                            echo "<td>₱" . number_format($row['total_fare'], 2) . "</td>";
-                            echo "<td>" . $row['total_passengers'] . "</td>";
-                            echo "<td>" . htmlspecialchars($row['driver_name']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['conductor_name']) . "</td>";
-                            echo "</tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='6'>No data found.</td></tr>";
-                    }
+                <div class="mb-3">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by Bus Number">
+                </div>
 
-                    $conn->close();
-                    ?>
-                </tbody>
-            </table>
-
+                <div id="busTableContainer"></div>
             </div>
         </div>
     </div>
+
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Live Search Script -->
+    <script>
+    $(document).ready(function () {
+        function fetchData(query = '') {
+            $.ajax({
+                url: '../../actions/search_bus.php',
+                method: 'GET',
+                data: { search: query },
+                success: function (data) {
+                    $('#busTableContainer').html(data);
+                }
+            });
+        }
+
+        fetchData(); // initial load
+
+        $('#searchInput').on('keyup', function () {
+            const query = $(this).val();
+            fetchData(query);
+        });
+    });
+
+    $(document).on('click', '.inspect-btn', function () {
+        const busNumber = $(this).data('bus');
+        const driver = $(this).data('driver');
+        const conductor = $(this).data('conductor');
+        const passengers = $(this).data('passengers');
+
+        Swal.fire({
+            title: 'Inspect Bus',
+            html: `
+                <p><strong>Bus No:</strong> ${busNumber}</p>
+                <p><strong>Passengers:</strong> ${passengers}</p>
+                <p><strong>Driver:</strong> ${driver}</p>
+                <p><strong>Conductor:</strong> ${conductor}</p>
+
+                <label for="issue" style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Select Violation:</label>
+                <select id="issue" class="swal2-select" style="width: 80%; padding: 8px; font-size: 14px;">
+                    <option value="" disabled selected>-- Select an issue --</option>
+                    <option>Reckless Driving</option>
+                    <option>Seatbelt Violation</option>
+                    <option>Driver Misconduct</option>
+                    <option>Unlicensed Driving</option>
+                    <option>Driving Negligence</option>
+                    <option>Collecting Fare Without Ticket</option>
+                    <option>Improper Pickup/Dropoff</option>
+                    <option>Late Ticket Issuance</option>
+                    <option>Unauthorized Free Fare</option>
+                    <option>Invalid Discount</option>
+                </select>
+
+                <label for="remarks" style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: 600;">Remarks:</label>
+                <textarea id="remarks" class="swal2-textarea" placeholder="Additional remarks..." style="width: 80%; min-height: 80px; padding: 8px; font-size: 14px; resize: vertical;"></textarea>
+                `,
+
+            showCancelButton: true,
+            confirmButtonText: 'Submit Inspection',
+            preConfirm: () => {
+                const issue = $('#issue').val();
+                const remarks = $('#remarks').val();
+
+                if (!issue) {
+                    Swal.showValidationMessage('Please select a violation');
+                    return false;
+                }
+
+                // Optionally send the data to the backend here
+                return { busNumber, passengers, driver, conductor, issue, remarks };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // TODO: Submit to server with AJAX
+                console.log(result.value);
+
+                // Example:
+                $.post('../../actions/mark_inspection.php', {
+                    bus_no: result.value.busNumber,
+                    passengers: result.value.passengers,
+                    driver: result.value.driver,
+                    conductor: result.value.conductor,
+                    issue: result.value.issue,
+                    remarks: result.value.remarks
+                }, function (response) {
+                    Swal.fire('Success', 'Inspection has been recorded.', 'success').then(() => {
+                        location.reload(); // refresh to show updated status
+                    });
+                });
+            }
+        });
+    });
+
+    </script>
 </body>
 </html>
