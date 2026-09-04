@@ -1,14 +1,13 @@
 <?php
-require '../libraries/PHPMailer/src/PHPMailer.php';
-require '../libraries/PHPMailer/src/SMTP.php';
-require '../libraries/PHPMailer/src/Exception.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once '../includes/mailer.php';
+require_once '../includes/passwords.php';
+require_once '../includes/security.php';
+bfms_start_secure_session();
 
 include "../includes/connection.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    bfms_require_csrf_token();
     // Retrieve form data
     $firstname = $_POST['firstname'];
     $lastname = $_POST['lastname'];
@@ -24,15 +23,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $barangay = $_POST['barangay'];
     $address = $_POST['address'];
     $account_number = $_POST['account_number'];
-    $password = 'REDACTED_LEGACY_PASSWORD';
+    $password = bfms_generate_temporary_password();
 
-    $hashed_password = md5($password); // Hash the password
+    $hashed_password = bfms_hash_password_for_database($conn, $password);
     $balance = 0; // Default balance
     $role = "User"; // Default role
     $points = 0; // Default points
 
     // Validate email and contact number
-    $stmt = $conn->prepare("SELECT * FROM useracc WHERE email = ? OR contactnumber = ?");
+    $stmt = $conn->prepare("SELECT 1 FROM useracc WHERE email = ? OR contactnumber = ? LIMIT 1");
     $stmt->bind_param("ss", $email, $contactnumber);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -68,17 +67,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         // Send confirmation email
-        $mail = new PHPMailer(true);
         try {
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'portfolio@example.invalid'; // Your email
-            $mail->Password = 'REDACTED_SMTP_PASSWORD'; // App password
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-
-            $mail->setFrom('portfolio@example.invalid', 'Ramstar Zaragoza');
+            $mail = bfms_create_mailer();
             $mail->addAddress($email, $firstname . ' ' . $lastname);
             $mail->isHTML(true);
             $mail->Subject = 'Registration Received';
@@ -91,12 +81,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $mail->send();
         } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            error_log('Registration email failed: ' . $e->getMessage());
         }
 
         echo "<script>alert('Registration successful!'); window.location.href = 'login.php';</script>";
     } else {
-        echo "<script>alert('Error: " . $stmt->error . "'); window.history.back();</script>";
+        error_log('User registration failed: ' . $stmt->error);
+        echo "<script>alert('Registration could not be completed.'); window.history.back();</script>";
     }
 
     $stmt->close();
@@ -278,6 +269,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container mt-5 register-container">
         <h2>Registration Form</h2>
         <form method="POST" action="" id="registrationForm" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(bfms_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="firstname" class="form-label">

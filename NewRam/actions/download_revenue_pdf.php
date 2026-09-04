@@ -1,13 +1,8 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
 require '../includes/connection.php';
 require '../libraries/fpdf/fpdf.php';
-
-// Validate session
-if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../../index.php");
-    exit();
-}
 
 // Get query parameters
 $selectedDate = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');

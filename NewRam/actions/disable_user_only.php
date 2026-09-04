@@ -1,11 +1,8 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
-
-if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../index.php");
-    exit();
-}
 
 function logActivity($conn, $user_id, $action, $performed_by)
 {
@@ -50,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Function to fetch updated table data
 function fetchUpdatedTableData($conn)
 {
-    $stmt = $conn->query("SELECT * FROM useracc");
+    $stmt = $conn->query("SELECT id, account_number, firstname, lastname, balance, is_activated FROM useracc");
     $users = $stmt->fetch_all(MYSQLI_ASSOC);
 
     $tableData = '';

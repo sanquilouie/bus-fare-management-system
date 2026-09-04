@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
 include '../../includes/connection.php';
 
 // Fetch driver names from useracc where role is 'Driver'
@@ -106,13 +107,18 @@ while ($row = $driverResult->fetch_assoc()) {
                 }
 
                 // ✅ Save session if not assigned
-                await fetch('../../actions/store_driver_session.php', {
+                const storeResponse = await fetch('../../actions/store_driver_session.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ account_number: accountNumber })
                 });
+
+                if (!storeResponse.ok) {
+                    Swal.showValidationMessage('This driver is no longer available.');
+                    return false;
+                }
 
                 document.getElementById('driver_fullname').value = match.firstname + ' ' + match.lastname;
 
@@ -136,9 +142,15 @@ while ($row = $driverResult->fetch_assoc()) {
                         driverInput.type = 'hidden';
                         driverInput.name = 'driver_name';
                         driverInput.value = selectedDriver;
+
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrf_token';
+                        csrfInput.value = " . json_encode(bfms_csrf_token()) . ";
     
                         form.appendChild(busInput);
                         form.appendChild(driverInput);
+                        form.appendChild(csrfInput);
     
                         document.body.appendChild(form);
                         form.submit();

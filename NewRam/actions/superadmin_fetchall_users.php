@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Superadmin']);
 include "../includes/connection.php";
 
 $limit = 10; // Users per page

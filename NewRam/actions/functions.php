@@ -1,7 +1,5 @@
 <?php
-// functions.php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Shared account and balance helpers.
 function fetchUserCount($conn)
 {
     $userCountQuery = "SELECT COUNT(*) as userCount FROM useracc";
@@ -12,14 +10,16 @@ function fetchUserCount($conn)
 function searchUserByAccount($conn, $accountNumber)
 {
     $accountNumber = mysqli_real_escape_string($conn, $accountNumber);
-    $searchQuery = "SELECT * FROM useracc WHERE account_number LIKE '%$accountNumber%'";
+    $searchQuery = "SELECT id, firstname, middlename, lastname, account_number, balance, is_activated
+                    FROM useracc WHERE account_number LIKE '%$accountNumber%'";
     return mysqli_query($conn, $searchQuery);
 }
 
 function fetchUserByRFID($conn, $rfidCode)
 {
     $rfidCode = mysqli_real_escape_string($conn, $rfidCode);
-    $userQuery = "SELECT * FROM useracc WHERE rfid_code = '$rfidCode'";
+    $userQuery = "SELECT id, firstname, lastname, account_number, balance, role, is_activated
+                  FROM useracc WHERE rfid_code = '$rfidCode'";
     return mysqli_query($conn, $userQuery);
 }
 
@@ -67,12 +67,18 @@ function convertPointsToPesos($conn, $userAccountNumber, $pointsToConvert)
 function loadUserBalance($conn, $userAccountNumber, $balanceToLoad)
 {
     // Fetch session variables for bus_number and conductor_id
-    session_start();
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
     $busNumber = isset($_SESSION['bus_number']) ? $_SESSION['bus_number'] : null;
     $conductorId = isset($_SESSION['driver_account_number']) ? $_SESSION['driver_account_number'] : null;
 
     // Sanitize inputs
     $userAccountNumber = mysqli_real_escape_string($conn, $userAccountNumber);
+    $balanceToLoad = (float) $balanceToLoad;
+    if (!is_finite($balanceToLoad) || $balanceToLoad <= 0) {
+        return false;
+    }
 
     // Fetch the user ID
     $userQuery = "SELECT id FROM useracc WHERE account_number = '$userAccountNumber'";

@@ -1,114 +1,99 @@
-<?php 
-session_start();
-include '../includes/connection.php';
-$response = ['success' => false, 'message' => ''];
-
-$driver_name = isset($_SESSION['driver_name']) ? $_SESSION['driver_name'] : null;
-
-$nameParts = explode(' ', $driver_name);
-$firstname = $nameParts[0]; // First name
-$middlename = isset($nameParts[1]) ? $nameParts[1] : ''; // Middle name (if present)
-$lastname = isset($nameParts[2]) ? $nameParts[2] : ''; // Last name (if present)
+<?php
+require_once '../includes/security.php';
+bfms_start_secure_session();
 
 if (isset($_POST['confirm_logout']) && $_POST['confirm_logout'] === 'true') {
-    if (isset($_SESSION['bus_number'], $_SESSION['driver_account_number'])) {
-        // Conductor session logic only
-        $driverID = $_SESSION['driver_account_number'];
+    bfms_require_csrf_token();
 
-        $stmt = $conn->prepare("SELECT 1 FROM businfo WHERE driverID = ? LIMIT 1");
-        $stmt->bind_param("s", $driverID);
-        $stmt->execute();
-        $stmt->store_result();
-
-        if ($stmt->num_rows === 0) {
-            unset($_SESSION['bus_number']);
-            unset($_SESSION['driver_account_number']);
-			unset($_SESSION['direction']);
-			unset($_SESSION['account_number']);
-			$_SESSION['passengers'] = [];
-        }
-
-        $stmt->close();
+    $accountNumber = (string) ($_SESSION['account_number'] ?? '');
+    $role = (string) ($_SESSION['role'] ?? '');
+    if ($accountNumber !== '' && in_array($role, ['Conductor', 'Superadmin'], true)) {
+        require_once '../includes/connection.php';
+        $assignmentStatement = $conn->prepare(
+            'SELECT 1 FROM businfo WHERE conductorID = ? LIMIT 1'
+        );
+        $assignmentStatement->bind_param('s', $accountNumber);
+        $assignmentStatement->execute();
+        $hasActiveAssignment = $assignmentStatement->get_result()->fetch_row() !== null;
+        $assignmentStatement->close();
         $conn->close();
 
-        // Send response for conductor logout
-        echo json_encode([
-            'success' => true,
-            'message' => 'You have been logged out successfully (conductor).'
-        ]);
-        exit();
+        if ($hasActiveAssignment) {
+            http_response_code(409);
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Complete and remit the active trip before logging out.',
+            ]);
+            exit;
+        }
     }
 
-    // If not a conductor, do regular logout (full session clear)
     session_unset();
     session_destroy();
 
+    header('Content-Type: application/json; charset=UTF-8');
     echo json_encode([
         'success' => true,
-        'message' => 'You have been logged out successfully.'
+        'message' => 'You have been logged out successfully.',
     ]);
-    exit();
+    exit;
 }
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Logout</title>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 <body>
-	<script>
-		Swal.fire({
-			title: 'Are you sure?',
-			text: "You will be logged out of the system.",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: 'Yes, log me out!'
-		}).then((result) => {
-			if (result.isConfirmed) {
-				// If confirmed, log the user out
-				fetch('logout.php', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-					},
-					body: new URLSearchParams({ confirm_logout: 'true' })
-				})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success) {
-							Swal.fire({
-					title: 'Logged Out!',
-					text: data.message,
-					icon: 'success',
-					showConfirmButton: false,  // Disable the "OK" button
-					timer: 1500  // Optionally, you can add a timer to auto-close after 1.5 seconds
-				}).then(() => {
-					window.location.href = 'login.php';  // Redirect to the login page after the alert
-				});
+<script>
+Swal.fire({
+    title: 'Are you sure?',
+    text: 'You will be logged out of the system.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, log me out!'
+}).then((result) => {
+    if (!result.isConfirmed) {
+        window.history.back();
+        return;
+    }
 
-						} else {
-							Swal.fire('Error', data.error || 'An error occurred during logout.', 'error');
-							window.history.back(); // Go back to the previous page
-						}
-					})
-					.catch(error => {
-						Swal.fire('Error', 'An error occurred while logging out.', 'error');
-					});
-			} else {
-				// If cancel, navigate back
-				window.history.back();
-			}
-		});
-	</script>
+    fetch('logout.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+            confirm_logout: 'true',
+            csrf_token: <?php echo json_encode(bfms_csrf_token()); ?>
+        })
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (!data.success) {
+                throw new Error(data.message || 'Logout failed');
+            }
+
+            Swal.fire({
+                title: 'Logged Out!',
+                text: data.message,
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = 'login.php';
+            });
+        })
+        .catch((error) => {
+            Swal.fire('Unable to log out', error.message || 'Unable to log out right now.', 'error');
+        });
+});
+</script>
 </body>
-
 </html>

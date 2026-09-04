@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 include '../../../includes/connection.php';
 // Check if the user is logged in
@@ -25,7 +21,8 @@ $totalTripsQuery = "
     WHERE rfid = ?";
 $totalTripsStmt = $conn->prepare($totalTripsQuery);
 if (!$totalTripsStmt) {
-    die("Prepare failed: " . $conn->error);
+    error_log('Recent-trip count preparation failed: ' . $conn->error);
+    exit('Unable to load recent trips.');
 }
 $totalTripsStmt->bind_param('s', $account_number);
 $totalTripsStmt->execute();
@@ -50,7 +47,8 @@ $recentTripsQuery = "
     LIMIT ? OFFSET ?";
 $recentTripsStmt = $conn->prepare($recentTripsQuery);
 if (!$recentTripsStmt) {
-    die("Prepare failed: " . $conn->error);
+    error_log('Recent-trip query preparation failed: ' . $conn->error);
+    exit('Unable to load recent trips.');
 }
 $recentTripsStmt->bind_param('sii', $account_number, $items_per_page, $offset);
 $recentTripsStmt->execute();

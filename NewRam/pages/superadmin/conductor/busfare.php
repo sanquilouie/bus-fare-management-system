@@ -1,11 +1,7 @@
 <?php
-session_start();
+require_once '../../../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
 include '../../../includes/connection.php';
-
-if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Conductor' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../.././index.php");
-    exit();
-}
 
 $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
@@ -266,20 +262,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['removeAllPassengers']))
 
 // Check if bus number and driver name are not set in the session
 if (!$bus_number || !$driverac) {
+    $drivers = [];
+    $driver_query = "SELECT account_number, firstname, lastname
+                     FROM useracc u
+                     WHERE u.role = 'Driver' AND u.is_activated = 1
+                       AND u.driverStatus = 'notdriving'
+                       AND NOT EXISTS (
+                           SELECT 1 FROM businfo b WHERE b.driverID = u.account_number
+                       )";
+    $driver_result = mysqli_query($conn, $driver_query);
+    while ($driver = mysqli_fetch_assoc($driver_result)) {
+        $drivers[] = $driver;
+    }
 
-    $bus_query = "SELECT bus_number FROM businfo WHERE status = 'available'";
+    $bus_query = "SELECT bus_number FROM businfo WHERE status = 'available' AND statusofbus = 'active'";
     $bus_result = mysqli_query($conn, $bus_query);
 
     // Prepare options for SweetAlert
     $bus_options = "";
     while ($bus = mysqli_fetch_assoc($bus_result)) {
-        $bus_options .= "<option value=\"" . $bus['bus_number'] . "\">" . $bus['bus_number'] . "</option>";
+        $safe_bus_number = htmlspecialchars($bus['bus_number'], ENT_QUOTES, 'UTF-8');
+        $bus_options .= "<option value=\"" . $safe_bus_number . "\">" . $safe_bus_number . "</option>";
     }
 
 
     // Show the SweetAlert modal
     echo "
     <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <script src='/NewRam/assets/js/NFCScanner_Login.js'></script>
     <script>
     window.onload = function() {
         // Step 1: Select Bus
@@ -315,23 +325,53 @@ if (!$bus_number || !$driverac) {
             if (result.isConfirmed) {
                 const busNumber = result.value;
 
-                // Step 2: Enter Driver Name
+                // Step 2: select a validated driver account
                 Swal.fire({
                     icon: 'question',
-                    title: 'Enter Driver Name',
-                    input: 'text',
-                    inputPlaceholder: 'Driver Name',
+                    title: 'Enter or Scan Driver Account Number',
+                    html: '<input id=\"driver_name\" required placeholder=\"Enter account number\" class=\"swal2-input\">',
                     showCancelButton: false,
                     confirmButtonText: 'OK',
-                    preConfirm: (driverName) => {
-                        if (!driverName) {
-                            Swal.showValidationMessage('Driver name is required');
+                    preConfirm: async function () {
+                        const accountNumber = document.getElementById('driver_name').value;
+                        if (!accountNumber) {
+                            Swal.showValidationMessage('Please enter an account number');
+                            return false;
                         }
-                        return { busNumber, driverName };
+
+                        const drivers = " . json_encode($drivers, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ";
+                        const match = drivers.find(driver => driver.account_number === accountNumber);
+                        if (!match) {
+                            Swal.showValidationMessage('No available driver was found with that account number');
+                            return false;
+                        }
+
+                        const assignmentResponse = await fetch('../../../actions/check_driver_assigned.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({account_number: accountNumber})
+                        });
+                        const assignment = await assignmentResponse.json();
+                        if (assignment.assigned) {
+                            Swal.showValidationMessage('This driver is already assigned to a bus.');
+                            return false;
+                        }
+
+                        const storeResponse = await fetch('../../../actions/store_driver_session.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({account_number: accountNumber})
+                        });
+                        if (!storeResponse.ok) {
+                            Swal.showValidationMessage('This driver is no longer available.');
+                            return false;
+                        }
+
+                        return match.firstname + ' ' + match.lastname;
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        const { busNumber, driverName } = result.value;
+                        const driverName = result.value;
 
                         // Submit form with bus number and driver name
                         const form = document.createElement('form');
@@ -348,8 +388,14 @@ if (!$bus_number || !$driverac) {
                         driverInput.name = 'driver_name';
                         driverInput.value = driverName;
 
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrf_token';
+                        csrfInput.value = " . json_encode(bfms_csrf_token()) . ";
+
                         form.appendChild(busInput);
                         form.appendChild(driverInput);
+                        form.appendChild(csrfInput);
 
                         document.body.appendChild(form);
                         form.submit();

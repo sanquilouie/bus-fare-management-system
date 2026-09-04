@@ -1,5 +1,7 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
+bfms_require_same_origin();
 date_default_timezone_set('Asia/Manila');
 include "../includes/connection.php";
 
@@ -65,7 +67,8 @@ if ($data) {
     // Unset conductor session and update businfo
     $updateBusStmt = $conn->prepare("UPDATE businfo SET driverName ='', conductorName ='', status = 'available', destination = '', driverID = '', conductorID = '', current_stop = '' WHERE bus_number = ?");
     if (!$updateBusStmt) {
-        die("Prepare failed: " . $conn->error);
+        error_log('Bus-release preparation failed: ' . $conn->error);
+        bfms_json_error('Unable to complete the remittance.', 500);
     }
     $updateBusStmt->bind_param("s", $busNo);
     $updateBusStmt->execute();

@@ -1,4 +1,6 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
 require '../libraries/fpdf/fpdf.php';
 include "../includes/connection.php";
 

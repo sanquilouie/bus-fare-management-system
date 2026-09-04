@@ -1,13 +1,8 @@
 <?php
-// Start the session and include database connection
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['User', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
-
-// Check if the user is logged in
-if (!isset($_SESSION['email']) || !isset($_SESSION['account_number'])) {
-    header("Location: ../../index.php");
-    exit();
-}
 
 // Get the POST data from the form
 $trip_id = $_POST['trip_id'];
@@ -35,7 +30,9 @@ $updateQuery = "
 
 $stmt = $conn->prepare($updateQuery);
 if ($stmt === false) {
-    die("Error in preparing the query: " . $conn->error);
+    error_log('Feedback update preparation failed: ' . $conn->error);
+    http_response_code(500);
+    exit('Unable to save feedback.');
 }
 
 $account_number = $_SESSION['account_number']; // User's account number (RFID)

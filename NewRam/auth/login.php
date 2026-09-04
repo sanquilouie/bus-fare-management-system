@@ -1,5 +1,7 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+require_once '../includes/passwords.php';
+bfms_start_secure_session();
 ob_start();
 include '../includes/connection.php';
 
@@ -26,8 +28,9 @@ function getRedirectURL($role)
    }
 }
 if (isset($_POST['Login'])) {
-   $username = mysqli_real_escape_string($conn, $_POST['username']);
-   $password = mysqli_real_escape_string($conn, md5($_POST['password']));
+   bfms_require_csrf_token();
+   $username = trim($_POST['username'] ?? '');
+   $password = $_POST['password'] ?? '';
 
    // Normalize contact number: if it starts with +63, replace with 0
    if (strpos($username, '+63') === 0) {
@@ -43,21 +46,24 @@ if (isset($_POST['Login'])) {
    }
 
    if (empty($errors)) {
-      // Query to check user credentials
-      $check_user_query = "
-         SELECT * 
-         FROM useracc 
-         WHERE (email = '{$username}' OR account_number = '{$username}') 
-         AND password = '{$password}'";
+      $checkUser = $conn->prepare(
+         'SELECT * FROM useracc WHERE email = ? OR account_number = ? LIMIT 1'
+      );
+      $checkUser->bind_param('ss', $username, $username);
+      $checkUser->execute();
+      $row = $checkUser->get_result()->fetch_assoc();
+      $checkUser->close();
 
-      $check_user = mysqli_query($conn, $check_user_query);
-
-      if (!$check_user) {
-         die("Database query failed: " . mysqli_error($conn));
-      }
-
-      if (mysqli_num_rows($check_user) > 0) {
-         $row = mysqli_fetch_assoc($check_user);
+      $upgradedHash = null;
+      if ($row && bfms_verify_password($password, (string) $row['password'], $upgradedHash)) {
+         if ($upgradedHash !== null && bfms_password_column_supports_modern_hash($conn)) {
+            $upgrade = $conn->prepare('UPDATE useracc SET password = ? WHERE id = ?');
+            $upgrade->bind_param('si', $upgradedHash, $row['id']);
+            $upgrade->execute();
+            $upgrade->close();
+         } elseif ($upgradedHash !== null) {
+            error_log('Legacy password was verified but could not be upgraded because the password column is too narrow.');
+         }
 
          if ($row['is_activated'] == 0) {
             $msg = "<div class='alert alert-warning' style='background-color:#FFA500; text-align:center; color:#FFFFFF;'>Your account is not activated! Please contact support.</div>";
@@ -67,21 +73,19 @@ if (isset($_POST['Login'])) {
 
             // If logging in using email, check if that account_number is in use in businfo
             if ($is_email_login) {
-               $businfo_check_query = "SELECT * FROM businfo WHERE conductorID = '{$user_account_number}' LIMIT 1";
-               $businfo_result = mysqli_query($conn, $businfo_check_query);
+               $businfoCheck = $conn->prepare('SELECT 1 FROM businfo WHERE conductorID = ? LIMIT 1');
+               $businfoCheck->bind_param('s', $user_account_number);
+               $businfoCheck->execute();
+               $businfoCheck->store_result();
+               $accountIsInUse = $businfoCheck->num_rows > 0;
+               $businfoCheck->close();
 
-               if (!$businfo_result) {
-                  die("Businfo query failed: " . mysqli_error($conn));
-               }
-
-               if (mysqli_num_rows($businfo_result) > 0) {
+               if ($accountIsInUse) {
                   if (!isset($_SESSION['account_number']) || $_SESSION['account_number'] !== $user_account_number) {
                      $msg = "<div class='alert alert-danger' style='background-color:#BF0210; text-align:center; color:#FFFFFF;'>Login restricted: this account is currently in use.</div>";
                   } else {
                      // Session account matches, allow login
-                     foreach ($row as $key => $value) {
-                        $_SESSION[$key] = $value;
-                     }
+                     bfms_establish_user_session($row);
 
                      echo "
                      <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
@@ -102,9 +106,7 @@ if (isset($_POST['Login'])) {
                   }
                } else {
                   // Not in businfo, proceed with login
-                  foreach ($row as $key => $value) {
-                     $_SESSION[$key] = $value;
-                  }
+                  bfms_establish_user_session($row);
 
                   echo "
                   <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
@@ -126,19 +128,17 @@ if (isset($_POST['Login'])) {
             } else {
                // Username is not email (likely account_number)
                if (!isset($_SESSION['account_number'])) {
-                  $businfo_check_query = "SELECT * FROM businfo WHERE conductorID = '{$username}' LIMIT 1";
-                  $businfo_result = mysqli_query($conn, $businfo_check_query);
+                  $businfoCheck = $conn->prepare('SELECT 1 FROM businfo WHERE conductorID = ? LIMIT 1');
+                  $businfoCheck->bind_param('s', $username);
+                  $businfoCheck->execute();
+                  $businfoCheck->store_result();
+                  $accountIsInUse = $businfoCheck->num_rows > 0;
+                  $businfoCheck->close();
 
-                  if (!$businfo_result) {
-                     die("Businfo query failed: " . mysqli_error($conn));
-                  }
-
-                  if (mysqli_num_rows($businfo_result) > 0) {
+                  if ($accountIsInUse) {
                      $msg = "<div class='alert alert-danger' style='background-color:#BF0210; text-align:center; color:#FFFFFF;'>Login restricted: this account is currently in use.</div>";
                   } else {
-                     foreach ($row as $key => $value) {
-                        $_SESSION[$key] = $value;
-                     }
+                     bfms_establish_user_session($row);
 
                      echo "
                      <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
@@ -160,9 +160,7 @@ if (isset($_POST['Login'])) {
                } else {
                   // Session is set, compare account_number to username
                   if ($_SESSION['account_number'] === $username) {
-                     foreach ($row as $key => $value) {
-                        $_SESSION[$key] = $value;
-                     }
+                     bfms_establish_user_session($row);
 
                      echo "
                      <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
@@ -570,6 +568,7 @@ if (isset($_POST['Login'])) {
                <div class="card-body p-3 p-md-4 p-xl-5">
                   <h2 class="fw-bold text-center mb-4" style="color: rgb(215, 185, 75);">Login Form</h2>
                   <form method="POST" action="#" class="login">
+                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(bfms_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                      <?php echo $msg; ?>
                   <div class="row gy-2 overflow-hidden">
                      <div class="col-12">

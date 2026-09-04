@@ -1,18 +1,15 @@
 <?php
-session_start();
+require_once '../../../../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 ob_start(); 
 include '../../../../includes/connection.php';
-
-if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../../../index.php");
-    exit();
-}
 
 // Count total records
 $totalQuery = "SELECT COUNT(*) AS total FROM useracc WHERE is_activated = 1 AND role = 'User'";
 $totalResult = mysqli_query($conn, $totalQuery);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    bfms_require_same_origin();
     $user_id = $_POST['user_id'] ?? null;
 
     if ($user_id) {

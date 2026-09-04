@@ -1,7 +1,7 @@
 <?php
 // check_employee_no.php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once '../includes/security.php';
+bfms_require_same_origin();
 include "../includes/connection.php";
 
 if (isset($_POST['employeeNumber'])) {

@@ -1,7 +1,7 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 header('Content-Type: application/json');
 
 include "../includes/connection.php";

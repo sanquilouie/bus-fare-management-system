@@ -1,8 +1,7 @@
 <?php
-session_start();
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
 
 if (isset($_POST['query'])) {
@@ -18,18 +17,21 @@ if (isset($_POST['query'])) {
     if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
             $status = isset($row['is_activated']) ? ($row['is_activated'] == 1 ? 'Activated' : 'Disabled') : 'N/A';
+            $safe = static function ($value) {
+                return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+            };
 
             echo '<tr>
-                    <td>' . $row['id'] . '</td>
-                    <td>' . $row['firstname'] . '</td>
-                    <td>' . $row['middlename'] . '</td>
-                    <td>' . $row['lastname'] . '</td>
-                    <td>' . date('F j, Y', strtotime($row['birthday'])) . '</td>
-                    <td>' . $row['age'] . '</td>
-                    <td>' . $row['gender'] . '</td>
-                    <td>' . $row['account_number'] . '</td>  
+                    <td>' . $safe($row['id']) . '</td>
+                    <td>' . $safe($row['firstname']) . '</td>
+                    <td>' . $safe($row['middlename']) . '</td>
+                    <td>' . $safe($row['lastname']) . '</td>
+                    <td>' . $safe(date('F j, Y', strtotime($row['birthday']))) . '</td>
+                    <td>' . $safe($row['age']) . '</td>
+                    <td>' . $safe($row['gender']) . '</td>
+                    <td>' . $safe($row['account_number']) . '</td>
                     <td>₱' . number_format($row['balance'], 2) . '</td>
-                    <td>' . $status . '</td>   
+                    <td>' . $safe($status) . '</td>
                 </tr>';
         }
     } else {

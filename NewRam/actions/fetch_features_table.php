@@ -1,5 +1,6 @@
 <?php
-// Include your DB connection here
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 require_once "../includes/connection.php";
 
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;

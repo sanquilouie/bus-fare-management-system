@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
 include "../includes/connection.php";
 
 header('Content-Type: application/json');
@@ -12,7 +13,7 @@ if (!isset($_SESSION['account_number'])) {
 $accountNumber = $_SESSION['account_number'];
 
 // Prepared statement to check existence in businfo
-$stmt = $conn->prepare("SELECT * FROM businfo WHERE conductorID = ?");
+$stmt = $conn->prepare("SELECT 1 FROM businfo WHERE conductorID = ? LIMIT 1");
 $stmt->bind_param("s", $accountNumber);
 $stmt->execute();
 $result = $stmt->get_result();

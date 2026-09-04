@@ -457,9 +457,9 @@ $userResult = mysqli_query($conn, $userQuery);
                         $.ajax({
                             url: '../../../actions/activate_user.php',
                             method: 'POST',
+                            dataType: 'json',
                             data: { user_id: userId },
-                            success: function (response) {
-                                const result = JSON.parse(response);
+                            success: function (result) {
                                 if (result.status === 'success') {
                                     Swal.fire('Success!', 'User has been activated', 'success').then(() => {
                                         $('#actionModal').modal('hide'); // Hide modal after confirmation

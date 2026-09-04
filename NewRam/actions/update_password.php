@@ -1,26 +1,26 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+require_once '../includes/passwords.php';
+bfms_require_authenticated();
+bfms_require_same_origin();
 include "../includes/connection.php";
 $errors = array();
-
-// Make sure the user is logged in and has a session for account number and email
-if (!isset($_SESSION['account_number']) || !isset($_SESSION['email'])) {
-    echo json_encode(['status' => 'error', 'message' => 'User not logged in.']);
-    exit();
-}
 
 $account_number = $_SESSION['account_number']; // Use session account number to identify the user
 $session_email = $_SESSION['email']; // Get the email from session
 
 if (isset($_POST['old_pass']) && isset($_POST['Password']) && isset($_POST['PasswordConf'])) {
-    $old_pass = mysqli_real_escape_string($conn, md5($_POST['old_pass']));
-    $Password = mysqli_real_escape_string($conn, $_POST['Password']);
-    $PasswordConf = mysqli_real_escape_string($conn, $_POST['PasswordConf']);
+    $oldPassword = $_POST['old_pass'];
+    $Password = $_POST['Password'];
+    $PasswordConf = $_POST['PasswordConf'];
 
     // Check if the old password matches for the logged-in user using account number and session email
-    $sql = mysqli_query($conn, "SELECT password FROM useracc WHERE account_number = '{$account_number}' AND email = '{$session_email}'");
-    $check_pwd = mysqli_fetch_array($sql);
-    $user_data = $check_pwd['password'];
+    $stmt = $conn->prepare('SELECT password FROM useracc WHERE account_number = ? AND email = ?');
+    $stmt->bind_param('ss', $account_number, $session_email);
+    $stmt->execute();
+    $check_pwd = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $user_data = (string) ($check_pwd['password'] ?? '');
 
     // Validate if new passwords match
     if ($Password != $PasswordConf) {
@@ -38,14 +38,18 @@ if (isset($_POST['old_pass']) && isset($_POST['Password']) && isset($_POST['Pass
     }
 
     // Check if old password is correct
-    if ($old_pass != $user_data) {
+    $unusedUpgrade = null;
+    if (!bfms_verify_password($oldPassword, $user_data, $unusedUpgrade)) {
         array_push($errors, "Old password is incorrect.");
     }
 
     // If no errors, update the password
     if (count($errors) == 0) {
-        $newpass = md5($Password);
-        $update = mysqli_query($conn, "UPDATE useracc SET password='{$newpass}' WHERE account_number='{$account_number}' AND email='{$session_email}'");
+        $newpass = bfms_hash_password_for_database($conn, $Password);
+        $stmt = $conn->prepare('UPDATE useracc SET password = ? WHERE account_number = ? AND email = ?');
+        $stmt->bind_param('sss', $newpass, $account_number, $session_email);
+        $update = $stmt->execute();
+        $stmt->close();
 
         if ($update) {
             echo json_encode(['status' => 'success', 'message' => 'Password has been updated successfully.']);

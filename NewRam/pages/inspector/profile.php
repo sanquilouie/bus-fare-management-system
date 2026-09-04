@@ -1,8 +1,8 @@
 <?php
 ob_start();
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once '../../includes/security.php';
+bfms_require_roles(['Inspector', 'Superadmin']);
+bfms_require_same_origin();
 
 include '../../includes/connection.php';
 

@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Inspector', 'Superadmin']);
+bfms_require_same_origin();
 include '../includes/connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,11 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             echo 'success';
         } else {
-            echo 'Database error: ' . $stmt->error;
+            error_log('Inspection insert failed: ' . $stmt->error);
+            echo 'Database error';
         }
         $stmt->close();
     } else {
-        echo 'Prepare failed: ' . $conn->error;
+        error_log('Inspection statement preparation failed: ' . $conn->error);
+        echo 'Database error';
     }
 
     $conn->close();

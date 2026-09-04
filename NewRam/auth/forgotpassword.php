@@ -1,28 +1,27 @@
 <?php
-// Include PHPMailer classes
-require '../libraries/PHPMailer/src/PHPMailer.php';
-require '../libraries/PHPMailer/src/SMTP.php';
-require '../libraries/PHPMailer/src/Exception.php';
-
-// Use PHPMailer namespace
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once '../includes/mailer.php';
+require_once '../includes/passwords.php';
+require_once '../includes/security.php';
+bfms_start_secure_session();
 
 // Include your database connection
 include '../includes/connection.php';
 
-// Initialize PHPMailer
-$mail = new PHPMailer(true);
-
 // Function to generate OTP
 function generateOTP($length = 6) {
-    return substr(str_shuffle("0123456789"), 0, $length);  // Generate a random 6-digit OTP
+    $minimum = 10 ** ($length - 1);
+    $maximum = (10 ** $length) - 1;
+    return (string) random_int($minimum, $maximum);
 }
 
 // Initialize otp_sent and password_updated variables to avoid undefined warnings
 $otp_sent = false;
 $password_updated = false;
 $error_message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    bfms_require_csrf_token();
+}
 
 // Handle Forgot Password form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'forgot_password' && isset($_POST['email'])) {
@@ -31,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $otp = generateOTP();  // Generate OTP
 
     // Check if email exists in the database
-    $stmt = $conn->prepare("SELECT * FROM useracc WHERE email = ?");
+    $stmt = $conn->prepare("SELECT firstname, lastname, email FROM useracc WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -40,17 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     if ($user) {
         // Send OTP via email
         try {
-            // Server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'portfolio@example.invalid'; // Your email
-            $mail->Password = 'REDACTED_SMTP_PASSWORD'; // Your email password
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-
-            // Recipients
-            $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+            $mail = bfms_create_mailer();
             $mail->addAddress($email, $user['firstname'] . ' ' . $user['lastname']);
 
             // Content
@@ -65,44 +54,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 
             $mail->send();
 
-            // Store OTP and expiration time in the database for validation
+            // Store only a hash of the OTP and its expiration time.
+            $otpHash = password_hash($otp, PASSWORD_DEFAULT);
             $otp_expiry = date('Y-m-d H:i:s', strtotime('+15 minutes')); // OTP expires in 15 minutes
             $stmt = $conn->prepare("UPDATE useracc SET otp = ?, otp_expiry = ? WHERE email = ?");
-            $stmt->bind_param("sss", $otp, $otp_expiry, $email);
+            $stmt->bind_param("sss", $otpHash, $otp_expiry, $email);
             $stmt->execute();
 
             $otp_sent = true;  // Flag to indicate OTP was sent successfully
         } catch (Exception $e) {
-            $error_message = "Error sending email: {$mail->ErrorInfo}";
+            error_log('Password-reset email failed: ' . $e->getMessage());
+            $error_message = 'Unable to send the password-reset email right now.';
         }
     } else {
-        $error_message = "No account found with this email.";
+        // Keep the public response generic so the endpoint does not enumerate accounts.
+        $otp_sent = true;
     }
 
     $stmt->close();
 }
 
 // Handle OTP verification and password reset
-// Handle OTP verification and password reset
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'verify_otp' && isset($_POST['email'])) {
     // Collect form data
     $email = $_POST['email'];
-    $entered_otp = $_POST['otp'];
-    $new_password = $_POST['new_password'];
+    $entered_otp = (string) ($_POST['otp'] ?? '');
+    $new_password = (string) ($_POST['new_password'] ?? '');
+    $confirm_password = (string) ($_POST['confirm_password'] ?? '');
 
-    // Check if the OTP is valid and not expired
-    $stmt = $conn->prepare("SELECT otp, otp_expiry FROM useracc WHERE email = ?");
+    $strongPassword = strlen($new_password) >= 8
+        && preg_match('/[A-Z]/', $new_password)
+        && preg_match('/[a-z]/', $new_password)
+        && preg_match('/[0-9]/', $new_password)
+        && preg_match('/[^\w]/', $new_password);
+    if (!$strongPassword) {
+        $error_message = 'Choose a password with at least eight characters, including uppercase, lowercase, number, and symbol.';
+    } elseif (!hash_equals($new_password, $confirm_password)) {
+        $strongPassword = false;
+        $error_message = 'The password confirmation does not match.';
+    }
+
+    $stmt = $conn->prepare("SELECT firstname, lastname, otp, otp_expiry FROM useracc WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
-
-      // Execute query to fetch user data by email
-$stmt = $conn->prepare("SELECT * FROM useracc WHERE email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc(); // Get user data
 
 // Check if 'firstname' and 'lastname' exist and are not empty
 if ($user) {
@@ -114,12 +110,17 @@ if ($user) {
 }
     
 
-    if ($user) {
+    if ($user && $strongPassword) {
         // Check if OTP matches and is not expired
-        if ($entered_otp === $user['otp'] && strtotime($user['otp_expiry']) > time()) {
-            // Update password with MD5 hash
-            $hashed_password = md5($new_password); // MD5 hash the new password
-            $stmt = $conn->prepare("UPDATE useracc SET password = ? WHERE email = ?");
+        $storedOtp = (string) ($user['otp'] ?? '');
+        $isHashedOtp = !empty(password_get_info($storedOtp)['algo']);
+        $otpMatches = $isHashedOtp
+            ? password_verify($entered_otp, $storedOtp)
+            : ($storedOtp !== '' && hash_equals($storedOtp, $entered_otp));
+
+        if ($otpMatches && strtotime($user['otp_expiry']) > time()) {
+            $hashed_password = bfms_hash_password_for_database($conn, $new_password);
+            $stmt = $conn->prepare("UPDATE useracc SET password = ?, otp = NULL, otp_expiry = NULL WHERE email = ?");
             $stmt->bind_param("ss", $hashed_password, $email);
             if ($stmt->execute()) {
                 $password_updated = true;  // Password updated successfully
@@ -127,18 +128,7 @@ if ($user) {
                 // Send confirmation email about password change
                // Send confirmation email about password change
 try {
-    // Server settings for sending the password change success email
-    $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
-    $mail->SMTPAuth = true;
-    $mail->Username = 'portfolio@example.invalid';
-    $mail->Password = 'REDACTED_SMTP_PASSWORD';
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port = 587;
-
-    // Recipients
-   
-                $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+    $mail = bfms_create_mailer();
     $mail->addAddress($email,$fullname);
 
 
@@ -159,7 +149,7 @@ try {
 
     $mail->send();
 } catch (Exception $e) {
-    $error_message = "Error sending confirmation email: {$mail->ErrorInfo}";
+    error_log('Password-change confirmation email failed: ' . $e->getMessage());
 }
 
             } else {
@@ -168,8 +158,8 @@ try {
         } else {
             $error_message = "Invalid or expired OTP.";
         }
-    } else {
-        $error_message = "No account found with this email.";
+    } elseif (!$user) {
+        $error_message = "Invalid or expired reset request.";
     }
 
     $stmt->close();
@@ -369,6 +359,7 @@ $conn->close();
          <div class="form-container">
             <h2>Forgot Password</h2>
             <form method="POST">
+               <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(bfms_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                <input type="hidden" name="action" value="forgot_password">
                <label for="email">Email Address:</label>
                <input type="email" name="email" placeholder="Enter your email" required>
@@ -382,6 +373,7 @@ $conn->close();
          <div class="form-container">
             <h2>Verify OTP</h2>
             <form id="reset-password-form" method="POST">
+               <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(bfms_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                <input type="hidden" name="action" value="verify_otp">
                <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
 

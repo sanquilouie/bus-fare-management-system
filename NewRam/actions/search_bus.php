@@ -1,4 +1,6 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Inspector', 'Superadmin']);
 include '../includes/connection.php';
 
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
@@ -49,7 +51,9 @@ GROUP BY
 $result = $conn->query($sql);
 
 if (!$result) {
-    die("Query failed: " . $conn->error);
+    error_log('Bus inspection search failed: ' . $conn->error);
+    http_response_code(500);
+    exit('Unable to load bus information.');
 }
 
 $output = '<table class="table table-bordered">

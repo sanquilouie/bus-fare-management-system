@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Conductor', 'Admin', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -103,7 +106,8 @@ $contactStmt->close();
 
     } catch (Exception $e) {
         $conn->rollback(); // Revert changes on error
-        echo json_encode(["success" => false, "message" => $e->getMessage()]);
+        error_log('Transaction update failed: ' . $e->getMessage());
+        echo json_encode(["success" => false, "message" => 'The transaction update could not be completed.']);
     }
 
     $conn->close();

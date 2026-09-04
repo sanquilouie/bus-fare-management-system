@@ -8,17 +8,23 @@ function fetchUserCount($conn) {
 
 function searchUserByAccount($conn, $accountNumber) {
     $accountNumber = mysqli_real_escape_string($conn, $accountNumber);
-    $searchQuery = "SELECT * FROM useracc WHERE account_number LIKE '%$accountNumber%'";
+    $searchQuery = "SELECT id, firstname, middlename, lastname, account_number, balance, is_activated
+                    FROM useracc WHERE account_number LIKE '%$accountNumber%'";
     return mysqli_query($conn, $searchQuery);
 }
 
 function fetchUserByRFID($conn, $rfidCode) {
     $rfidCode = mysqli_real_escape_string($conn, $rfidCode);
-    $userQuery = "SELECT * FROM useracc WHERE rfid_code = '$rfidCode'";
+    $userQuery = "SELECT id, firstname, middlename, lastname, account_number, balance, is_activated
+                  FROM useracc WHERE rfid_code = '$rfidCode'";
     return mysqli_query($conn, $userQuery);
 }
 function loadUserBalance($conn, $userAccountNumber, $balanceToLoad) {
     $userAccountNumber = mysqli_real_escape_string($conn, $userAccountNumber);
+    $balanceToLoad = (float) $balanceToLoad;
+    if (!is_finite($balanceToLoad) || $balanceToLoad <= 0) {
+        return false;
+    }
     
     // Fetch the user ID
     $userQuery = "SELECT id FROM useracc WHERE account_number = '$userAccountNumber'";

@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 include '../includes/connection.php';
 
 $data = json_decode(file_get_contents("php://input"));

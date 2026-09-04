@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
 require('../libraries/fpdf/fpdf.php'); // Adjust the path if necessary
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,7 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = mysqli_query($conn, $query);
 
     if (!$result) {
-        die('Database query failed: ' . mysqli_error($conn));
+        error_log('PDF data query failed: ' . mysqli_error($conn));
+        http_response_code(500);
+        exit('Unable to generate the report.');
     }
 
     // Initialize PDF

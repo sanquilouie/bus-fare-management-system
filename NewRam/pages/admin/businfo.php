@@ -18,7 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['toggleBusId'])) {
 
     $stmt = $conn->prepare("UPDATE businfo SET statusofbus = ? WHERE bus_id = ?");
         if (!$stmt) {
-            die("Prepare failed: " . $conn->error);
+            error_log('Bus-status update preparation failed: ' . $conn->error);
+            exit('Unable to update the bus status.');
         }
     $stmt->bind_param("si", $newStatus, $busId);
     $stmt->execute();

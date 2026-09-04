@@ -1,19 +1,18 @@
 <?php
-session_start();
+require_once '../../../../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 ob_start(); // Start output buffering
 include '../../../../includes/connection.php';
 
-if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Superadmin')) {
-    header("Location: ../../../../index.php");
-    exit();
-}
-
 // Fetch all users for fund transfer
-$allUsersQuery = "SELECT * FROM useracc WHERE is_activated = 1 AND role = 'User' ORDER BY created_at DESC";
+$allUsersQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender,
+                         address, province, municipality, barangay, account_number, balance
+                  FROM useracc WHERE is_activated = 1 AND role = 'User' ORDER BY created_at DESC";
 $allUsersResult = mysqli_query($conn, $allUsersQuery);
 
 // Handle fund transfer
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    bfms_require_same_origin();
     $user_id = $_POST['user_id'];
     // Additional logic for fund transfer goes here...
 

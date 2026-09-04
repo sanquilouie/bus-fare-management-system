@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
+bfms_require_same_origin();
 // Include the print function
 require_once 'print_function.php';
 

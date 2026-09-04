@@ -1,12 +1,12 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 header('Content-Type: application/json');
 
 include "../includes/connection.php";
 
-$pdo = new PDO("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpass);
-
 // Fetch all routes
-$stmt = $pdo->query("SELECT * FROM routes");
+$stmt = $pdo->query("SELECT route_id, route_name, route_lat, route_long, radius, coordinates FROM routes");
 $routes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Return the routes as JSON

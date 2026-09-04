@@ -1,12 +1,16 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 include "../includes/connection.php";
 
 $limit = 10; // Users per page
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
-$query = "SELECT * FROM useracc WHERE is_activated = 1 AND role = 'User' ORDER BY created_at DESC LIMIT ?, ?";
+$query = "SELECT id, firstname, lastname, account_number, is_activated
+          FROM useracc
+          WHERE is_activated = 1 AND role = 'User'
+          ORDER BY created_at DESC LIMIT ?, ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("ii", $offset, $limit);
 $stmt->execute();

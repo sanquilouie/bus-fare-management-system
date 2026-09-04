@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
 
 if (isset($_POST['busNumber']) || isset($_POST['plateNumber'])) {
@@ -6,7 +9,7 @@ if (isset($_POST['busNumber']) || isset($_POST['plateNumber'])) {
     $plateNumber = isset($_POST['plateNumber']) ? $_POST['plateNumber'] : '';
 
     // Query to check if bus number or plate number exists
-    $queryCheck = "SELECT * FROM businfo WHERE bus_number = ? OR plate_number = ?";
+    $queryCheck = "SELECT 1 FROM businfo WHERE bus_number = ? OR plate_number = ? LIMIT 1";
     $stmtCheck = $conn->prepare($queryCheck);
     $stmtCheck->bind_param("ss", $busNumber, $plateNumber);
     $stmtCheck->execute();

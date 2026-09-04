@@ -26,7 +26,8 @@ $query = "SELECT * FROM useracc WHERE account_number = '$user_id'";
 $result = mysqli_query($conn, $query);
 
 if (!$result) {
-    die("Query failed: " . mysqli_error($conn)); // This line will explain the SQL error
+    error_log('Personal-information query failed: ' . mysqli_error($conn));
+    exit('Unable to load personal information.');
 }
 
 $user = mysqli_fetch_assoc($result);

@@ -119,7 +119,8 @@ WHERE total_load > 0
 
         $updateBusStmt = $conn->prepare("UPDATE businfo SET driverName ='', conductorName ='', status = 'available', destination = '', driverID = '', conductorID = '', current_stop = '' WHERE conductorID = ?");
             if (!$updateBusStmt) {
-                die("Prepare failed: " . $conn->error);
+                error_log('Bus-release preparation failed: ' . $conn->error);
+                exit('Unable to complete the remittance.');
             }
             $updateBusStmt->bind_param("s", $rfid_scan);
             $updateBusStmt->execute();

@@ -1,34 +1,52 @@
 <?php
-if ($_SERVER['HTTP_HOST'] === 'localhost') {
-    // Local
-    $dbhost = 'localhost';
-    $dbuser = 'REDACTED_DB_USER';
-    $dbpass = 'REDACTED_DB_PASSWORD';
-    $dbname = 'REDACTED_DB_NAME';
-} else {
-    // Live
-    $dbhost = 'localhost';
-	$dbuser = 'REDACTED_DB_USER';
-	$dbpass = 'REDACTED_DB_PASSWORD';
-	$dbname = 'REDACTED_DB_NAME';
-}
 
-$conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+require_once __DIR__ . '/config.php';
+
+$dbhost = bfms_required_env('DB_HOST');
+$dbport = (int) bfms_env('DB_PORT', '3306');
+$dbuser = bfms_required_env('DB_USER');
+$dbpass = bfms_required_env('DB_PASSWORD');
+$dbname = bfms_required_env('DB_NAME');
+$timezone = bfms_env('APP_TIMEZONE', 'Asia/Manila');
+$dbTimezone = bfms_env('DB_TIME_ZONE', '+08:00');
+
+date_default_timezone_set($timezone);
+
+$conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname, $dbport);
 if (!$conn) {
-	die("Failed to connect using MySQLi: " . mysqli_connect_error());
+    error_log('MySQLi connection failed: ' . mysqli_connect_error());
+    http_response_code(500);
+    exit('Database connection unavailable.');
 }
 
-mysqli_query($conn, "SET time_zone = '+08:00'");
+mysqli_set_charset($conn, 'utf8mb4');
+
+$timezoneStatement = mysqli_prepare($conn, 'SET time_zone = ?');
+if (!$timezoneStatement) {
+    error_log('Unable to prepare the MySQLi session timezone setting.');
+    http_response_code(500);
+    exit('Database connection unavailable.');
+}
+$timezoneStatement->bind_param('s', $dbTimezone);
+if (!$timezoneStatement->execute()) {
+    error_log('Unable to set the MySQLi session timezone: ' . $timezoneStatement->error);
+    $timezoneStatement->close();
+    http_response_code(500);
+    exit('Database connection unavailable.');
+}
+$timezoneStatement->close();
 
 try {
-    // Connect using PDO
-    $pdo = new PDO("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpass);
-    // Set the PDO error mode to exception
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Set the time zone for the PDO connection
-    $pdo->exec("SET time_zone = '+08:00'");
-} catch (PDOException $e) {
-    die("Failed to connect using PDO: " . $e->getMessage());
+    $dsn = "mysql:host={$dbhost};port={$dbport};dbname={$dbname};charset=utf8mb4";
+    $pdo = new PDO($dsn, $dbuser, $dbpass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]);
+    $timezoneStatement = $pdo->prepare('SET time_zone = ?');
+    $timezoneStatement->execute([$dbTimezone]);
+} catch (PDOException $exception) {
+    error_log('PDO connection failed: ' . $exception->getMessage());
+    http_response_code(500);
+    exit('Database connection unavailable.');
 }
-?>

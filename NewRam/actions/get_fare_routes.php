@@ -1,13 +1,15 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
+bfms_require_same_origin();
 // Include your database connection here
 include "../includes/connection.php";
 
 // Get the JSON payload from the POST request
 $data = json_decode(file_get_contents('php://input'), true);
 
-error_log(print_r($data, true));
 // Get the current stop from the incoming request
-$currentstop = $data['currentStop'];
+$currentstop = (string) ($data['currentStop'] ?? '');
 
 $query = "SELECT id, route_name, post, province, regular_fare, discounted_fare, special_fare FROM fare_routes WHERE route_name = ?";
 $stmt = $conn->prepare($query);

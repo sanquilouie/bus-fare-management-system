@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
 include "../includes/connection.php";
 
 $limit = 15; // Records per page

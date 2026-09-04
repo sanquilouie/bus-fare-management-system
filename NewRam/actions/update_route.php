@@ -1,13 +1,10 @@
 <?php
-// Start the session to access session variables
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
+bfms_require_same_origin();
 
 // Ensure content type is set to JSON
 header('Content-Type: application/json');
-
-// Enable error reporting for debugging purposes
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 // Include the database connection
 include "../includes/connection.php";

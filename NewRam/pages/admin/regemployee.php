@@ -1,16 +1,10 @@
 <?php
 ob_start();
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-require '../../libraries/PHPMailer/src/PHPMailer.php';
-require '../../libraries/PHPMailer/src/SMTP.php';
-require '../../libraries/PHPMailer/src/Exception.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
+require_once '../../includes/security.php';
+require_once '../../includes/mailer.php';
+require_once '../../includes/passwords.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 include '../../includes/connection.php';
 
 
@@ -18,6 +12,12 @@ include '../../includes/connection.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Get form values and sanitize inputs
     $employeeType = $_POST['employeeType'];
+    $allowedEmployeeRoles = ['Cashier', 'Conductor', 'Driver', 'Inspector'];
+    if (!in_array($employeeType, $allowedEmployeeRoles, true)) {
+        $_SESSION['error'] = 'Invalid employee role.';
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit;
+    }
     $firstName = $_POST['firstName'];
     $middleName = $_POST['middleName'];
     $lastName = $_POST['lastName'];
@@ -48,12 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $age = date_diff(date_create($birthday), date_create('today'))->y;
 
     // Password generation
-    $pass = 'ramstarbus123';
-    $password = md5($pass); // Consider using password_hash() for better security
+    $pass = bfms_generate_temporary_password();
+    $password = bfms_hash_password_for_database($conn, $pass);
 
-    // Set default role and activation status
+    // Keep the account inactive until its credentials have been delivered.
     $role = $employeeType;
-    $activated = 1;
+    $activated = 0;
 
     // Prepare the SQL query
     $query = "INSERT INTO useracc (
@@ -61,55 +61,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         province, municipality, barangay, address, password, role, is_activated
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    // Prepare the statement
-    if ($stmt = $conn->prepare($query)) {
-        // Bind parameters
+    $conn->begin_transaction();
+    try {
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            throw new RuntimeException('Unable to prepare the employee registration query.');
+        }
+
         $stmt->bind_param("sssssssssssssssi", $accountNumber, $firstName, $middleName, $lastName, $email, 
             $phone, $birthday, $age, $gender, $province, $municipality, $barangay, $address, $password, $role, $activated);
-
-        // Execute the query
-        if ($stmt->execute()) {
-
-            $mail = new PHPMailer(true);
-                try {
-                    $mail->isSMTP();
-                    $mail->Host = 'smtp.gmail.com';
-                    $mail->SMTPAuth = true;
-                    $mail->Username = 'portfolio@example.invalid';
-                    $mail->Password = 'REDACTED_SMTP_PASSWORD'; // App password
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port = 587;
-    
-                    $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
-                    $mail->addAddress($email, $firstName . ' ' . $lastName);
-                    $mail->isHTML(true);
-                    $mail->Subject = 'Registration Received';
-                    $mail->Body = "
-                        <p>Dear $firstName,</p>
-                        <p>Congratulations! You are officially hired for the position of $role at our company.</p>
-                        <p>We look forward to wor;king with you and are excited to have you on the team.</p>
-                        <p><strong>Account Number:</strong>  $accountNumber
-                        <br><strong>Default Password:</strong> ramstarbus123</p>
-                        <p>To get started, please log in to our company portal using the link below:</p>
-                        <p>https://ramstarzaragosa.site/</p>
-                        <p>Best regards,
-                        <br>Ramstar Bus Transportation</p>
-                    ";
-    
-                    $mail->send();
-                } catch (Exception $e) {
-                    error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
-                }
-
-            $_SESSION['success'] = 'Employee registered successfully!';
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit;
-        } else {
-            $_SESSION['error'] = 'Error during registration!';
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Unable to create the employee account.');
         }
+        $employeeId = $stmt->insert_id;
         $stmt->close();
-    } else {
-        $_SESSION['error'] = 'Error preparing the SQL query!';
+
+        $mail = bfms_create_mailer();
+        $loginUrl = bfms_app_url('auth/login.php');
+        $mail->addAddress($email, $firstName . ' ' . $lastName);
+        $mail->isHTML(true);
+        $mail->Subject = 'Registration Received';
+        $mail->Body = "
+            <p>Dear $firstName,</p>
+            <p>Congratulations! You are officially hired for the position of $role at our company.</p>
+            <p>We look forward to working with you and are excited to have you on the team.</p>
+            <p><strong>Account Number:</strong> $accountNumber
+            <br><strong>Temporary Password:</strong> $pass</p>
+            <p>To get started, please log in to our company portal using the link below:</p>
+            <p>$loginUrl</p>
+            <p>Best regards,<br>Ramstar Bus Transportation</p>
+        ";
+        $mail->send();
+        unset($mail);
+
+        $activateStmt = $conn->prepare('UPDATE useracc SET is_activated = 1 WHERE id = ? AND is_activated = 0');
+        if (!$activateStmt) {
+            throw new RuntimeException('Unable to prepare employee activation.');
+        }
+        $activateStmt->bind_param('i', $employeeId);
+        $activateStmt->execute();
+        if ($activateStmt->affected_rows !== 1) {
+            $activateStmt->close();
+            throw new RuntimeException('Employee activation did not update the expected record.');
+        }
+        $activateStmt->close();
+
+        $conn->commit();
+        unset($pass);
+        $_SESSION['success'] = 'Employee registered successfully and credentials were emailed.';
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+    } catch (Throwable $e) {
+        $conn->rollback();
+        unset($pass);
+        error_log('Employee registration failed: ' . $e->getMessage());
+        $_SESSION['error'] = 'Employee registration could not be completed because credentials could not be delivered.';
     }
 
     // Close connection

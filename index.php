@@ -1,6 +1,7 @@
 <?php
+require_once 'NewRam/includes/security.php';
+bfms_start_secure_session();
 include 'NewRam/includes/connection.php';
-session_start();
 // For Slide
 $sliderFeatures = $conn->query("SELECT * FROM features WHERE is_active = 1 AND type = 'Slide'");
 

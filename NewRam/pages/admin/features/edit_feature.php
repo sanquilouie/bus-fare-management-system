@@ -1,4 +1,6 @@
 <?php
+require_once '../../../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 include '../../../includes/connection.php';
 
 $id = $_GET['id'] ?? null;
@@ -10,8 +12,9 @@ if (!$id) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = $_POST['title'];
-    $description = $_POST['description'];
+    bfms_require_csrf_token();
+    $title = trim((string) ($_POST['title'] ?? ''));
+    $description = trim((string) ($_POST['description'] ?? ''));
 
     $stmt = $conn->prepare("UPDATE features SET title = ?, description = ? WHERE id = ?");
     $stmt->bind_param("ssi", $title, $description, $id);
@@ -47,6 +50,7 @@ if (!$feature) {
         <div class="modal-dialog">
             <div class="modal-content">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(bfms_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Feature</h5>
                     </div>

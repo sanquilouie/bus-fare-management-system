@@ -1,23 +1,40 @@
 <?php
-session_start();
+require_once '../../../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 include '../../../includes/connection.php';
-
-
-if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Cashier' && $_SESSION['role'] != 'Superadmin' && $_SESSION['role'] != 'Admin')) {
-    header("Location: ../../../../index.php");
-    exit();
-}
 
 // Handle image upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
-    $title = $_POST['title'];
-    $desc = $_POST['description'];
-    $type = $_POST['type'];
-    $target_dir = "../../../assets/images/";
-    $image = basename($_FILES["image"]["name"]);
-    $target_file = $target_dir . $image;
+    bfms_require_csrf_token();
+    $title = trim((string) ($_POST['title'] ?? ''));
+    $desc = trim((string) ($_POST['description'] ?? ''));
+    $type = (string) ($_POST['type'] ?? '');
+    $target_dir = __DIR__ . "/../../../assets/images/features/";
+    $upload = $_FILES['image'];
+    $allowedTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
 
-    if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+    if (!in_array($type, ['Slide', 'Card'], true) || $title === '' || $desc === '') {
+        http_response_code(422);
+        exit('Invalid feature details.');
+    }
+
+    if ($upload['error'] !== UPLOAD_ERR_OK || $upload['size'] < 1 || $upload['size'] > 5 * 1024 * 1024
+        || !is_uploaded_file($upload['tmp_name'])) {
+        http_response_code(422);
+        exit('The image upload failed or exceeded the 5 MB limit.');
+    }
+
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($upload['tmp_name']);
+    if (!isset($allowedTypes[$mime]) || @getimagesize($upload['tmp_name']) === false) {
+        http_response_code(422);
+        exit('Only valid JPEG, PNG, and WebP images are accepted.');
+    }
+
+    $filename = 'feature_' . bin2hex(random_bytes(16)) . '.' . $allowedTypes[$mime];
+    $image = 'features/' . $filename;
+    $target_file = $target_dir . $filename;
+
+    if (move_uploaded_file($upload['tmp_name'], $target_file)) {
         $stmt = $conn->prepare("INSERT INTO features (image, title, description, type) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssss", $image, $title, $desc, $type);
         $stmt->execute();
@@ -27,42 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     } else {
         echo "<div class='alert alert-danger'>Image upload failed.</div>";
     }
-}
-
-// Handle toggle
-if (isset($_GET['toggle'])) {
-    $id = (int) $_GET['toggle'];
-    $conn->query("UPDATE features SET is_active = NOT is_active WHERE id = $id");
-    header("Location: settings.php");
-    exit();
-}
-
-// Handle delete
-if (isset($_GET['delete'])) {
-    $id = (int) $_GET['delete'];
-
-    // Get image filename first
-    $stmt = $conn->prepare("SELECT image FROM features WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->bind_result($imageName);
-    $stmt->fetch();
-    $stmt->close();
-
-    // Delete image file from the server
-    $imagePath = "../../../assets/images/" . $imageName;
-    if (file_exists($imagePath)) {
-        unlink($imagePath);
-    }
-
-    // Delete record from database
-    $stmt = $conn->prepare("DELETE FROM features WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-
-    header("Location: settings.php");
-    exit();
 }
 
 $limit = 5; // number of features per page
@@ -87,6 +68,7 @@ $features = $stmt->get_result();
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="csrf-token" content="<?= htmlspecialchars(bfms_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
   <title>Manage Features</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -121,9 +103,10 @@ $features = $stmt->get_result();
                 </div>
 
                 <form action="settings.php" method="POST" enctype="multipart/form-data" class="mb-5">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(bfms_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
                     <div class="mb-3">
                     <label class="form-label">Image</label>
-                    <input type="file" name="image" class="form-control" required>
+                    <input type="file" name="image" class="form-control" accept="image/jpeg,image/png,image/webp" required>
                     </div>
                     <div class="mb-3">
                     <input type="text" name="title" class="form-control" placeholder="Feature Title" required>
@@ -196,7 +179,10 @@ function openFeatureModal(page = 1) {
                         if (result.isConfirmed) {
                             fetch('../../../actions/admin_settings_feature_actions.php', {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                                },
                                 body: `action=delete&id=${id}`
                             })
                             .then(res => res.json())
@@ -217,7 +203,10 @@ function openFeatureModal(page = 1) {
                     const id = this.getAttribute('data-id');
                     fetch('../../../actions/admin_settings_feature_actions.php', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                        },
                         body: `action=toggle&id=${id}`
                     })
                     .then(res => res.json())

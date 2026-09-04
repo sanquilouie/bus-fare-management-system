@@ -1,10 +1,9 @@
 <?php
-require '../libraries/PHPMailer/src/PHPMailer.php';
-require '../libraries/PHPMailer/src/SMTP.php';
-require '../libraries/PHPMailer/src/Exception.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once '../includes/mailer.php';
+require_once '../includes/passwords.php';
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 // Include your database connection
 include "../includes/connection.php";
 
@@ -38,15 +37,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = htmlspecialchars($_POST['address']);
     $account_number = htmlspecialchars($_POST['account_number']);
     $role = 'User'; // Default role
-    // Generate a random password
-    $password = 'REDACTED_LEGACY_PASSWORD';
+    $password = bfms_generate_temporary_password();
 
     // Calculate the age
     $birthday_date = new DateTime($birthday);
     $today = new DateTime();
     $age = $today->diff($birthday_date)->y;
 
-    $hashed_password = md5($password);  // Use password_hash for security
+    $hashed_password = bfms_hash_password_for_database($conn, $password);
     $balance = 0.00; // Default balance
 
     // Only proceed if no errors encountered
@@ -84,17 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $registration_successful = true;
     
                 // Send confirmation email
-                $mail = new PHPMailer(true);
                 try {
-                    $mail->isSMTP();
-                    $mail->Host = 'smtp.gmail.com';
-                    $mail->SMTPAuth = true;
-                    $mail->Username = 'portfolio@example.invalid';
-                    $mail->Password = 'REDACTED_SMTP_PASSWORD'; // App password
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port = 587;
-    
-                    $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+                    $mail = bfms_create_mailer();
                     $mail->addAddress($email, $firstname . ' ' . $lastname);
                     $mail->isHTML(true);
                     $mail->Subject = 'Registration Received';
@@ -107,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
                     $mail->send();
                 } catch (Exception $e) {
-                    error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
+                    error_log('Registration email failed: ' . $e->getMessage());
                 }
             } else {
                 $error_message = "Database error: " . $stmt->error;

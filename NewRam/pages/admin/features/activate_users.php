@@ -1,12 +1,8 @@
 <?php
-session_start();
-require '../../../libraries/PHPMailer/src/PHPMailer.php';
-require '../../../libraries/PHPMailer/src/SMTP.php';
-require '../../../libraries/PHPMailer/src/Exception.php';
-
-// Use PHPMailer namespace
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once '../../../includes/security.php';
+require_once '../../../includes/mailer.php';
+require_once '../../../includes/passwords.php';
+bfms_require_roles(['Admin', 'Superadmin']);
 ob_start(); // Start output buffering
 include '../../../includes/connection.php';
 
@@ -16,44 +12,69 @@ if (!isset($_SESSION['email']) || ($_SESSION['role'] != 'Admin' && $_SESSION['ro
 }
 
 // Fetch users for activation
-$inactiveUsersQuery = "SELECT * FROM useracc WHERE is_activated = 0 AND role = 'User' ORDER BY created_at DESC";
+$inactiveUsersQuery = "SELECT id, firstname, lastname, account_number
+                       FROM useracc WHERE is_activated = 0 AND role = 'User' ORDER BY created_at DESC";
 $inactiveUsersResult = mysqli_query($conn, $inactiveUsersQuery);
 
 // Handle activation
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $user_id = $_POST['user_id'];
-    $account_number = $_POST['account_number'] ?? null;
+    bfms_require_same_origin();
+    $user_id = filter_input(INPUT_POST, 'user_id', FILTER_VALIDATE_INT);
+    $account_number = trim((string) ($_POST['account_number'] ?? ''));
 
-    if ($user_id) {
-        // If the user already has an account number, activate the user directly
-        if ($account_number) {
-            // Activate user with the given account number
-            $activateQuery = "UPDATE useracc SET is_activated = 1, account_number = ? WHERE id = ?";
-            $stmt = $conn->prepare($activateQuery);
-            $stmt->bind_param("si", $account_number, $user_id);
-
-            if ($stmt->execute()) {
-                // Sending Email using PHPMailer
-                sendActivationEmail($user_id, $account_number); // Send email after assigning account number
-            } else {
-                $_SESSION['message'] = ['type' => 'error', 'text' => 'Error activating user.'];
-            }
-            $stmt->close();
-        } else {
-            // If no account number provided, just activate the user directly
-            $activateQuery = "UPDATE useracc SET is_activated = 1 WHERE id = ?";
-            $stmt = $conn->prepare($activateQuery);
-            $stmt->bind_param("i", $user_id);
-
-            if ($stmt->execute()) {
-                $_SESSION['message'] = ['type' => 'success', 'text' => 'User activated without email.'];
-            } else {
-                $_SESSION['message'] = ['type' => 'error', 'text' => 'Error activating user.'];
-            }
-            $stmt->close();
-        }
+    if (!$user_id) {
+        $_SESSION['message'] = ['type' => 'error', 'text' => 'A valid user ID is required.'];
+    } elseif ($account_number === '') {
+        $_SESSION['message'] = ['type' => 'error', 'text' => 'An account number is required before activation.'];
     } else {
-        $_SESSION['message'] = ['type' => 'error', 'text' => 'User ID is missing.'];
+        $conn->begin_transaction();
+        try {
+            $userStmt = $conn->prepare(
+                "SELECT firstname, lastname, email FROM useracc
+                 WHERE id = ? AND is_activated = 0 AND role = 'User' FOR UPDATE"
+            );
+            $userStmt->bind_param('i', $user_id);
+            $userStmt->execute();
+            $userStmt->bind_result($firstname, $lastname, $email);
+            $userFound = $userStmt->fetch();
+            $userStmt->close();
+            if (!$userFound) {
+                throw new RuntimeException('The inactive user record was not found.');
+            }
+
+            $password = bfms_generate_temporary_password();
+            $passwordHash = bfms_hash_password_for_database($conn, $password);
+            $credentialStmt = $conn->prepare(
+                'UPDATE useracc SET account_number = ?, password = ? WHERE id = ? AND is_activated = 0'
+            );
+            $credentialStmt->bind_param('ssi', $account_number, $passwordHash, $user_id);
+            $credentialStmt->execute();
+            if ($credentialStmt->affected_rows !== 1) {
+                $credentialStmt->close();
+                throw new RuntimeException('Credentials were not stored for the expected user.');
+            }
+            $credentialStmt->close();
+
+            sendActivationEmail($email, $firstname, $lastname, $account_number, $password);
+
+            $activateStmt = $conn->prepare('UPDATE useracc SET is_activated = 1 WHERE id = ? AND is_activated = 0');
+            $activateStmt->bind_param('i', $user_id);
+            $activateStmt->execute();
+            if ($activateStmt->affected_rows !== 1) {
+                $activateStmt->close();
+                throw new RuntimeException('Activation did not update the expected user.');
+            }
+            $activateStmt->close();
+
+            $conn->commit();
+            $_SESSION['message'] = ['type' => 'success', 'text' => 'User activated and credentials emailed successfully.'];
+        } catch (Throwable $e) {
+            $conn->rollback();
+            error_log('User activation failed: ' . $e->getMessage());
+            $_SESSION['message'] = ['type' => 'error', 'text' => 'User activation was not completed because credentials could not be delivered.'];
+        } finally {
+            unset($password);
+        }
     }
 
     header("Location: activate_users.php"); // Redirect back to the activation page
@@ -61,53 +82,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Function to send activation email
-function sendActivationEmail($user_id, $account_number)
+function sendActivationEmail($email, $firstname, $lastname, $account_number, $password)
 {
-    global $conn;
-
-    // Fetch user details
-    $userQuery = "SELECT firstname, lastname, email FROM useracc WHERE id = ?";
-    $stmt = $conn->prepare($userQuery);
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $stmt->bind_result($firstname, $lastname, $email);
-    $stmt->fetch();
-    $stmt->close();
-
-    // Generate a default password
-    $password = 'REDACTED_LEGACY_PASSWORD';
-
-    // Sending Email using PHPMailer
-    $mail = new PHPMailer(true);
-    try {
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'portfolio@example.invalid';  // Replace with your email
-        $mail->Password = 'REDACTED_SMTP_PASSWORD';  // Replace with your email password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-
-        $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
-        $mail->addAddress($email, $firstname . ' ' . $lastname);
-        $mail->isHTML(true);
-        $mail->Subject = 'Registration Successful';
-        $mail->Body = "
-            <p>Dear $firstname,</p>
-            <p>Your account has been successfully activated!.</p>
-            <p>Login to https://ramstarzaragosa.site/</p>
-            <p><strong>Account Number:</strong> $account_number<br>
-            <strong>Password:</strong>$password</p>
-            <p>Change your password after logging in for security.</p>
-            <p>Best regards,<br>RAMSTAR</p>
-        ";
-
-        $mail->send();
-        $_SESSION['message'] = ['type' => 'success', 'text' => 'User activated and email sent successfully.'];
-    } catch (Exception $e) {
-        $_SESSION['message'] = ['type' => 'error', 'text' => 'User activated, but email could not be sent.'];
-        error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
-    }
+    $mail = bfms_create_mailer();
+    $loginUrl = bfms_app_url('auth/login.php');
+    $mail->addAddress($email, $firstname . ' ' . $lastname);
+    $mail->isHTML(true);
+    $mail->Subject = 'Registration Successful';
+    $mail->Body = "
+        <p>Dear $firstname,</p>
+        <p>Your account has been successfully activated.</p>
+        <p>Login at $loginUrl</p>
+        <p><strong>Account Number:</strong> $account_number<br>
+        <strong>Temporary Password:</strong> $password</p>
+        <p>Change your password after logging in for security.</p>
+        <p>Best regards,<br>RAMSTAR</p>
+    ";
+    $mail->send();
 }
 
 ?>

@@ -1,5 +1,7 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['User', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
 
 // Ensure this script only runs for POST requests

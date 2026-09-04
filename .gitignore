@@ -1,0 +1,36 @@
+# Local environment and secret configuration
+.env
+.env.*
+!.env.example
+*.local.php
+config.local.php
+
+# Runtime output and user uploads
+*.log
+*.tmp
+*.bak
+*.swp
+NewRam/assets/uploads/*
+!NewRam/assets/uploads/.gitkeep
+NewRam/assets/images/features/*
+!NewRam/assets/images/features/.gitkeep
+!NewRam/assets/images/features/.htaccess
+
+# Composer-installed dependencies (kept in this cleanup pass; untrack later)
+NewRam/libraries/vendor/
+
+# IDE, editor, OS, and cache files
+.idea/
+.vscode/
+.vs/
+.cache/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated reports if written to disk during local development
+*.xlsx
+*.xls
+*.csv
+*.pdf
+!NewRam/libraries/**/*.pdf

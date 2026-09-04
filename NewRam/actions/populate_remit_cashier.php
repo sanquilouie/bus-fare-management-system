@@ -1,4 +1,7 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
+bfms_require_same_origin();
 header('Content-Type: application/json');  // Set the content type as JSON
 
 include "../includes/connection.php";

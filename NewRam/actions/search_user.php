@@ -1,5 +1,8 @@
 <?php
 // search_user.php
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
 include 'functions.php';
 
@@ -24,9 +27,13 @@ if (isset($_POST['search_account'])) {
             } else {
                 // Concatenate the name from firstname, middlename, and lastname
                 $fullName = trim($user['firstname'] . ' ' . $user['middlename'] . ' ' . $user['lastname']);
+                $safeUser = array_intersect_key($user, array_flip([
+                    'id', 'firstname', 'middlename', 'lastname',
+                    'account_number', 'balance', 'is_activated'
+                ]));
                 echo json_encode([
                     'success' => "User  found: " . htmlspecialchars($fullName),
-                    'user' => $user
+                    'user' => $safeUser
                 ]);
             }
         } else {

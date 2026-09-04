@@ -1,17 +1,10 @@
 <?php
-session_start();
-require '../libraries/PHPMailer/src/PHPMailer.php';
-require '../libraries/PHPMailer/src/SMTP.php';
-require '../libraries/PHPMailer/src/Exception.php';
-
-// Use PHPMailer namespace
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once '../includes/mailer.php';
+require_once '../includes/security.php';
+bfms_require_roles(['Admin', 'Superadmin']);
+bfms_require_same_origin();
 
 include "../includes/connection.php";
-
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 // Function to log activities
 function logActivity($conn, $user_id, $action, $performed_by)
@@ -34,7 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
 
         try {
             // Fetch current user details
-            $userQuery = "SELECT * FROM useracc WHERE id = ? AND is_activated = 1 AND role = 'User'";
+            $userQuery = "SELECT id, account_number, balance, email, firstname, lastname
+                          FROM useracc WHERE id = ? AND is_activated = 1 AND role = 'User'";
             $stmt = $conn->prepare($userQuery);
             $stmt->bind_param("i", $user_id);
             $stmt->execute();
@@ -44,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
                 $userData = $userResult->fetch_assoc();
 
                 // Check if the current account_number (RFID) exists in useracc
-                $checkCurrentAccountQuery = "SELECT * FROM useracc WHERE account_number = ? AND id != ?";
+                $checkCurrentAccountQuery = "SELECT 1 FROM useracc WHERE account_number = ? AND id != ? LIMIT 1";
                 $stmt = $conn->prepare($checkCurrentAccountQuery);
                 $stmt->bind_param("si", $userData['account_number'], $user_id);
                 $stmt->execute();
@@ -56,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
                 }
 
                 // Check if the current RFID (or corresponding identifier) exists in deactivated accounts
-                $checkDeactivatedQuery = "SELECT * FROM deactivated_accounts WHERE original_account_number = ?";
+                $checkDeactivatedQuery = "SELECT 1 FROM deactivated_accounts WHERE original_account_number = ? LIMIT 1";
                 $stmt = $conn->prepare($checkDeactivatedQuery);
                 $stmt->bind_param("s", $userData['account_number']);
                 $stmt->execute();
@@ -69,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
                 }
 
                 // Check if the new account number already exists
-                $checkNewAccountQuery = "SELECT * FROM useracc WHERE account_number = ?";
+                $checkNewAccountQuery = "SELECT 1 FROM useracc WHERE account_number = ? LIMIT 1";
                 $stmt = $conn->prepare($checkNewAccountQuery);
                 $stmt->bind_param("s", $newAccountNumber);
                 $stmt->execute();
@@ -89,17 +83,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
                     throw new Exception("Failed to update account number and balance: " . $stmt->error);
                 }
 
-                $mail = new PHPMailer(true);
                     try {
-                        $mail->isSMTP();
-                        $mail->Host = 'smtp.gmail.com';
-                        $mail->SMTPAuth = true;
-                        $mail->Username = 'portfolio@example.invalid';
-                        $mail->Password = 'REDACTED_SMTP_PASSWORD';
-                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                        $mail->Port = 587;
-
-                        $mail->setFrom('portfolio@example.invalid', 'Ramstar Bus Transportation');
+                        $mail = bfms_create_mailer();
+                        $loginUrl = bfms_app_url('auth/login.php');
                         $mail->addAddress($userData['email'], $userData['firstname'] . ' ' . $userData['lastname']);
                         $mail->isHTML(true);
                         $mail->Subject = 'Registration Successful';
@@ -107,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
                             <p>Dear {$userData['firstname']},</p>
                             <p>We’re pleased to inform you that your account has been successfully transferred.</p>
                             <p><strong>Your new account number is:</strong> $newAccountNumber</p>
-                            <p>You can now log in at <a href='https://ramstarzaragosa.site/'>https://ramstarzaragosa.site/</a>.</p>
+                            <p>You can now log in at <a href='$loginUrl'>$loginUrl</a>.</p>
                             <p>Best regards,<br>
                             Ramstar Bus Transportation</p>
                         ";
@@ -115,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
 
                         $mail->send();
                     } catch (Exception $e) {
-                        error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
+                        error_log('Account-transfer email failed: ' . $e->getMessage());
                     }
 
                 // Log the activity of disabling the user
@@ -125,27 +111,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
                 $conn->commit();
 
                 // Fetch updated list of users
-                $userListQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address, province, municipality, barangay, account_number, balance 
+                $userListQuery = "SELECT id, firstname, middlename, lastname, birthday, age, gender, address, province, municipality, barangay, account_number, balance
                                   FROM useracc WHERE is_activated = 1 AND role = 'User'";
                 $userResult = mysqli_query($conn, $userListQuery);
 
                 $updatedTableData = '';
+                $safe = static function ($value) {
+                    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+                };
 
                 // Build the updated table rows
                 while ($row = mysqli_fetch_assoc($userResult)) {
                     $updatedTableData .= '<tr>
-                        <td>' . $row['id'] . '</td>
-                        <td>' . $row['firstname'] . '</td>
-                        <td>' . $row['middlename'] . '</td>
-                        <td>' . $row['lastname'] . '</td>
-                        <td>' . date('F j, Y', strtotime($row['birthday'])) . '</td>
-                        <td>' . $row['age'] . '</td>
-                        <td>' . $row['gender'] . '</td>
-                        <td>' . $row['address'] . '</td>
-                        <td>' . $row['province'] . '</td>
-                        <td>' . $row['municipality'] . '</td>
-                        <td>' . $row['barangay'] . '</td>
-                        <td>' . $row['account_number'] . '</td>
+                        <td>' . $safe($row['id']) . '</td>
+                        <td>' . $safe($row['firstname']) . '</td>
+                        <td>' . $safe($row['middlename']) . '</td>
+                        <td>' . $safe($row['lastname']) . '</td>
+                        <td>' . $safe(date('F j, Y', strtotime($row['birthday']))) . '</td>
+                        <td>' . $safe($row['age']) . '</td>
+                        <td>' . $safe($row['gender']) . '</td>
+                        <td>' . $safe($row['address']) . '</td>
+                        <td>' . $safe($row['province']) . '</td>
+                        <td>' . $safe($row['municipality']) . '</td>
+                        <td>' . $safe($row['barangay']) . '</td>
+                        <td>' . $safe($row['account_number']) . '</td>
                         <td>₱' . number_format($row['balance'], 2) . '</td>
                         <td>
                             <form id="disableForm' . $row['id'] . '" method="POST">
@@ -166,7 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id']) && isset($_
         } catch (Exception $e) {
             // Rollback the transaction in case of any failure
             $conn->rollback();
-            echo json_encode(['success' => false, 'message' => "Transaction failed: " . $e->getMessage()]);
+            error_log('Account transfer failed: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'The account transfer could not be completed.']);
         }
 
         // Close the statement

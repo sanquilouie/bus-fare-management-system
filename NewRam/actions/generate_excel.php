@@ -1,4 +1,6 @@
 <?php
+require_once '../includes/security.php';
+bfms_require_roles(['Cashier', 'Admin', 'Superadmin']);
 require '../libraries/vendor/autoload.php'; // Include PhpSpreadsheet library
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;

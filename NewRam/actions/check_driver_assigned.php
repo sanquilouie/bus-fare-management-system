@@ -1,5 +1,8 @@
 <?php
 // check_driver_assigned.php
+require_once '../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
+bfms_require_same_origin();
 include "../includes/connection.php";
 
 $data = json_decode(file_get_contents("php://input"), true);

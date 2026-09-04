@@ -1,5 +1,7 @@
 <?php
-session_start();
+require_once '../includes/security.php';
+bfms_require_roles(['Conductor', 'Superadmin']);
+bfms_require_same_origin();
 header('Content-Type: application/json');
 
 include "../includes/connection.php";
